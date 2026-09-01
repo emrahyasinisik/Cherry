@@ -1,0 +1,15 @@
+---
+description: Go — gqlgen, paketler, hata ve bağlam
+globs:
+  - "**/*.go"
+  - "go.mod"
+alwaysApply: false
+---
+
+# Go
+
+- GraphQL schema first (gqlgen). Do not hand-roll a parallel REST resource API.
+- Pass `context.Context` through store and LLM calls. Honor cancel on user stop.
+- Do not import UI packages. Platform code stays in `services/api`.
+- Wrap errors with `%w`. Do not panic in resolvers.
+- Secrets from env, never committed. Local/dev mock is allowed when credentials are missing.

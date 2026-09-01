@@ -1,0 +1,15 @@
+---
+description: Electron Win/Mac — main/preload, tek oturum, yerel runner
+globs:
+  - apps/desktop/**
+alwaysApply: false
+---
+
+# Electron desktop
+
+- Target Windows and macOS. No Linux requirement unless asked.
+- Separate main, preload, and renderer. Preload exposes a narrow API. No `nodeIntegration` in the renderer.
+- Main process owns: window, tray, generated-project paths, local-activate child processes, MCP stdio.
+- Device fingerprint is collected in main and sent hashed to the API.
+- One Icerde window plus tray status for the background agent.
+- Never ship a mobile wrapper. Read [docs/desktop.md](docs/desktop.md).

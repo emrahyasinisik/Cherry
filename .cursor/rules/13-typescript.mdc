@@ -1,0 +1,14 @@
+---
+description: TypeScript — üstte import, exhaustive switch, shadcn
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# TypeScript
+
+- Imports at the top of the module. No inline imports in function bodies, type positions, or interface fields unless a circular dependency is documented at the import.
+- `switch` on discriminated unions or enums: handle every variant and `default` with a `never` check so new variants fail compile.
+- Prefer explicit types on exported functions and GraphQL client results.
+- Do not add a second UI kit besides shadcn/ui + Tailwind.

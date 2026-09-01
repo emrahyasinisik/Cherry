@@ -1,0 +1,19 @@
+---
+description: Go GraphQL platform API — gqlgen, İçerde backend'i, müşteri backend'i değil
+globs:
+  - services/api/**
+  - "**/*.graphqls"
+  - "**/*.resolvers.go"
+alwaysApply: false
+---
+
+# GraphQL Go / Platform API
+
+- Platform API is Go + GraphQL (gqlgen). Schema is the contract; resolvers stay thin.
+- This service is **Icerde**, not the customer's generated backend.
+- Auth, orgs, devices, jobs, LLM versions, and audit logs go here.
+- Do not expose raw Mongo documents. Map to GraphQL types.
+- Mutations that change security or LLM routing must write an audit event.
+- Errors: user-safe messages to the client; details only in logs. No stack traces in GraphQL.
+- Health may be a tiny HTTP endpoint. Everything else is GraphQL.
+- Read [docs/backend-graphql.md](docs/backend-graphql.md) before adding types or resolvers.

@@ -1,0 +1,19 @@
+---
+description: Next.js masaüstü UI — shadcn, Tailwind, gerçek metin, boş/yükleniyor/hata
+globs:
+  - apps/web/**
+  - "**/*.tsx"
+  - "**/*.ts"
+alwaysApply: false
+---
+
+# Next.js UI
+
+- Renderer UI is Next.js + TypeScript + Tailwind + shadcn/ui. Do not add a second component library.
+- This UI runs inside Electron. There is no Icerde mobile UI.
+- Talk to the platform via GraphQL only.
+- Real copy in Turkish (primary UI) with English where the user-facing product needs both.
+- Every screen: empty, loading, error.
+- Desktop and a usable narrow window (Electron may be resized). No mobile-app navigation patterns as the product shell.
+- Do not call LLMs from the browser. Go through the API so GDPR and routing apply.
+- Read [docs/frontend.md](docs/frontend.md) before adding routes.

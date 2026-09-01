@@ -1,0 +1,16 @@
+---
+description: Üretilen backend'i yerelde ayağa kaldırma — Docker veya go run, barındırma yok
+globs:
+  - apps/desktop/**/activate/**
+  - apps/desktop/**/runner/**
+alwaysApply: false
+---
+
+# Local activate
+
+- “Active” means: Icerde starts the **generated** backend on localhost (Docker Compose or `go run` / stack equivalent) so Maestro and the emulator can reach it.
+- Not a public URL. Not Icerde cloud.
+- Track pid, port, logs, and stop on project close or user stop.
+- Do not start the generated API inside the platform Go process.
+- Collision: bind uncommon ports; never steal 3000/5173/8080 from the Icerde desktop UI if those are in use — pick an isolated range for generated apps.
+- Read [docs/local-activate.md](docs/local-activate.md).

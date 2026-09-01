@@ -1,0 +1,20 @@
+---
+description: İçerde proje sabitleri — mobil istemci yok, iki backend karışmaz, barındırma yok
+alwaysApply: true
+---
+
+# İçerde — proje kuralları / project rules
+
+- Respond to the user in Turkish and English.
+- Icerde is **not** a mobile app. Ship Electron for Windows and macOS only.
+- Never mix the **platform API** (Go GraphQL + MongoDB) with the **generated customer backend** (files on disk).
+- Customer delivery is files (folder, zip, or git). Do **not** host customer backends in v1.
+- The generated mobile stack is chosen by the user (Expo, Flutter, native, …).
+- Security is X-inspired: password, 6-digit new-device code, TOTP, trusted devices, session revoke. No SMS. No phone number as identity. One active session per account.
+- Every LLM call must pass the KVKK/GDPR layer (redact → model → scan → audit).
+- Two LLMs: A codegen, B test/review. Switching models must change subsequent answers.
+- OpenCode is the code-writing engine; do not reimplement it.
+- Before coding a section, read its `.cursor/rules/*.mdc` and `docs/*.md`. If behavior changes, update the doc in the same change.
+- Imports stay at the top of the file. No inline imports unless a circular dependency is documented.
+- TypeScript switches over unions/enums must use a `never` check in `default`.
+- No lorem ipsum. Real copy. Cover empty, loading, and error states in UI.

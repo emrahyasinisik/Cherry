@@ -1,0 +1,18 @@
+---
+description: Mobil uygulama fabrikası — ajan FE+BE yazar, yığın kullanıcı seçer, teslim dosya
+globs:
+  - services/api/**/project/**
+  - services/api/**/job/**
+  - apps/web/**/projects/**
+  - apps/desktop/**/factory/**
+alwaysApply: false
+---
+
+# Mobile factory
+
+- Icerde **writes** mobile apps; it is not one.
+- Pipeline: brief → user-selected stack → agent writes frontend + backend + Maestro YAML → files on disk.
+- Do not hard-code a single mobile stack as the only option. First implementation may ship one adapter; the interface must allow others.
+- OpenCode is the writer. The agent runs in the background.
+- Output layout: `frontend/`, `backend/`, `maestro/`, `README`.
+- Never upload the generated app to Icerde hosting. Read [docs/mobile-factory.md](docs/mobile-factory.md).

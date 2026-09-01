@@ -1,0 +1,20 @@
+---
+description: X-inspired güvenlik — şifre, 6 haneli kod, TOTP, cihaz, tek oturum, SMS yok
+globs:
+  - services/api/**/auth/**
+  - services/api/**/session/**
+  - apps/web/**/auth/**
+  - apps/web/**/security/**
+alwaysApply: false
+---
+
+# Security (X-inspired)
+
+- Password login.
+- New or untrusted device: 6-digit code (TTL, attempt lock). Code goes to the temporary mailbox, not SMS.
+- TOTP MFA (authenticator app). No SMS. No phone number identity.
+- Trusted device list. Session list with revoke.
+- One active session per account: a new successful login revokes others.
+- Suspicious login: notify via the account/temp mail path.
+- Passkeys/WebAuthn are out of v1.
+- Read [docs/security.md](docs/security.md) before changing login order.
