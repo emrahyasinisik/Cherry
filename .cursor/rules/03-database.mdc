@@ -11,6 +11,7 @@ alwaysApply: false
 
 - One database for the Icerde platform. Generated customer apps may use their own stores on disk; do not write customer app data into Icerde collections except job metadata.
 - Collections: users, organizations, memberships, devices, sessions, verificationCodes, tempMailboxes, projects, jobs, llmModels, llmVersions, auditEvents.
+- `tempMailboxes` and `verificationCodes` are first-party (our mailer). No AgentMail documents.
 - User delete is a first-class path (KVKK/GDPR). Cascade or anonymize; never leave orphan PII.
 - Hash secrets (passwords, TOTP seeds, device fingerprints). Store 6-digit codes hashed with TTL.
 - Indexes for email, org id, session token hash, job status, audit subject.

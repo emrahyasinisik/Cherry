@@ -6,6 +6,16 @@
 
 **EN:** UI trials go through Maestro MCP. Flows are written into the customer files.
 
+## Kurulum / Install
+
+Resmi CLI (Java 17+, `JAVA_HOME`):
+
+```bash
+curl -fsSL "https://get.maestro.mobile.dev" | bash
+```
+
+MCP sunucusu CLI’nin içinde: `maestro mcp`. Doğrulama: `maestro --help`.
+
 ## Test döngüsü / Test loop
 
 ```mermaid

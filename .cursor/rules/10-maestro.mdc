@@ -10,6 +10,7 @@ alwaysApply: false
 # Maestro MCP
 
 - Wire Maestro MCP (`list_devices`, `inspect_screen`, `run`, screenshots, viewer) through the desktop MCP host.
+- Install the CLI with: `curl -fsSL "https://get.maestro.mobile.dev" | bash` then `maestro mcp`. Java 17+ and `JAVA_HOME` required.
 - LLM B (test) uses Maestro. LLM A (codegen) must not skip the GDPR layer to talk to Maestro.
 - Flows are YAML files owned by the generated project under `maestro/`. They ship with the customer files.
 - If no emulator is available, still write flows and record a skipped/mock run; do not pretend a pass.
