@@ -1,9 +1,23 @@
 export type WorkspaceKind = "PERSONAL" | "ORGANIZATION";
+export type LoginNext = "SESSION" | "DEVICE_CODE" | "TOTP";
+export type VerifyPurpose =
+  | "NEW_DEVICE"
+  | "LOGIN_CHALLENGE"
+  | "EMAIL_VERIFY"
+  | "SUSPICIOUS_LOGIN";
 
 export type User = {
   id: string;
   email: string;
   workspaceKind: WorkspaceKind;
+  totpEnabled: boolean;
+};
+
+export type LoginResult = {
+  next: LoginNext;
+  token?: string | null;
+  challengeId?: string | null;
+  user?: User | null;
 };
 
 export type Project = {
@@ -11,6 +25,29 @@ export type Project = {
   name: string;
   stack: string;
   status: string;
+};
+
+export type Device = {
+  id: string;
+  label: string;
+  trusted: boolean;
+  current: boolean;
+  lastSeenAt: string;
+};
+
+export type SessionInfo = {
+  id: string;
+  current: boolean;
+  createdAt: string;
+  deviceLabel: string;
+};
+
+export type MailMessage = {
+  id: string;
+  subject: string;
+  body: string;
+  purpose: VerifyPurpose;
+  createdAt: string;
 };
 
 export type Health = {
@@ -95,6 +132,23 @@ export function workspaceLabel(kind: WorkspaceKind): string {
       return "Organizasyon";
     default: {
       const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
+}
+
+export function purposeLabel(purpose: VerifyPurpose): string {
+  switch (purpose) {
+    case "NEW_DEVICE":
+      return "Yeni cihaz";
+    case "LOGIN_CHALLENGE":
+      return "Giriş doğrulama";
+    case "EMAIL_VERIFY":
+      return "E-posta doğrulama";
+    case "SUSPICIOUS_LOGIN":
+      return "Şüpheli giriş";
+    default: {
+      const exhaustive: never = purpose;
       return exhaustive;
     }
   }

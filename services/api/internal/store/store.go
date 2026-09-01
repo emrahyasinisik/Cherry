@@ -3,12 +3,17 @@ package store
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrUnauthorized       = errors.New("unauthorized")
 	ErrValidation         = errors.New("validation")
+	ErrNotFound           = errors.New("not found")
+	ErrExists             = errors.New("exists")
+	ErrLocked             = errors.New("locked")
+	ErrExpired            = errors.New("expired")
 )
 
 type WorkspaceKind string
@@ -18,10 +23,22 @@ const (
 	WorkspaceOrganization WorkspaceKind = "ORGANIZATION"
 )
 
+type Purpose string
+
+const (
+	PurposeNewDevice       Purpose = "NEW_DEVICE"
+	PurposeLoginChallenge  Purpose = "LOGIN_CHALLENGE"
+	PurposeEmailVerify     Purpose = "EMAIL_VERIFY"
+	PurposeSuspiciousLogin Purpose = "SUSPICIOUS_LOGIN"
+)
+
 type User struct {
 	ID            string
 	Email         string
+	PasswordHash  string
 	WorkspaceKind WorkspaceKind
+	TotpSecret    string
+	TotpEnabled   bool
 }
 
 type Project struct {
@@ -31,11 +48,79 @@ type Project struct {
 	Status string
 }
 
+type Challenge struct {
+	ID             string
+	UserID         string
+	Purpose        Purpose
+	CodeHash       string
+	LinkHash       string
+	Attempts       int
+	MaxAttempts    int
+	ExpiresAt      time.Time
+	DeviceFPHash   string
+	DeviceLabel    string
+	CodeVerified   bool
+	Consumed       bool
+	TrustDevice    bool
+}
+
+type Session struct {
+	ID          string
+	UserID      string
+	TokenHash   string
+	DeviceID    string
+	DeviceLabel string
+	CreatedAt   time.Time
+	Revoked     bool
+}
+
+type Device struct {
+	ID       string
+	UserID   string
+	FPHash   string
+	Label    string
+	Trusted  bool
+	LastSeen time.Time
+}
+
+type Mail struct {
+	ID          string
+	UserID      string
+	ChallengeID string
+	Subject     string
+	Body        string
+	Purpose     Purpose
+	CreatedAt   time.Time
+}
+
 type Store interface {
 	Name() string
 	Ping(ctx context.Context) error
-	Login(ctx context.Context, email, password string) (token string, user User, err error)
-	Logout(ctx context.Context, token string) error
-	Me(ctx context.Context, token string) (*User, error)
-	Projects(ctx context.Context, token string) ([]Project, error)
+
+	CreateUser(ctx context.Context, user User) (User, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	GetUserByID(ctx context.Context, id string) (*User, error)
+	UpdateUser(ctx context.Context, user User) error
+
+	PutChallenge(ctx context.Context, challenge Challenge) error
+	GetChallenge(ctx context.Context, id string) (*Challenge, error)
+	GetChallengeByLinkHash(ctx context.Context, linkHash string) (*Challenge, error)
+	InvalidateChallenges(ctx context.Context, userID string, purpose Purpose) error
+
+	CreateSession(ctx context.Context, session Session) error
+	GetSessionByTokenHash(ctx context.Context, tokenHash string) (*Session, error)
+	ListSessions(ctx context.Context, userID string) ([]Session, error)
+	RevokeSession(ctx context.Context, id string) error
+	RevokeOtherSessions(ctx context.Context, userID, keepID string) error
+
+	UpsertDevice(ctx context.Context, device Device) (Device, error)
+	GetDeviceByFP(ctx context.Context, userID, fpHash string) (*Device, error)
+	ListDevices(ctx context.Context, userID string) ([]Device, error)
+	RevokeDevice(ctx context.Context, id string) error
+
+	AddMail(ctx context.Context, mail Mail) error
+	ListMail(ctx context.Context, userID string) ([]Mail, error)
+	MailByChallenge(ctx context.Context, challengeID string) (*Mail, error)
+
+	Projects(ctx context.Context, userID string) ([]Project, error)
 }

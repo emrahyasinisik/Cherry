@@ -1,7 +1,7 @@
 package graph
 
-import "github.com/icerde/api/internal/store"
+import "github.com/icerde/api/internal/auth"
 
 type Resolver struct {
-	Store store.Store
+	Auth *auth.Service
 }

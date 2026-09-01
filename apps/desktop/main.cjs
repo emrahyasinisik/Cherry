@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron");
+const path = require("path");
 
 const WEB_URL = process.env.ICERDE_WEB_URL || "http://127.0.0.1:43147";
 
@@ -9,9 +10,10 @@ function createWindow() {
     backgroundColor: "#0E1114",
     title: "İçerde",
     webPreferences: {
-      preload: require("path").join(__dirname, "preload.cjs"),
+      preload: path.join(__dirname, "preload.cjs"),
       nodeIntegration: false,
       contextIsolation: true,
+      sandbox: false,
     },
   });
   void win.loadURL(WEB_URL);

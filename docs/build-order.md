@@ -39,4 +39,4 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 7. **LLM B + tek tuş switch** — test yuvası; switch sonraki cevapları değiştirir.
 8. **Colab fine-tune** — izler birikince.
 
-Şimdi yapılacak bir sonraki iş: **2 — auth + posta**. Dilim 1 iskele kodda.
+Şimdi yapılacak bir sonraki iş: **3 — proje diski**. Dilim 2 auth kodda.

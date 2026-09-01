@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { LoginForm } from "@/components/login-form";
 
 export default function HomePage() {
@@ -9,10 +11,12 @@ export default function HomePage() {
           Masaüstü stüdyo — mobil uygulama üretir ve dener
         </p>
         <div className="mt-6">
-          <LoginForm />
+          <Suspense fallback={<p className="text-muted-foreground">Yükleniyor…</p>}>
+            <LoginForm />
+          </Suspense>
         </div>
         <p className="mt-6 text-center text-[11px] text-muted-foreground">
-          KVKK / GDPR · SMS yok · iskele dilimi
+          KVKK / GDPR · SMS yok · 6 haneli kod birinci parti
         </p>
       </div>
     </div>

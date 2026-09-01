@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,6 +16,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/icerde/api/graph"
+	"github.com/icerde/api/internal/auth"
+	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 	"github.com/rs/cors"
 )
@@ -23,6 +26,7 @@ func main() {
 	addr := getenv("ICERDE_API_ADDR", "127.0.0.1:43148")
 	webOrigin := getenv("ICERDE_WEB_ORIGIN", "http://127.0.0.1:43147")
 	mongoURI := os.Getenv("MONGO_URI")
+	pepper := getenv("ICERDE_CODE_PEPPER", "icerde-dev-pepper-change-me")
 
 	memory := store.NewMemory()
 	var mongoOK bool
@@ -35,11 +39,23 @@ func main() {
 		} else {
 			mongoOK = true
 			defer func() { _ = client.Disconnect(context.Background()) }()
-			log.Printf("mongo ping ok; session store is still memory until auth slice")
+			log.Printf("mongo ping ok; auth collections still memory until mongo adapters")
 		}
 	}
 
-	resolver := &graph.Resolver{Store: memory}
+	mail := &mailer.Service{
+		Store:  memory,
+		WebURL: webOrigin,
+		SMTP: mailer.Config{
+			Host:     os.Getenv("SMTP_HOST"),
+			Port:     getenv("SMTP_PORT", "587"),
+			User:     os.Getenv("SMTP_USER"),
+			Password: os.Getenv("SMTP_PASSWORD"),
+			From:     getenv("SMTP_FROM", "icerde@localhost"),
+		},
+	}
+	authSvc := auth.New(memory, mail, pepper, webOrigin)
+	resolver := &graph.Resolver{Auth: authSvc}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -47,7 +63,7 @@ func main() {
 	srv.Use(extension.Introspection{})
 
 	mux := http.NewServeMux()
-	mux.Handle("/graphql", withToken(srv))
+	mux.Handle("/graphql", withRequestMeta(srv))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		status := "memory"
@@ -57,7 +73,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":      true,
 			"store":   status,
-			"version": "0.1.0-scaffold",
+			"version": "0.2.0-auth",
 		})
 	})
 
@@ -89,11 +105,19 @@ func main() {
 	_ = server.Shutdown(ctx)
 }
 
-func withToken(next http.Handler) http.Handler {
+func withRequestMeta(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 		token = strings.TrimSpace(token)
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			ip = r.RemoteAddr
+		}
+		if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
+			ip = strings.TrimSpace(strings.Split(fwd, ",")[0])
+		}
 		ctx := graph.WithToken(r.Context(), token)
+		ctx = graph.WithIP(ctx, ip)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -4,9 +4,7 @@
 
 **EN:** Icerde is not a mobile app. It is a Win/Mac desktop studio. A background agent writes a mobile app’s frontend and backend, boots it locally, and UI-tests it with **Maestro MCP**. The customer receives **folder / zip / git**. No hosting.
 
-Bu depoda henüz uygulama kodu yoktur. Önce kurallar ve belgeler yazıldı.
-
-**This repo has no application code yet.** Rules and documents come first.
+Ajanlar için: [AGENTS.md](AGENTS.md)
 
 ## Belgeler / Documents
 
@@ -32,28 +30,17 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 | LLMOps | [.cursor/rules/11-llmops.mdc](.cursor/rules/11-llmops.mdc) | [docs/llmops.md](docs/llmops.md) |
 | KVKK / GDPR | [.cursor/rules/12-gdpr-kvkk.mdc](.cursor/rules/12-gdpr-kvkk.mdc) | [docs/gdpr-kvkk.md](docs/gdpr-kvkk.md) |
 
-Ajanlar için: [AGENTS.md](AGENTS.md)
+## Çalıştır / Run
 
-## Çalıştır / Run (dilim 1 — iskele)
-
-İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). Bu ortamda Docker yoksa oturum **bellekte** kalır. Mongo için `docker compose up -d` ve `MONGO_URI=mongodb://127.0.0.1:27017`.
+İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). SMTP yoksa kod **in-app geçici kutuya** düşer. Oturum bellekte (Docker yoksa).
 
 ```bash
 npm run dev:api
 npm run dev:web
 ```
 
-Masaüstü (API + web açıkken):
-
-```bash
-npm --prefix apps/desktop install
-npm run dev:desktop
-```
-
-UI: http://127.0.0.1:43147 — herhangi bir e-posta + şifre (iskele; gerçek MFA dilim 2).
+UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8), 6 haneli kod kutudan, “bu cihaza güven”. Güvenlik ekranı: cihaz, oturum, TOTP, kutu.
 
 ## Dilim durumu / Slice status
 
-İskele çalışıyor. Sıradaki: [docs/build-order.md](docs/build-order.md) dilim 2 (auth + e-posta).
-
-The scaffold is running. Next: auth + first-party mail.
+Dilim 2 (auth + posta) kodda. Sıradaki: [docs/build-order.md](docs/build-order.md) dilim 3 (proje diski).

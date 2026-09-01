@@ -5,30 +5,21 @@ import (
 	"testing"
 )
 
-func TestMemoryLoginValidation(t *testing.T) {
+func TestMemoryCreateUserAndMail(t *testing.T) {
 	mem := NewMemory()
 	ctx := context.Background()
-
-	_, _, err := mem.Login(ctx, "not-an-email", "x")
-	if err != ErrValidation {
-		t.Fatalf("expected validation, got %v", err)
-	}
-
-	token, user, err := mem.Login(ctx, "ada@icerde.dev", "secret")
+	user, err := mem.CreateUser(ctx, User{Email: "ada@icerde.dev", PasswordHash: "x", WorkspaceKind: WorkspacePersonal})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if token == "" || user.Email != "ada@icerde.dev" {
-		t.Fatalf("unexpected login: %#v %#v", token, user)
+	if _, err := mem.CreateUser(ctx, User{Email: "ada@icerde.dev", PasswordHash: "x"}); err != ErrExists {
+		t.Fatalf("expected exists, got %v", err)
 	}
-
-	me, err := mem.Me(ctx, token)
-	if err != nil || me.Email != user.Email {
-		t.Fatalf("me: %v %#v", err, me)
+	if err := mem.AddMail(ctx, Mail{UserID: user.ID, ChallengeID: "c1", Subject: "s", Body: "b"}); err != nil {
+		t.Fatal(err)
 	}
-
-	projects, err := mem.Projects(ctx, token)
-	if err != nil || len(projects) != 0 {
-		t.Fatalf("projects should be empty: %v %#v", err, projects)
+	got, err := mem.MailByChallenge(ctx, "c1")
+	if err != nil || got.Body != "b" {
+		t.Fatalf("mail: %v %#v", err, got)
 	}
 }

@@ -1,51 +1,279 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, type FormEvent } from "react";
 
+import { CodeInputs } from "@/components/code-inputs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { graphql, setToken, type User } from "@/lib/api";
+import {
+  graphql,
+  setToken,
+  type LoginResult,
+  type MailMessage,
+} from "@/lib/api";
+import { getDeviceFingerprint, getDeviceLabel } from "@/lib/device";
+
+const LOGIN_RESULT = `
+  next
+  token
+  challengeId
+  user { id email workspaceKind totpEnabled }
+`;
+
+type Step = "credentials" | "code" | "totp";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [step, setStep] = useState<Step>("credentials");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [totp, setTotp] = useState("");
+  const [trustDevice, setTrustDevice] = useState(true);
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [mailbox, setMailbox] = useState<MailMessage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    const link = searchParams.get("link");
+    if (!link) {
+      return;
+    }
+    let cancelled = false;
+    async function run() {
+      setPending(true);
+      try {
+        const data = await graphql<{ verifyLink: LoginResult }>(
+          `mutation VerifyLink($token: String!, $deviceFingerprint: String!, $deviceLabel: String!) {
+            verifyLink(token: $token, deviceFingerprint: $deviceFingerprint, deviceLabel: $deviceLabel) {
+              ${LOGIN_RESULT}
+            }
+          }`,
+          {
+            token: link,
+            deviceFingerprint: getDeviceFingerprint(),
+            deviceLabel: getDeviceLabel(),
+          },
+        );
+        if (!cancelled) {
+          await applyResult(data.verifyLink);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Link geçersiz.");
+        }
+      } finally {
+        if (!cancelled) {
+          setPending(false);
+        }
+      }
+    }
+    const timer = window.setTimeout(() => {
+      void run();
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- verify link once
+  }, [searchParams, router]);
+
+  async function applyResult(result: LoginResult) {
+    switch (result.next) {
+      case "SESSION":
+        if (!result.token) {
+          setError("Oturum token’ı gelmedi.");
+          return;
+        }
+        setToken(result.token);
+        router.push("/projects");
+        return;
+      case "DEVICE_CODE":
+        if (!result.challengeId) {
+          setError("Doğrulama başlatılamadı.");
+          return;
+        }
+        setChallengeId(result.challengeId);
+        setStep("code");
+        await loadMailbox(result.challengeId);
+        return;
+      case "TOTP":
+        if (!result.challengeId) {
+          setError("TOTP başlatılamadı.");
+          return;
+        }
+        setChallengeId(result.challengeId);
+        setStep("totp");
+        return;
+      default: {
+        const exhaustive: never = result.next;
+        setError(String(exhaustive));
+      }
+    }
+  }
+
+  async function loadMailbox(id: string) {
+    const data = await graphql<{ challengeMailbox: MailMessage | null }>(
+      `query Box($challengeId: ID!) {
+        challengeMailbox(challengeId: $challengeId) {
+          id subject body purpose createdAt
+        }
+      }`,
+      { challengeId: id },
+    );
+    setMailbox(data.challengeMailbox);
+  }
+
+  async function handleCredentials(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-
     if (!email.trim() || !password) {
       setError("E-posta ve şifre gerekli.");
       return;
     }
-
+    if (mode === "register" && password.length < 8) {
+      setError("Şifre en az 8 karakter.");
+      return;
+    }
     setPending(true);
     try {
-      const data = await graphql<{ login: { token: string; user: User } }>(
-        `mutation Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-            token
-            user { id email workspaceKind }
-          }
-        }`,
-        { email: email.trim(), password },
-      );
-      setToken(data.login.token);
-      router.push("/projects");
+      const mutation =
+        mode === "register"
+          ? `mutation Register($email: String!, $password: String!, $deviceFingerprint: String!, $deviceLabel: String!) {
+              register(email: $email, password: $password, deviceFingerprint: $deviceFingerprint, deviceLabel: $deviceLabel) {
+                ${LOGIN_RESULT}
+              }
+            }`
+          : `mutation Login($email: String!, $password: String!, $deviceFingerprint: String!, $deviceLabel: String!) {
+              login(email: $email, password: $password, deviceFingerprint: $deviceFingerprint, deviceLabel: $deviceLabel) {
+                ${LOGIN_RESULT}
+              }
+            }`;
+      const data = await graphql<Record<string, LoginResult>>(mutation, {
+        email: email.trim(),
+        password,
+        deviceFingerprint: getDeviceFingerprint(),
+        deviceLabel: getDeviceLabel(),
+      });
+      const result = mode === "register" ? data.register : data.login;
+      await applyResult(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Giriş yapılamadı.");
+      setError(err instanceof Error ? err.message : "İşlem başarısız.");
     } finally {
       setPending(false);
     }
   }
 
+  async function handleCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    if (!challengeId || code.replace(/\D/g, "").length !== 6) {
+      setError("6 haneli kodu gir.");
+      return;
+    }
+    setPending(true);
+    try {
+      const data = await graphql<{ verifyCode: LoginResult }>(
+        `mutation VerifyCode($challengeId: ID!, $code: String!, $trustDevice: Boolean!) {
+          verifyCode(challengeId: $challengeId, code: $code, trustDevice: $trustDevice) {
+            ${LOGIN_RESULT}
+          }
+        }`,
+        {
+          challengeId,
+          code: code.replace(/\D/g, ""),
+          trustDevice,
+        },
+      );
+      await applyResult(data.verifyCode);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kod geçersiz.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleTotp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    if (!challengeId || totp.replace(/\D/g, "").length !== 6) {
+      setError("Authenticator kodunu gir.");
+      return;
+    }
+    setPending(true);
+    try {
+      const data = await graphql<{ verifyTotp: LoginResult }>(
+        `mutation VerifyTotp($challengeId: ID!, $code: String!) {
+          verifyTotp(challengeId: $challengeId, code: $code) {
+            ${LOGIN_RESULT}
+          }
+        }`,
+        { challengeId, code: totp.replace(/\D/g, "") },
+      );
+      await applyResult(data.verifyTotp);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "TOTP geçersiz.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (step === "code") {
+    return (
+      <form onSubmit={(event) => void handleCode(event)} className="flex flex-col gap-4">
+        <p className="text-muted-foreground">
+          Yeni veya tanınmayan cihaz. 6 haneli kod geçici kutuya düştü.
+        </p>
+        {mailbox ? (
+          <pre className="overflow-auto rounded-md border border-border bg-background/60 p-3 font-mono text-[11px] leading-4 whitespace-pre-wrap">
+            {mailbox.body}
+          </pre>
+        ) : null}
+        <CodeInputs value={code} onChange={setCode} disabled={pending} />
+        <label className="flex items-center gap-2 text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={trustDevice}
+            onChange={(event) => setTrustDevice(event.target.checked)}
+          />
+          Bu cihaza güven
+        </label>
+        {error ? (
+          <p className="text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <Button type="submit" size="lg" className="h-10 w-full" disabled={pending}>
+          {pending ? "Doğrulanıyor…" : "Kodu doğrula"}
+        </Button>
+      </form>
+    );
+  }
+
+  if (step === "totp") {
+    return (
+      <form onSubmit={(event) => void handleTotp(event)} className="flex flex-col gap-4">
+        <p className="text-muted-foreground">Authenticator uygulamasındaki 6 hane.</p>
+        <CodeInputs value={totp} onChange={setTotp} disabled={pending} />
+        {error ? (
+          <p className="text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <Button type="submit" size="lg" className="h-10 w-full" disabled={pending}>
+          {pending ? "Doğrulanıyor…" : "TOTP doğrula"}
+        </Button>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
+    <form onSubmit={(event) => void handleCredentials(event)} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">E-posta</Label>
         <Input
@@ -64,7 +292,7 @@ export function LoginForm() {
         <Input
           id="password"
           type="password"
-          autoComplete="current-password"
+          autoComplete={mode === "register" ? "new-password" : "current-password"}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           className="icerde-focus h-9"
@@ -77,11 +305,18 @@ export function LoginForm() {
         </p>
       ) : null}
       <Button type="submit" size="lg" className="h-10 w-full" disabled={pending}>
-        {pending ? "Giriş yapılıyor…" : "Giriş yap"}
+        {pending ? "Gönderiliyor…" : mode === "register" ? "Hesap oluştur" : "Giriş yap"}
       </Button>
-      <p className="text-center text-muted-foreground">
-        Yeni cihazda 6 haneli kod — dilim 2
-      </p>
+      <button
+        type="button"
+        className="text-center text-muted-foreground underline-offset-4 hover:underline"
+        onClick={() => {
+          setMode(mode === "login" ? "register" : "login");
+          setError(null);
+        }}
+      >
+        {mode === "login" ? "Hesabın yok mu? Oluştur" : "Zaten hesabın var mı? Giriş yap"}
+      </button>
     </form>
   );
 }

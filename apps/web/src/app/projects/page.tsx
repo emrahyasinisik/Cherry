@@ -24,7 +24,7 @@ export default function ProjectsPage() {
       try {
         const data = await graphql<{ me: User | null; projects: Project[] }>(
           `query ProjectsHome {
-            me { id email workspaceKind }
+            me { id email workspaceKind totpEnabled }
             projects { id name stack status }
           }`,
         );

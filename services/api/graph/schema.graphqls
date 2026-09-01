@@ -3,11 +3,54 @@ type Query {
   health: Health!
   me: User
   projects: [Project!]!
+  devices: [Device!]!
+  sessions: [Session!]!
+  mailbox: [MailMessage!]!
+  challengeMailbox(challengeId: ID!): MailMessage
 }
 
 type Mutation {
-  login(email: String!, password: String!): AuthPayload!
+  register(
+    email: String!
+    password: String!
+    deviceFingerprint: String!
+    deviceLabel: String!
+  ): LoginResult!
+  login(
+    email: String!
+    password: String!
+    deviceFingerprint: String!
+    deviceLabel: String!
+  ): LoginResult!
+  verifyCode(challengeId: ID!, code: String!, trustDevice: Boolean!): LoginResult!
+  verifyLink(token: String!, deviceFingerprint: String!, deviceLabel: String!): LoginResult!
+  verifyTotp(challengeId: ID!, code: String!): LoginResult!
+  enableTotp: TotpSetup!
+  confirmTotp(code: String!): Boolean!
+  disableTotp(code: String!): Boolean!
+  revokeSession(id: ID!): Boolean!
+  revokeDevice(id: ID!): Boolean!
   logout: Boolean!
+}
+
+enum LoginNext {
+  SESSION
+  DEVICE_CODE
+  TOTP
+}
+
+enum VerifyPurpose {
+  NEW_DEVICE
+  LOGIN_CHALLENGE
+  EMAIL_VERIFY
+  SUSPICIOUS_LOGIN
+}
+
+type LoginResult {
+  next: LoginNext!
+  token: String
+  challengeId: ID
+  user: User
 }
 
 type Health {
@@ -20,6 +63,7 @@ type User {
   id: ID!
   email: String!
   workspaceKind: WorkspaceKind!
+  totpEnabled: Boolean!
 }
 
 enum WorkspaceKind {
@@ -34,7 +78,30 @@ type Project {
   status: String!
 }
 
-type AuthPayload {
-  token: String!
-  user: User!
+type Device {
+  id: ID!
+  label: String!
+  trusted: Boolean!
+  current: Boolean!
+  lastSeenAt: String!
+}
+
+type Session {
+  id: ID!
+  current: Boolean!
+  createdAt: String!
+  deviceLabel: String!
+}
+
+type MailMessage {
+  id: ID!
+  subject: String!
+  body: String!
+  purpose: VerifyPurpose!
+  createdAt: String!
+}
+
+type TotpSetup {
+  secret: String!
+  otpauthUrl: String!
 }

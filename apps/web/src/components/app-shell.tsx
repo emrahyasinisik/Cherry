@@ -29,7 +29,7 @@ const NAV: NavItem[] = [
   { href: "/projects", label: "Projeler", icon: FolderKanban, enabled: true },
   { href: "/projects", label: "Ajan", icon: Bot, enabled: false },
   { href: "/projects", label: "Maestro", icon: Smartphone, enabled: false },
-  { href: "/projects", label: "Güvenlik", icon: Shield, enabled: false },
+  { href: "/security", label: "Güvenlik", icon: Shield, enabled: true },
   { href: "/projects", label: "Organizasyon", icon: Building2, enabled: false },
   { href: "/projects", label: "LLM", icon: Cpu, enabled: false },
   { href: "/projects", label: "Gizlilik", icon: Scale, enabled: false },
@@ -61,7 +61,9 @@ export function AppShell({
         <div className="flex items-center gap-3">
           <span className="text-[15px] font-medium tracking-tight">İçerde</span>
           <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground">Projeler</span>
+          <span className="text-muted-foreground">
+            {pathname.startsWith("/security") ? "Güvenlik" : "Projeler"}
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
@@ -135,7 +137,7 @@ export function AppShell({
       <footer className="flex h-8 shrink-0 items-center gap-3 border-t border-border px-4 font-mono text-[11px] text-muted-foreground">
         <span>1 oturum</span>
         <span>·</span>
-        <span>iskele</span>
+        <span>kayıtlı cihaz</span>
         <span>·</span>
         <span>GDPR katmanı henüz bağlı değil</span>
       </footer>

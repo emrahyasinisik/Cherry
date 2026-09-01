@@ -9,15 +9,33 @@ import (
 	"strconv"
 )
 
-type AuthPayload struct {
-	Token string `json:"token"`
-	User  *User  `json:"user"`
+type Device struct {
+	ID         string `json:"id"`
+	Label      string `json:"label"`
+	Trusted    bool   `json:"trusted"`
+	Current    bool   `json:"current"`
+	LastSeenAt string `json:"lastSeenAt"`
 }
 
 type Health struct {
 	Ok      bool   `json:"ok"`
 	Store   string `json:"store"`
 	Version string `json:"version"`
+}
+
+type LoginResult struct {
+	Next        LoginNext `json:"next"`
+	Token       *string   `json:"token,omitempty"`
+	ChallengeID *string   `json:"challengeId,omitempty"`
+	User        *User     `json:"user,omitempty"`
+}
+
+type MailMessage struct {
+	ID        string        `json:"id"`
+	Subject   string        `json:"subject"`
+	Body      string        `json:"body"`
+	Purpose   VerifyPurpose `json:"purpose"`
+	CreatedAt string        `json:"createdAt"`
 }
 
 type Mutation struct {
@@ -34,10 +52,139 @@ type Project struct {
 type Query struct {
 }
 
+type Session struct {
+	ID          string `json:"id"`
+	Current     bool   `json:"current"`
+	CreatedAt   string `json:"createdAt"`
+	DeviceLabel string `json:"deviceLabel"`
+}
+
+type TotpSetup struct {
+	Secret     string `json:"secret"`
+	OtpauthURL string `json:"otpauthUrl"`
+}
+
 type User struct {
 	ID            string        `json:"id"`
 	Email         string        `json:"email"`
 	WorkspaceKind WorkspaceKind `json:"workspaceKind"`
+	TotpEnabled   bool          `json:"totpEnabled"`
+}
+
+type LoginNext string
+
+const (
+	LoginNextSession    LoginNext = "SESSION"
+	LoginNextDeviceCode LoginNext = "DEVICE_CODE"
+	LoginNextTotp       LoginNext = "TOTP"
+)
+
+var AllLoginNext = []LoginNext{
+	LoginNextSession,
+	LoginNextDeviceCode,
+	LoginNextTotp,
+}
+
+func (e LoginNext) IsValid() bool {
+	switch e {
+	case LoginNextSession, LoginNextDeviceCode, LoginNextTotp:
+		return true
+	}
+	return false
+}
+
+func (e LoginNext) String() string {
+	return string(e)
+}
+
+func (e *LoginNext) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LoginNext(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LoginNext", str)
+	}
+	return nil
+}
+
+func (e LoginNext) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LoginNext) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LoginNext) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type VerifyPurpose string
+
+const (
+	VerifyPurposeNewDevice       VerifyPurpose = "NEW_DEVICE"
+	VerifyPurposeLoginChallenge  VerifyPurpose = "LOGIN_CHALLENGE"
+	VerifyPurposeEmailVerify     VerifyPurpose = "EMAIL_VERIFY"
+	VerifyPurposeSuspiciousLogin VerifyPurpose = "SUSPICIOUS_LOGIN"
+)
+
+var AllVerifyPurpose = []VerifyPurpose{
+	VerifyPurposeNewDevice,
+	VerifyPurposeLoginChallenge,
+	VerifyPurposeEmailVerify,
+	VerifyPurposeSuspiciousLogin,
+}
+
+func (e VerifyPurpose) IsValid() bool {
+	switch e {
+	case VerifyPurposeNewDevice, VerifyPurposeLoginChallenge, VerifyPurposeEmailVerify, VerifyPurposeSuspiciousLogin:
+		return true
+	}
+	return false
+}
+
+func (e VerifyPurpose) String() string {
+	return string(e)
+}
+
+func (e *VerifyPurpose) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VerifyPurpose(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VerifyPurpose", str)
+	}
+	return nil
+}
+
+func (e VerifyPurpose) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *VerifyPurpose) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e VerifyPurpose) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type WorkspaceKind string
