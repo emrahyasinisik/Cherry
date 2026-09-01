@@ -22,6 +22,7 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 | Hareket | [.cursor/rules/16-motion.mdc](.cursor/rules/16-motion.mdc) | [docs/motion.md](docs/motion.md) |
 | MCP / CLI | [.cursor/rules/17-integrations.mdc](.cursor/rules/17-integrations.mdc) | [docs/integrations.md](docs/integrations.md) |
 | E-posta / 6 hane | [.cursor/rules/18-email-verification.mdc](.cursor/rules/18-email-verification.mdc) | [docs/email-verification.md](docs/email-verification.md) |
+| Yapım sırası | [.cursor/rules/19-build-order.mdc](.cursor/rules/19-build-order.mdc) | [docs/build-order.md](docs/build-order.md) |
 | Electron | [.cursor/rules/05-desktop.mdc](.cursor/rules/05-desktop.mdc) | [docs/desktop.md](docs/desktop.md) |
 | Güvenlik | [.cursor/rules/06-security.mdc](.cursor/rules/06-security.mdc) | [docs/security.md](docs/security.md) |
 | Org / kişisel | [.cursor/rules/07-organizations.mdc](.cursor/rules/07-organizations.mdc) | [docs/organizations.md](docs/organizations.md) |

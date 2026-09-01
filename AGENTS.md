@@ -25,7 +25,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 - Two LLMs: A = codegen, B = test/review. One-click switch changes subsequent answers.
 - OpenCode is the code-writing engine; do not rewrite it.
 - MCP/CLI: Maestro + OpenCode required in the product. Email and 6-digit codes are first-party (no AgentMail). Optional GitHub in this Cursor project. See [docs/integrations.md](docs/integrations.md).
-- No inline imports. Exhaustive TypeScript switches with a `never` default.
+- Follow [docs/build-order.md](docs/build-order.md): scaffold first, then one LLM slot (A), not Colab or LLM B.
 - UI must look like a professional desktop atelier: [docs/design-system.md](docs/design-system.md), motion [docs/motion.md](docs/motion.md), screens [docs/screens.md](docs/screens.md). No slop gradients or spring animations.
 
 ## Intended layout (when coding starts)

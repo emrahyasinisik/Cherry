@@ -1,0 +1,15 @@
+---
+description: Yapım sırası — önce iskele, sonra tek LLM A; Colab ve iki model en sonda
+globs:
+  - docs/build-order.md
+  - services/api/**
+  - apps/**
+alwaysApply: false
+---
+
+# Build order
+
+- Follow [docs/build-order.md](docs/build-order.md).
+- Next implementation slice is the **app scaffold** (Electron, Next.js, Go GraphQL, Mongo), not a second LLM and not Colab.
+- Do not fine-tune or stand up LLM B until LLM A runs behind the GDPR layer on a real project folder.
+- A stub writer on disk is allowed before OpenCode (slice 3 before 5).
