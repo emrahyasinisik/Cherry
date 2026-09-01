@@ -50,6 +50,7 @@ flowchart TB
 6. [frontend.md](frontend.md) + [desktop.md](desktop.md)
 7. [mobile-factory.md](mobile-factory.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
 8. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
+9. [integrations.md](integrations.md) — MCP / CLI
 
 ## Bölüm tablosu / Section table
 
@@ -72,3 +73,4 @@ flowchart TB
 | 14 | Go | [14-go.mdc](../.cursor/rules/14-go.mdc) | [backend-graphql.md](backend-graphql.md) |
 | 15 | Tasarım | [15-design.mdc](../.cursor/rules/15-design.mdc) | [design-system.md](design-system.md) · [screens.md](screens.md) |
 | 16 | Hareket | [16-motion.mdc](../.cursor/rules/16-motion.mdc) | [motion.md](motion.md) |
+| 17 | MCP / CLI | [17-integrations.mdc](../.cursor/rules/17-integrations.mdc) | [integrations.md](integrations.md) |

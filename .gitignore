@@ -13,3 +13,5 @@ coverage/
 .idea/
 .vscode/
 generated/
+.cursor/mcp.json
+opencode.json
