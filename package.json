@@ -1,0 +1,11 @@
+{
+  "name": "icerde",
+  "private": true,
+  "description": "İçerde desktop studio — scaffold",
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "go -C services/api run ./cmd/api",
+    "dev:desktop": "npm --prefix apps/desktop start",
+    "dev": "echo 'Run dev:api and dev:web in two terminals (see README).'"
+  }
+}

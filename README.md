@@ -34,8 +34,26 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 
 Ajanlar için: [AGENTS.md](AGENTS.md)
 
-## Kod yok / No code yet
+## Çalıştır / Run (dilim 1 — iskele)
 
-Uygulama iskelesi (Next.js, Go GraphQL, Electron, MongoDB) belgeler onaylandıktan sonra yazılacak.
+İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). Bu ortamda Docker yoksa oturum **bellekte** kalır. Mongo için `docker compose up -d` ve `MONGO_URI=mongodb://127.0.0.1:27017`.
 
-The app scaffold (Next.js, Go GraphQL, Electron, MongoDB) starts after these documents are accepted.
+```bash
+npm run dev:api
+npm run dev:web
+```
+
+Masaüstü (API + web açıkken):
+
+```bash
+npm --prefix apps/desktop install
+npm run dev:desktop
+```
+
+UI: http://127.0.0.1:43147 — herhangi bir e-posta + şifre (iskele; gerçek MFA dilim 2).
+
+## Dilim durumu / Slice status
+
+İskele çalışıyor. Sıradaki: [docs/build-order.md](docs/build-order.md) dilim 2 (auth + e-posta).
+
+The scaffold is running. Next: auth + first-party mail.

@@ -1,0 +1,40 @@
+"""Icerde platform GraphQL — not the generated customer app API."""
+type Query {
+  health: Health!
+  me: User
+  projects: [Project!]!
+}
+
+type Mutation {
+  login(email: String!, password: String!): AuthPayload!
+  logout: Boolean!
+}
+
+type Health {
+  ok: Boolean!
+  store: String!
+  version: String!
+}
+
+type User {
+  id: ID!
+  email: String!
+  workspaceKind: WorkspaceKind!
+}
+
+enum WorkspaceKind {
+  PERSONAL
+  ORGANIZATION
+}
+
+type Project {
+  id: ID!
+  name: String!
+  stack: String!
+  status: String!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}

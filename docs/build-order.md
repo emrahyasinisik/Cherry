@@ -39,4 +39,4 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 7. **LLM B + tek tuş switch** — test yuvası; switch sonraki cevapları değiştirir.
 8. **Colab fine-tune** — izler birikince.
 
-Şimdi yapılacak bir sonraki iş: **1 — iskele**. İlk yapay zeka **4**.
+Şimdi yapılacak bir sonraki iş: **2 — auth + posta**. Dilim 1 iskele kodda.

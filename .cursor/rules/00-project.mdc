@@ -20,4 +20,4 @@ alwaysApply: true
 - TypeScript switches over unions/enums must use a `never` check in `default`.
 - No lorem ipsum. Real copy. Cover empty, loading, and error states in UI.
 - UI is a dark workshop (ink, paper type, one brass accent). Follow docs/design-system.md and docs/motion.md. No purple AI chrome, springs, or decorative animation.
-- Build order: scaffold first, then one LLM (A). See docs/build-order.md.
+- Build order: scaffold first, then one LLM (A). See docs/build-order.md. Slice 1 (shell) is in apps/ and services/api.
