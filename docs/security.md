@@ -1,10 +1,10 @@
 # Güvenlik / Security — X-inspired
 
-**Kural:** [.cursor/rules/06-security.mdc](../.cursor/rules/06-security.mdc)
+**Kural:** [.cursor/rules/06-security.mdc](../.cursor/rules/06-security.mdc) · posta: [email-verification.md](email-verification.md)
 
-**TR:** X’in görünen akışı. SMS yok, telefon kimliği yok, tek oturum, geçici e-posta kutusu.
+**TR:** X’in görünen akışı. SMS yok, telefon kimliği yok, tek oturum. E-posta ve 6 hane **birinci parti**.
 
-**EN:** X’s visible flow. No SMS, no phone identity, one session, temporary mailbox.
+**EN:** X’s visible flow. No SMS, no phone identity, one session. Mail and 6-digit codes are **first-party**.
 
 ## Giriş sırası / Login order
 
@@ -13,7 +13,7 @@ sequenceDiagram
   participant U as User
   participant App as Electron
   participant API as GoGraphQL
-  participant Mail as TempMailbox
+  participant Mail as Icerde_mailer
   participant DB as MongoDB
   U->>App: email_plus_password
   App->>API: login
@@ -61,7 +61,8 @@ stateDiagram-v2
 
 - SMS, phone number
 - Many concurrent sessions (we keep one)
-- Blocking temporary email (we use a temp inbox for codes)
+- Blocking temporary-email *providers* as a product feature (we run our own inbox for codes)
+- AgentMail or any third-party inbox API
 - Passkeys (later)
 
-Codes: ~10 minute TTL, hashed, attempt lock.
+Codes: ~10 minute TTL, hashed, attempt lock. Details: [email-verification.md](email-verification.md).

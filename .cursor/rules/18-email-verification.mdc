@@ -1,0 +1,19 @@
+---
+description: Birinci parti e-posta ve 6 haneli kod — AgentMail yok, hash+TTL, in-app kutu
+globs:
+  - services/api/**/mail/**
+  - services/api/**/verify/**
+  - apps/web/**/auth/**
+  - apps/web/**/inbox/**
+alwaysApply: false
+---
+
+# Email and 6-digit codes (first-party)
+
+- We implement mail + verification in Icerde (`services/api` + UI). **No AgentMail, no inbox SaaS MCP, no SMS.**
+- Transport is SMTP from env. Missing SMTP in dev → in-app `tempMailboxes` sink + server log, never a fake GraphQL success that reveals the code in the mutation payload in production.
+- Store only `codeHash` (pepper + SHA-256), ~10 min TTL, max 5 attempts, one active code per purpose (new code invalidates old).
+- Purposes: `new_device`, `login_challenge`, `email_verify`, `suspicious_login`. Exhaustive switch with `never` / Go equivalent.
+- Link token and 6-digit UI both resolve the same record.
+- Temp mailbox is our Mongo collection + Security UI, not a third-party inbox.
+- Read [docs/email-verification.md](docs/email-verification.md) and [docs/security.md](docs/security.md).

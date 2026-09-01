@@ -34,11 +34,13 @@ sequenceDiagram
 flowchart TB
   Schema[schema_graphqls] --> Resolvers[resolvers]
   Resolvers --> Auth[auth]
+  Resolvers --> Mail[mailer_verify]
   Resolvers --> Orgs[orgs]
   Resolvers --> Projects[projects_jobs]
   Resolvers --> LLM[llm_router]
   Resolvers --> Privacy[gdpr_export_delete]
   Auth --> Store[mongo_store]
+  Mail --> Store
   Orgs --> Store
   Projects --> Store
   LLM --> Store
@@ -47,7 +49,7 @@ flowchart TB
 
 ## İlk şema grupları / First schema groups
 
-- `Auth`: register, login, verifyCode, totp, devices, sessions, logout
+- `Auth`: register, login, verifyCode, totp, devices, sessions, logout, mailbox (first-party; no AgentMail)
 - `Workspace`: personal profile, organizations, members
 - `Factory`: projects, jobs, artifacts path metadata (not file blobs in Mongo)
 - `LLMOps`: models, versions, active pointer, switch, mcpRoot

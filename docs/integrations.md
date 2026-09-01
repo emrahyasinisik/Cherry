@@ -9,12 +9,13 @@
 ```mermaid
 flowchart TB
   subgraph cursorIDE [Cursor_IDE_gelistirme]
-    CursorMCP[istege_GitHub_AgentMail]
+    CursorMCP[istege_GitHub_Maestro]
   end
   subgraph icerdeApp [Icerde_Electron_urun]
     Host[MCP_host]
     Host --> Read[mcp_read_file]
     Host --> Maestro[maestro_mcp]
+    Mailer[birinci_parti_mailer]
   end
   subgraph writer [OpenCode_CLI]
     OC[opencode]
@@ -34,27 +35,30 @@ Bunlar **Cursor’a süs için değil**, İçerde ve OpenCode’un çalışması
 | **OpenCode CLI** | Ajanın kod yazma motoru | OpenCode kurulumu; proje `opencode.json` içinde Maestro bağlı. |
 | **Node.js LTS + Go 1.22+ + Docker** | Next.js, GraphQL, Mongo | Docker Compose ile Mongo. |
 | **Emülatör** | Maestro’nun gerçek cihazı | Android Studio AVD (Win/Mac). iOS Simulator yalnızca Mac. Yoksa test `skipped`, asla sahte `passed`. |
+| **SMTP (prod)** | Bizim e-posta + 6 hane | Env ile mailer. AgentMail yok. Dev: in-app kutu. [email-verification.md](email-verification.md) |
 
 Maestro **İçerde Electron MCP host** ve **OpenCode** içine bağlanır. Sadece Cursor’a bağlayıp üründe unutmak yetmez.
 
 Örnek: [../opencode.json.example](../opencode.json.example)
 
-## 2. Bağlamanı istediğim — bu Cursor projesi / Connect in this Cursor project
+## 2. Bu Cursor projesinde / In this Cursor project
 
 Geliştirirken (İçerde’yi biz yazarken):
 
 | Ne | Durum | Ne işe yarar |
 | --- | --- | --- |
-| **AgentMail MCP** | Bu oturumda `needsAuth` | Geçici e-posta / 6 haneli kod kutusu. Authenticate et. Ürün tarafında SDK; Cursor’da MCP ile deneme. |
-| **GitHub MCP** | İsteğe bağlı ama faydalı | Müşteri teslimi git ise repo açma, PR. Zip-only ise gerekmez. |
+| **GitHub MCP** | İsteğe bağlı | Müşteri teslimi git ise. Zip-only ise gerekmez. |
 | **Maestro MCP** | Geliştirici makinede | Flow’ları sen elle denersin. Ürün host’unun yerine geçmez. |
 
-Örnek: [../.cursor/mcp.json.example](.cursor/mcp.json.example) → kopyala `.cursor/mcp.json` (secret koyma, git’e atma).
+Örnek: [../.cursor/mcp.json.example](../.cursor/mcp.json.example) → kopyala `.cursor/mcp.json` (secret koyma, git’e atma).
+
+**E-posta / 6 haneli kod için MCP bağlama.** Birinci parti: [email-verification.md](email-verification.md).
 
 ## 3. Bağlama / Do not connect
 
 | Ne | Neden |
 | --- | --- |
+| **AgentMail / inbox SaaS MCP** | Mail ve 6 haneyi biz yazıyoruz. |
 | Figma / Canva MCP | İçerde Figma’dan üretmez (şimdilik). |
 | Rastgele filesystem / shell MCP | Electron zaten `mcp_read_file` sunar; kök admin’de. |
 | MongoDB MCP | Platform Docker ile konuşur; şart değil. |
@@ -68,7 +72,8 @@ Colab **MCP değil**: Google hesabı + notebook export. Cursor’a bağlanmaz.
 2. Maestro CLI → `maestro --help`
 3. OpenCode CLI → `opencode --help`
 4. Android emulator (ve Mac’te Xcode sim)
-5. Cursor: AgentMail’i authenticate et; isteğe `.cursor/mcp.json`
+5. İsteğe `.cursor/mcp.json` (GitHub / Maestro — **mail yok**)
 6. OpenCode: `opencode.json` ile Maestro
+7. Prod: `SMTP_*` env
 
 Cloud agent ortamında emülatör ağır olabilir; orada Maestro mock/`skipped` kabul.

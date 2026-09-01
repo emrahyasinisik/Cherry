@@ -34,7 +34,7 @@ flowchart TB
 
 - Email, phone, national id, addresses, auth codes, TOTP, session tokens
 - Customer app secrets (API keys in generated `.env`)
-- Temp mailbox bodies
+- Temp mailbox bodies (our `tempMailboxes`, not a vendor inbox)
 
 Audit stores purpose, legal basis, model version id, redaction counts — not the raw secret.
 

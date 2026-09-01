@@ -11,10 +11,10 @@ alwaysApply: false
 # Security (X-inspired)
 
 - Password login.
-- New or untrusted device: 6-digit code (TTL, attempt lock). Code goes to the temporary mailbox, not SMS.
+- New or untrusted device: 6-digit code (TTL, attempt lock). Code is sent by **our** mailer and shown in **our** temp mailbox, not SMS and not AgentMail.
 - TOTP MFA (authenticator app). No SMS. No phone number identity.
 - Trusted device list. Session list with revoke.
 - One active session per account: a new successful login revokes others.
-- Suspicious login: notify via the account/temp mail path.
+- Suspicious login: notify via our mailer + temp mailbox.
 - Passkeys/WebAuthn are out of v1.
-- Read [docs/security.md](docs/security.md) before changing login order.
+- Read [docs/security.md](docs/security.md) and [docs/email-verification.md](docs/email-verification.md) before changing login order.

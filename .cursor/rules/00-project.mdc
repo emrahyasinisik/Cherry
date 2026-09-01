@@ -14,7 +14,7 @@ alwaysApply: true
 - Every LLM call must pass the KVKK/GDPR layer (redact → model → scan → audit).
 - Two LLMs: A codegen, B test/review. Switching models must change subsequent answers.
 - OpenCode is the code-writing engine; do not reimplement it.
-- Integrations: see docs/integrations.md. Maestro+OpenCode are runtime. AgentMail in Cursor for temp mail. No Figma/SMS MCP.
+- Integrations: see docs/integrations.md. Maestro+OpenCode are runtime. Email and 6-digit codes are first-party (no AgentMail). No Figma/SMS MCP.
 - Before coding a section, read its `.cursor/rules/*.mdc` and `docs/*.md`. If behavior changes, update the doc in the same change.
 - Imports stay at the top of the file. No inline imports unless a circular dependency is documented.
 - TypeScript switches over unions/enums must use a `never` check in `default`.

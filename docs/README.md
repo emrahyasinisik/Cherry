@@ -43,7 +43,7 @@ flowchart TB
 ## Okuma sırası / Read order
 
 1. [architecture.md](architecture.md) — sistem resmi
-2. [security.md](security.md) — kapı
+2. [security.md](security.md) + [email-verification.md](email-verification.md)
 3. [organizations.md](organizations.md) — kişisel / org
 4. [backend-graphql.md](backend-graphql.md) + [database.md](database.md)
 5. [design-system.md](design-system.md) + [motion.md](motion.md) + [screens.md](screens.md)
@@ -74,3 +74,4 @@ flowchart TB
 | 15 | Tasarım | [15-design.mdc](../.cursor/rules/15-design.mdc) | [design-system.md](design-system.md) · [screens.md](screens.md) |
 | 16 | Hareket | [16-motion.mdc](../.cursor/rules/16-motion.mdc) | [motion.md](motion.md) |
 | 17 | MCP / CLI | [17-integrations.mdc](../.cursor/rules/17-integrations.mdc) | [integrations.md](integrations.md) |
+| 18 | E-posta / 6 hane | [18-email-verification.mdc](../.cursor/rules/18-email-verification.mdc) | [email-verification.md](email-verification.md) |

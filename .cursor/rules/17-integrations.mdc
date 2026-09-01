@@ -1,5 +1,5 @@
 ---
-description: MCP ve CLI bağlama — Maestro+OpenCode zorunlu, AgentMail/GitHub isteğe, Figma/SMS yok
+description: MCP ve CLI bağlama — Maestro+OpenCode zorunlu, mail birinci parti, Figma/SMS/AgentMail yok
 globs:
   - .cursor/mcp.json
   - opencode.json
@@ -11,7 +11,8 @@ alwaysApply: false
 
 - Read [docs/integrations.md](docs/integrations.md) before adding an MCP or CLI.
 - **Required runtime:** Maestro CLI (`maestro mcp`) inside Icerde’s Electron MCP host and inside OpenCode. OpenCode CLI is the writer. Java 17+, Node, Go, Docker, emulator on the user’s machine.
-- **Connect in this Cursor project:** AgentMail MCP (authenticate — temp mailbox / 6-digit codes). GitHub MCP if git handoff is used. Maestro in Cursor is optional for the developer, not a substitute for the in-app host.
+- **Connect in this Cursor project:** GitHub MCP if git handoff is used. Maestro in Cursor is optional for the developer, not a substitute for the in-app host.
+- **Mail and 6-digit codes are first-party.** Do not connect AgentMail or any inbox SaaS. See [docs/email-verification.md](docs/email-verification.md).
 - **Do not connect:** Figma/Canva, SMS providers, extra filesystem/shell MCPs, MongoDB MCP as a requirement.
 - Never commit real `.cursor/mcp.json` with secrets. Use the `.example` files.
 - Colab is not an MCP. Do not fake a Colab MCP.

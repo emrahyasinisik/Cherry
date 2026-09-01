@@ -53,7 +53,8 @@ flowchart LR
 ## Alan kuralları / Field rules
 
 - Passwords: argon2id or bcrypt. TOTP secret encrypted at rest.
-- `verificationCodes.codeHash`, TTL 10 minutes, max attempts.
+- `verificationCodes.codeHash`, TTL 10 minutes, max attempts. Plain code is never stored. First-party mailer: [email-verification.md](email-verification.md).
+- `tempMailboxes` is **our** collection (in-app inbox), not AgentMail.
 - `sessions.tokenHash`, unique; at most one `active` per user.
 - `projects.diskPath` is a pointer on the machine, not the source tree in GridFS.
 - `auditEvents` immutable insert; redacted payload only.
