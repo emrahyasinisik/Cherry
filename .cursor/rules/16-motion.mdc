@@ -1,0 +1,19 @@
+---
+description: Profesyonel hareket — kısa süre, ease-out, reduced-motion, spring yasak
+globs:
+  - apps/web/**
+  - "**/*.css"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# Motion
+
+- Follow [docs/motion.md](docs/motion.md). Use duration tokens 80 / 160 / 240 / 320 only. Nothing longer than 400ms.
+- Easing: `cubic-bezier(0.16, 1, 0.3, 1)` enter, `cubic-bezier(0.4, 0, 1, 1)` exit. Linear for progress and log tail.
+- Animate only `opacity` and `transform` (4–8px). No layout animation (top/left/height/width except sidebar width).
+- Forbidden: spring, bounce, elastic, back, 3D flip, shake, confetti, looping decorative pulses, blur animation.
+- If using Framer Motion / motion/react, set explicit duration + ease from tokens. `type: "spring"` is forbidden.
+- Stagger ≤ 30ms and ≤ 5 items.
+- `prefers-reduced-motion: reduce` must zero all transitions and animations. Focus ring stays visible without motion.
+- LLM switch: 160ms pill crossfade, not a celebration. Failed 6-digit: danger border 160ms, no shake.

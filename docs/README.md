@@ -46,9 +46,10 @@ flowchart TB
 2. [security.md](security.md) — kapı
 3. [organizations.md](organizations.md) — kişisel / org
 4. [backend-graphql.md](backend-graphql.md) + [database.md](database.md)
-5. [frontend.md](frontend.md) + [desktop.md](desktop.md)
-6. [mobile-factory.md](mobile-factory.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
-7. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
+5. [design-system.md](design-system.md) + [motion.md](motion.md) + [screens.md](screens.md)
+6. [frontend.md](frontend.md) + [desktop.md](desktop.md)
+7. [mobile-factory.md](mobile-factory.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
+8. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
 
 ## Bölüm tablosu / Section table
 
@@ -69,3 +70,5 @@ flowchart TB
 | 12 | KVKK/GDPR | [12-gdpr-kvkk.mdc](../.cursor/rules/12-gdpr-kvkk.mdc) | [gdpr-kvkk.md](gdpr-kvkk.md) |
 | 13 | TypeScript | [13-typescript.mdc](../.cursor/rules/13-typescript.mdc) | [frontend.md](frontend.md) |
 | 14 | Go | [14-go.mdc](../.cursor/rules/14-go.mdc) | [backend-graphql.md](backend-graphql.md) |
+| 15 | Tasarım | [15-design.mdc](../.cursor/rules/15-design.mdc) | [design-system.md](design-system.md) · [screens.md](screens.md) |
+| 16 | Hareket | [16-motion.mdc](../.cursor/rules/16-motion.mdc) | [motion.md](motion.md) |

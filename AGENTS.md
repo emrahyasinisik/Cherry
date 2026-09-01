@@ -25,6 +25,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 - Two LLMs: A = codegen, B = test/review. One-click switch changes subsequent answers.
 - OpenCode is the code-writing engine; do not rewrite it.
 - No inline imports. Exhaustive TypeScript switches with a `never` default.
+- UI must look like a professional desktop atelier: [docs/design-system.md](docs/design-system.md), motion [docs/motion.md](docs/motion.md), screens [docs/screens.md](docs/screens.md). No slop gradients or spring animations.
 
 ## Intended layout (when coding starts)
 
@@ -42,3 +43,4 @@ docs/              this documentation
 - Do not host customer backends.
 - Do not send PII to an LLM without redaction.
 - Do not implement a section without updating its doc if behavior changes.
+- Do not ship default shadcn violet, bounce/spring motion, or mascot illustrations.

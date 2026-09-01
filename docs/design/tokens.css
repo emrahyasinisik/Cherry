@@ -1,0 +1,33 @@
+:root {
+  --bg: #0e1114;
+  --surface: #161b20;
+  --surface-2: #1c2329;
+  --border: #2a323a;
+  --text: #e8e4dc;
+  --muted: #8b939c;
+  --accent: #c4a574;
+  --accent-hover: #d4b896;
+  --danger: #c45c4a;
+  --success: #6f9e7a;
+  --radius: 8px;
+  --radius-card: 10px;
+  --font-sans: "Geist", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --motion-instant: 80ms;
+  --motion-short: 160ms;
+  --motion-medium: 240ms;
+  --motion-panel: 320ms;
+  --motion-stagger: 30ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-instant: 0ms;
+    --motion-short: 0ms;
+    --motion-medium: 0ms;
+    --motion-panel: 0ms;
+    --motion-stagger: 0ms;
+  }
+}

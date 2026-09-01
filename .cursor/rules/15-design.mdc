@@ -1,0 +1,21 @@
+---
+description: İçerde görsel dil — koyu atölye, pirinç vurgu, shadcn teması, slop yasak
+globs:
+  - apps/web/**
+  - apps/desktop/**
+  - "**/*.css"
+  - "**/*.tsx"
+alwaysApply: false
+---
+
+# Design
+
+- Follow [docs/design-system.md](docs/design-system.md) and [docs/screens.md](docs/screens.md). Tokens live in [docs/design/tokens.css](docs/design/tokens.css).
+- Look: ink `#0E1114`, paper text `#E8E4DC`, **one** brass accent `#C4A574`. Dark-only in v1.
+- shadcn/ui + Tailwind only. Map CSS variables to these tokens; do not leave default violet shadcn theme.
+- Radius 8px controls, 10px cards max. 1px `--border`.
+- Body 13px. Logs and 6-digit codes: `--font-mono`.
+- Lucide 16px. No emoji, mascots, 3D icons, mesh gradients, purple AI chrome, glass blobs.
+- Match the character of `docs/design/icerde-login.png`, `icerde-studio.png`, `icerde-llm-admin.png`.
+- Real Turkish copy. Empty / loading / error on every screen.
+- Desktop shell: sidebar + titlebar + statusbar. No mobile tab bar for Icerde.

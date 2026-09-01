@@ -16,4 +16,5 @@ alwaysApply: false
 - Every screen: empty, loading, error.
 - Desktop and a usable narrow window (Electron may be resized). No mobile-app navigation patterns as the product shell.
 - Do not call LLMs from the browser. Go through the API so GDPR and routing apply.
-- Read [docs/frontend.md](docs/frontend.md) before adding routes.
+- Theme from [docs/design/tokens.css](docs/design/tokens.css). Do not ship default shadcn violet.
+- Read [docs/frontend.md](docs/frontend.md), [docs/design-system.md](docs/design-system.md), [docs/screens.md](docs/screens.md), [docs/motion.md](docs/motion.md) before adding routes.

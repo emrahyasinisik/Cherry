@@ -40,6 +40,7 @@ stateDiagram-v2
 
 ## UI kuralları / UI rules
 
-- shadcn/ui + Tailwind only.
+- shadcn/ui + Tailwind only. Theme = [design/tokens.css](design/tokens.css), not default violet.
+- Visual system: [design-system.md](design-system.md). Motion: [motion.md](motion.md). Layouts: [screens.md](screens.md).
 - LLM admin switch is one control; it must call the API and then show the new active model on the next completion.
 - Do not fetch Mongo or filesystem from the browser; desktop preload handles files.
