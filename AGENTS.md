@@ -9,7 +9,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 ## Map
 
 1. [docs/README.md](docs/README.md) — index and drawings overview
-2. [docs/remaining.md](docs/remaining.md) — pause note: next is slice 5 (OpenCode)
+2. [docs/remaining.md](docs/remaining.md) — pause note: next is slice 6 (local activate + Maestro)
 3. Matching `.cursor/rules/*.mdc` for the files you will touch
 4. Matching `docs/*.md` for the drawing and invariants
 

@@ -81,7 +81,7 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 		{
 			rel:  "preview/home.html",
 			kind: "preview",
-			body: screenHTML(name, "Ana ekran", brief, "Ajanın ürettiği ilk kabuk. Gerçek kod OpenCode (dilim 5) ile dolar.", "home"),
+			body: screenHTML(name, "Ana ekran", brief, "Ajanın ürettiği kabuk. OpenCode bu dosyaları doldurur.", "home"),
 		},
 	}
 	fe, err := frontendFiles(project.Stack, name, slug, brief)

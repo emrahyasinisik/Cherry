@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/icerde/api/internal/llm"
+	"github.com/icerde/api/internal/opencode"
 	"github.com/icerde/api/internal/store"
 )
 
@@ -22,6 +23,8 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 		t.Fatal(err)
 	}
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+	fake := &opencode.Fake{}
+	svc.OpenCode = fake
 
 	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
 	if err != nil {
@@ -37,10 +40,13 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	if got.Status != store.StatusReady {
 		t.Fatalf("status %s", got.Status)
 	}
-	for _, rel := range []string{"README.md", "frontend/app/index.tsx", "backend/main.go", "maestro/login.yaml", "preview/home.html", "llm/plan.md", "icerde.zip"} {
+	for _, rel := range []string{"README.md", "frontend/app/index.tsx", "backend/main.go", "maestro/login.yaml", "preview/home.html", "llm/plan.md", "llm/opencode.ran", "opencode.json", "AGENTS.md", "icerde.zip"} {
 		if _, err := os.Stat(filepath.Join(got.RootPath, rel)); err != nil {
 			t.Fatalf("%s: %v", rel, err)
 		}
+	}
+	if fake.Ran != 1 {
+		t.Fatalf("opencode ran %d", fake.Ran)
 	}
 	studio, err := svc.Maestro(ctx, "u1", project.ID)
 	if err != nil {
@@ -51,6 +57,70 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	}
 	if studio.Flows[0].Result != store.MaestroSkipped {
 		t.Fatalf("must skip without emulator, got %s", studio.Flows[0].Result)
+	}
+}
+
+func TestPipelineWithoutOpenCodeKeepsScaffold(t *testing.T) {
+	mem := store.NewMemory()
+	svc := New(mem, t.TempDir())
+	svc.StepDelay = 0
+	svc.AutoRun = false
+	ctx := context.Background()
+	if err := llm.Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.RunSync(ctx, project.ID); err != nil {
+		t.Fatal(err)
+	}
+	got, err := svc.Get(ctx, "u1", project.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status != store.StatusReady {
+		t.Fatalf("status %s", got.Status)
+	}
+	logs, err := svc.Logs(ctx, "u1", project.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := ""
+	for _, line := range logs {
+		joined += line.Message
+	}
+	if !strings.Contains(joined, "OpenCode bağlı değil") {
+		t.Fatalf("logs %s", joined)
+	}
+}
+
+func TestOpenCodePromptRedactsEmail(t *testing.T) {
+	mem := store.NewMemory()
+	svc := New(mem, t.TempDir())
+	svc.StepDelay = 0
+	svc.AutoRun = false
+	ctx := context.Background()
+	if err := llm.Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+	fake := &opencode.Fake{}
+	svc.OpenCode = fake
+	project, err := svc.Create(ctx, "u1", "Kahve", "ada@icerde.dev için sipariş kuyruğu uygulaması.", "EXPO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.RunSync(ctx, project.ID); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(fake.Prompt, "ada@icerde.dev") {
+		t.Fatalf("prompt leaked email: %s", fake.Prompt)
+	}
+	if !strings.Contains(fake.Prompt, "[REDACTED_EMAIL]") {
+		t.Fatalf("expected redaction in %s", fake.Prompt)
 	}
 }
 

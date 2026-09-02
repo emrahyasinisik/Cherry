@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-const apiVersion = "0.4.0-llm"
+const apiVersion = "0.5.0-opencode"
 
 func gqlErr(err error) error {
 	switch {

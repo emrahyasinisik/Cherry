@@ -41,6 +41,7 @@ export function AppShell({
   const router = useRouter();
   const [lastProject, setLastProject] = useState<string | null>(null);
   const [llm, setLlm] = useState<LlmStatus | null>(null);
+  const [openCode, setOpenCode] = useState<string | null>(null);
 
   useEffect(() => {
     setLastProject(getLastProjectId());
@@ -50,6 +51,14 @@ export function AppShell({
       .then((data) => setLlm(data.llmStatus))
       .catch(() => {
         setLlm(null);
+      });
+    void fetch("/health")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { opencode?: string } | null) => {
+        setOpenCode(data?.opencode ?? null);
+      })
+      .catch(() => {
+        setOpenCode(null);
       });
   }, [pathname]);
   const maestroHref = lastProject ? `/projects/${lastProject}/maestro` : "/maestro";
@@ -162,6 +171,8 @@ export function AppShell({
             <span>{llm.channel}</span>
           </>
         ) : null}
+        <span>·</span>
+        <span>{openCode === "cli" ? "OpenCode CLI" : "OpenCode yok"}</span>
       </footer>
     </div>
   );

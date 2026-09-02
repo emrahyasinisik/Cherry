@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/icerde/api/internal/gdpr"
 	"github.com/icerde/api/internal/llm"
+	"github.com/icerde/api/internal/opencode"
 	"github.com/icerde/api/internal/store"
 )
 
@@ -18,6 +20,7 @@ type Service struct {
 	StepDelay time.Duration
 	AutoRun   bool
 	LLM       *llm.Service
+	OpenCode  opencode.Runner
 }
 
 func New(st store.Store, root string) *Service {
@@ -130,8 +133,19 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.log(ctx, project.ID, "Dosya ağacı hazır: "+project.RootPath); err != nil {
 		return err
 	}
+	if err := opencode.WriteConfig(project.RootPath); err != nil {
+		return err
+	}
+	briefSafe, _ := gdpr.Redact(project.Brief)
+	if err := opencode.WriteAgents(project.RootPath, project.Name, label, briefSafe); err != nil {
+		return err
+	}
 	s.pause()
 	if err := s.runLLM(ctx, project); err != nil {
+		return err
+	}
+	s.pause()
+	if err := s.runOpenCode(ctx, project); err != nil {
 		return err
 	}
 	s.pause()
@@ -149,7 +163,7 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.setStatus(ctx, project.ID, store.StatusReady); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Kod iskeleti stub; OpenCode dilim 5.")
+	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Yazıcı: OpenCode.")
 }
 
 func (s *Service) runLLM(ctx context.Context, project store.Project) error {
@@ -182,7 +196,61 @@ func (s *Service) runLLM(ctx context.Context, project store.Project) error {
 	if err := os.WriteFile(planPath, []byte(body), 0o644); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "GDPR → LLM A "+out.Version.Name+" ("+out.Channel+") redact="+fmt.Sprintf("%d/%d", out.InputN, out.OutputN)+". Plan: llm/plan.md")
+	return s.log(ctx, project.ID, "GDPR → işçi A "+out.Version.Name+" ("+out.Channel+") redact="+fmt.Sprintf("%d/%d", out.InputN, out.OutputN)+". Plan: llm/plan.md")
+}
+
+func (s *Service) runOpenCode(ctx context.Context, project store.Project) error {
+	if s.OpenCode == nil {
+		return s.log(ctx, project.ID, "OpenCode bağlı değil — iskelet kaldı.")
+	}
+	if err := s.log(ctx, project.ID, "OpenCode yazılıyor (GDPR’li brif, proje kökü)."); err != nil {
+		return err
+	}
+	plan := ""
+	if s.LLM != nil {
+		text, err := s.LLM.ReadProjectFile(ctx, "llm/plan.md")
+		if err == nil {
+			plan = text
+		}
+	}
+	label, err := stackLabel(project.Stack)
+	if err != nil {
+		return err
+	}
+	briefSafe, _ := gdpr.Redact(project.Brief)
+	nameSafe, _ := gdpr.Redact(project.Name)
+	prompt := strings.Join([]string{
+		"İçerde müşteri uygulamasını bu dizinde yaz. Kök dışına çıkma.",
+		"Yığın: " + label,
+		"Ad: " + nameSafe,
+		"Brif: " + briefSafe,
+		"Klasörler: frontend/, backend/, maestro/, preview/.",
+		"Barındırma yok. Teslim dosya. Maestro YAML yaz; emülatör yoksa test çalıştırma.",
+		"İçerde platform GraphQL’ine dokunma.",
+		"Plan:",
+		plan,
+	}, "\n")
+	res, err := s.OpenCode.Run(ctx, opencode.Request{
+		Dir:    project.RootPath,
+		Prompt: prompt,
+		Title:  "icerde-" + project.ID,
+	})
+	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
+		return writeErr
+	}
+	if err != nil {
+		return err
+	}
+	switch res.Status {
+	case opencode.StatusRan:
+		return s.log(ctx, project.ID, "OpenCode "+res.Status.Label()+" ("+res.Bin+"). Günlük: llm/opencode.log")
+	case opencode.StatusMissing:
+		return s.log(ctx, project.ID, "OpenCode CLI yok — iskelet kaldı, sahte yazım yok. Kur: opencode --help")
+	case opencode.StatusFailed:
+		return s.log(ctx, project.ID, "OpenCode hata: "+res.Err+" — iskelet duruyor. llm/opencode.log")
+	default:
+		return s.log(ctx, project.ID, "OpenCode durum: "+string(res.Status))
+	}
 }
 
 func (s *Service) setStatus(ctx context.Context, id string, status store.ProjectStatus) error {
@@ -227,6 +295,8 @@ func fileKind(rel string) string {
 		return "maestro"
 	case strings.HasPrefix(rel, "llm/"):
 		return "llm"
+	case rel == "opencode.json" || rel == "AGENTS.md":
+		return "opencode"
 	case strings.HasPrefix(rel, "preview/"):
 		return "preview"
 	default:

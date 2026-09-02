@@ -21,6 +21,7 @@ import (
 	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/llm"
 	"github.com/icerde/api/internal/mailer"
+	"github.com/icerde/api/internal/opencode"
 	"github.com/icerde/api/internal/store"
 	"github.com/rs/cors"
 )
@@ -75,6 +76,14 @@ func main() {
 	}
 	fact := factory.New(memory, projectsRoot)
 	fact.LLM = llmSvc
+	oc := opencode.NewCLI()
+	fact.OpenCode = oc
+	ocBin, ocVer, ocOK := oc.Probe()
+	if ocOK {
+		log.Printf("opencode bin=%s version=%s", ocBin, ocVer)
+	} else {
+		log.Printf("opencode CLI missing — factory keeps scaffold, no fake write")
+	}
 	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
 	resolver := &graph.Resolver{Auth: authSvc, Factory: fact, LLM: llmSvc}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
@@ -92,12 +101,13 @@ func main() {
 			status = "memory+mongo-ping"
 		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"ok":      true,
-			"store":   status,
-			"version": "0.4.0-llm",
-			"mail":    mail.Channel(),
-			"gdpr":    true,
-			"llm":     llmSvc.Completer.Channel(),
+			"ok":       true,
+			"store":    status,
+			"version":  "0.5.0-opencode",
+			"mail":     mail.Channel(),
+			"gdpr":     true,
+			"llm":      llmSvc.Completer.Channel(),
+			"opencode": ocStatus(ocOK),
 		})
 	})
 	mux.HandleFunc("/export/", func(w http.ResponseWriter, r *http.Request) {
@@ -165,6 +175,13 @@ func withRequestMeta(next http.Handler) http.Handler {
 		ctx = graph.WithIP(ctx, ip)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func ocStatus(ok bool) string {
+	if ok {
+		return "cli"
+	}
+	return "missing"
 }
 
 func getenv(key, fallback string) string {

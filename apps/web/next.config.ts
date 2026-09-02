@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/graphql",
-        destination: "http://127.0.0.1:43148/graphql",
+        source: "/health",
+        destination: "http://127.0.0.1:43148/health",
       },
       {
         source: "/export/:id",

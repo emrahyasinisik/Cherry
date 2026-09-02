@@ -10,6 +10,5 @@ alwaysApply: false
 # Build order
 
 - Follow [docs/build-order.md](docs/build-order.md). Pause checklist: [docs/remaining.md](docs/remaining.md).
-- Next implementation slice is **5 — OpenCode**. Slices 1–4 are done. Do not stand up the second capacity worker (LLM B) or Colab until OpenCode writes real files behind GDPR.
-- Do not add worker B (load) or fine-tune until LLM A runs behind the GDPR layer on a real project folder. One worker is enough until concurrent jobs exist.
-- A stub writer on disk is allowed before OpenCode (slice 3 before 5).
+- Next implementation slice is **6 — local activate + Maestro MCP**. Slices 1–5 are done. Do not stand up worker B or Colab until generated apps actually boot and Maestro can run or skip.
+- OpenCode is the writer (`opencode run --dir`). Do not reimplement it. Missing CLI keeps the scaffold; do not fake an OpenCode write.

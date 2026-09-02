@@ -50,7 +50,7 @@ flowchart TB
 4. [backend-graphql.md](backend-graphql.md) + [database.md](database.md)
 5. [design-system.md](design-system.md) + [motion.md](motion.md) + [screens.md](screens.md)
 6. [frontend.md](frontend.md) + [desktop.md](desktop.md)
-7. [mobile-factory.md](mobile-factory.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
+7. [mobile-factory.md](mobile-factory.md) + [opencode.md](opencode.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
 8. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
 9. [integrations.md](integrations.md) — MCP / CLI
 
@@ -66,7 +66,7 @@ flowchart TB
 | 05 | Electron | [05-desktop.mdc](../.cursor/rules/05-desktop.mdc) | [desktop.md](desktop.md) |
 | 06 | Güvenlik | [06-security.mdc](../.cursor/rules/06-security.mdc) | [security.md](security.md) |
 | 07 | Org | [07-organizations.mdc](../.cursor/rules/07-organizations.mdc) | [organizations.md](organizations.md) |
-| 08 | Mobil fabrika | [08-mobile-factory.mdc](../.cursor/rules/08-mobile-factory.mdc) | [mobile-factory.md](mobile-factory.md) |
+| 08 | Mobil fabrika | [08-mobile-factory.mdc](../.cursor/rules/08-mobile-factory.mdc) | [mobile-factory.md](mobile-factory.md) · [opencode.md](opencode.md) |
 | 09 | Yerel aktif | [09-local-activate.mdc](../.cursor/rules/09-local-activate.mdc) | [local-activate.md](local-activate.md) |
 | 10 | Maestro | [10-maestro.mdc](../.cursor/rules/10-maestro.mdc) | [maestro.md](maestro.md) |
 | 11 | LLMOps | [11-llmops.mdc](../.cursor/rules/11-llmops.mdc) | [llmops.md](llmops.md) |

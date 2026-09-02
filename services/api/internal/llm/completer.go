@@ -21,7 +21,7 @@ func (MockCompleter) Complete(_ context.Context, version store.LlmVersion, promp
 	case "ver-a-2":
 		return "LLM A " + version.Name + " plan:\n- Ekranları yığın dosyalarına böl.\n- Maestro akışını giriş + ana ekran tut.\nKaynak (redakte):\n" + clip(prompt, 400), nil
 	case "ver-a-1":
-		return "LLM A " + version.Name + " iskelet:\n- README ve stub frontend/backend duruyor.\n- OpenCode (dilim 5) gerçek yazıcı olacak.\nBrif (redakte):\n" + clip(prompt, 400), nil
+		return "LLM A " + version.Name + " iskelet:\n- README ve frontend/backend duruyor.\n- OpenCode bu planla dosyaları yazar.\nBrif (redakte):\n" + clip(prompt, 400), nil
 	default:
 		return "LLM A " + version.Name + ":\n" + clip(prompt, 400), nil
 	}

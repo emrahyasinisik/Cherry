@@ -105,7 +105,7 @@ export default function NewProjectPage() {
         <div>
           <h1 className="text-base font-medium">Ne üretilsin?</h1>
           <p className="text-muted-foreground">
-            Brifi yaz, yığını seç. Ajan arka planda kodlar; sen beklerken stüdyoda logu görürsün.
+            Brifi yaz, yığını seç. OpenCode arka planda kodlar; sen stüdyoda günlüğü görürsün.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">
