@@ -3,6 +3,7 @@ package graph
 import (
 	"testing"
 
+	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 )
@@ -81,5 +82,15 @@ func TestMapProjectEnumsExhaustive(t *testing.T) {
 	}
 	if _, err := mapChatRole(store.ChatRole("X")); err == nil {
 		t.Fatal("expected chat role error")
+	}
+	for _, status := range []activate.Status{
+		activate.StatusIdle, activate.StatusStarting, activate.StatusRunning, activate.StatusStopping, activate.StatusFailed,
+	} {
+		if _, err := mapActivateStatus(status); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapActivateStatus(activate.Status("X")); err == nil {
+		t.Fatal("expected activate error")
 	}
 }

@@ -181,6 +181,42 @@ func (r *mutationResolver) SendProjectMessage(ctx context.Context, projectID str
 	return r.projectPayload(ctx, user.ID, row.ID, true)
 }
 
+// ActivateProject is the resolver for the activateProject field.
+func (r *mutationResolver) ActivateProject(ctx context.Context, id string) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if _, err := r.Factory.Activate(ctx, user.ID, id); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.projectPayload(ctx, user.ID, id, true)
+}
+
+// DeactivateProject is the resolver for the deactivateProject field.
+func (r *mutationResolver) DeactivateProject(ctx context.Context, id string) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if _, err := r.Factory.Deactivate(ctx, user.ID, id); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.projectPayload(ctx, user.ID, id, true)
+}
+
+// RunMaestro is the resolver for the runMaestro field.
+func (r *mutationResolver) RunMaestro(ctx context.Context, projectID string) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if _, err := r.Factory.RunMaestro(ctx, user.ID, projectID); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.projectPayload(ctx, user.ID, projectID, true)
+}
+
 // SetActiveVersion is the resolver for the setActiveVersion field.
 func (r *mutationResolver) SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))

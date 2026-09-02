@@ -2,53 +2,56 @@
 
 **Kural:** [.cursor/rules/10-maestro.mdc](../.cursor/rules/10-maestro.mdc)
 
-**TR:** UI denemesi Maestro MCP ile. Flow’lar müşteri dosyalarına yazılır.
+**TR:** UI denemesi Maestro ile. Flow’lar müşteri dosyalarına yazılır. Cihaz yoksa **SKIPPED**; PASSED uydurulmaz.
 
-**EN:** UI trials go through Maestro MCP. Flows are written into the customer files.
+**EN:** UI trials go through Maestro. Flows are written into the customer files. No device → **SKIPPED**; never fake PASSED.
 
 ## Kurulum / Install
 
-Resmi CLI (Java 17+, `JAVA_HOME`):
+Müşteri Maestro kurmaz. İçerde `vendor/bin` (veya `resources/bin`) paketler. Geliştirici PATH / `ICERDE_MAESTRO_BIN` yedek.
+
+The customer does not install Maestro. Icerde vendors it. PATH is a developer fallback.
 
 ```bash
+./scripts/vendor-sidecars.sh
+# or, developer machine only:
 curl -fsSL "https://get.maestro.mobile.dev" | bash
 ```
 
-MCP sunucusu CLI’nin içinde: `maestro mcp`. Doğrulama: `maestro --help`.
+Electron main, CLI varsa `maestro mcp` (stdio) ayağa kaldırır; yoksa host boş kalır, akışlar SKIPPED.
 
 ## Test döngüsü / Test loop
 
 ```mermaid
 flowchart TB
-  Start[free_worker_A_or_B] --> List[list_devices]
-  List --> Boot[emulator_or_skip]
-  Boot --> Inspect[inspect_screen]
-  Inspect --> Write[write_yaml_flow]
-  Write --> Run[run_flow]
-  Run --> Pass[pass_save_flow]
-  Run --> Fail[fail_screenshot]
-  Fail --> Fix[agent_fix_code_or_flow]
-  Fix --> Inspect
-  Pass --> Report[job_report]
+  Start[activate_localhost] --> List[adb_devices]
+  List -->|none| Skip[SKIPPED_not_pass]
+  List -->|device| CLI{maestro_cli}
+  CLI -->|missing| Skip
+  CLI -->|ok| Run[maestro_test_yaml]
+  Run --> Pass[PASSED]
+  Run --> Fail[FAILED]
+  Skip --> Report[job_report]
+  Pass --> Report
+  Fail --> Report
 ```
+
+`runMaestro` GraphQL mutasyonu stüdyo ve Maestro ekranından. Pipeline TESTING aynı koşucuyu kullanır, sonra yerel API’yi kapatır.
 
 ## MCP araçları / MCP tools
 
 ```mermaid
 flowchart LR
-  Host[Electron_MCP_host] --> LD[list_devices]
-  Host --> IS[inspect_screen]
-  Host --> SS[take_screenshot]
-  Host --> Run[run]
-  Host --> View[open_maestro_viewer]
+  Host[Electron_MCP_host] --> MCP[maestro_mcp_stdio]
+  API[Go_runMaestro] --> Test[maestro_test]
+  Test --> Local[customer_API_47xxx]
 ```
 
-Dilim 3 viewer: stüdyo UI (telefon maketi + YAML). Dilim 6: gerçek `maestro mcp`.
-
+Maestro **Icerde GraphQL’e değil**, yerelde aktif müşteri API’sine konuşur.
 
 ## Kurallar / Rules
 
 - YAML under `maestro/` ships with zip/git.
-- No emulator: status `skipped`, never `passed`.
+- No emulator / no CLI: status `SKIPPED`, never `PASSED`.
 - Bound repair attempts (suggested max 3 per flow) then fail the job.
 - Maestro talks to the **locally activated** customer API, not Icerde GraphQL.

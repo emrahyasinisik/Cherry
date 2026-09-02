@@ -7,6 +7,7 @@ import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import {
   PROJECT_FIELDS,
+  activateStatusLabel,
   getToken,
   graphql,
   maestroResultLabel,
@@ -27,6 +28,8 @@ export default function MaestroPage() {
   const [error, setError] = useState<string | null>(null);
   const [screenId, setScreenId] = useState<string | null>(null);
   const [flowId, setFlowId] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getToken()) {
@@ -92,6 +95,24 @@ export default function MaestroPage() {
   const flow = project.maestro.flows.find((item) => item.id === flowId) ?? project.maestro.flows[0];
   const ready = project.maestro.ready;
 
+  async function handleRunMaestro() {
+    setRunning(true);
+    setRunError(null);
+    try {
+      const data = await graphql<{ runMaestro: Project }>(
+        `mutation RunMaestro($id: ID!) {
+          runMaestro(projectId: $id) { ${PROJECT_FIELDS} }
+        }`,
+        { id },
+      );
+      setProject(data.runMaestro);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : "Maestro koşulamadı.");
+    } finally {
+      setRunning(false);
+    }
+  }
+
   return (
     <AppShell user={user} title={`${project.name} · Maestro`} status={projectStatusLabel(project.status)}>
       <div className="flex min-h-full flex-col gap-4 p-6 lg:flex-row">
@@ -104,10 +125,24 @@ export default function MaestroPage() {
                   ? "Üretilen ekranlar ve Maestro YAML. Cihaz yoksa akış SKIPPED — sahte geçiş yok."
                   : "Ajan yazınca tasarım ve testler burada durur."}
               </p>
+              {project.activate.url ? (
+                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                  Yerel API {project.activate.url} · {activateStatusLabel(project.activate.status)}
+                </p>
+              ) : (
+                <p className="mt-1 text-muted-foreground">
+                  Yerel API kapalı. Stüdyodan başlat; Maestro Icerde GraphQL’e değil localhost’a konuşur.
+                </p>
+              )}
             </div>
-            <Button type="button" variant="outline" onClick={() => router.push(`/projects/${id}`)}>
-              Ajan günlüğüne dön
-            </Button>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" disabled={running} onClick={() => void handleRunMaestro()}>
+                {running ? "Koşuyor…" : "Maestro’yu koş"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => router.push(`/projects/${id}`)}>
+                Ajan günlüğüne dön
+              </Button>
+            </div>
           </div>
           {!ready ? (
             <div className="rounded-[10px] border border-dashed border-border px-4 py-10 text-center text-muted-foreground">
@@ -172,6 +207,7 @@ export default function MaestroPage() {
               ))}
             </ul>
           )}
+          {runError ? <p className="text-destructive">{runError}</p> : null}
           {flow ? <FlowDetail flow={flow} /> : null}
         </aside>
       </div>

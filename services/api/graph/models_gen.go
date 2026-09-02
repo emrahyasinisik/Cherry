@@ -83,6 +83,14 @@ type LlmVersion struct {
 	Note string `json:"note"`
 }
 
+type LocalActivate struct {
+	Status ActivateStatus `json:"status"`
+	URL    *string        `json:"url,omitempty"`
+	Port   *int           `json:"port,omitempty"`
+	Pid    *int           `json:"pid,omitempty"`
+	Note   string         `json:"note"`
+}
+
 type LoginResult struct {
 	Next         LoginNext `json:"next"`
 	Token        *string   `json:"token,omitempty"`
@@ -129,6 +137,7 @@ type Project struct {
 	Logs      []*JobLog      `json:"logs"`
 	Files     []*ProjectFile `json:"files"`
 	Maestro   *MaestroStudio `json:"maestro"`
+	Activate  *LocalActivate `json:"activate"`
 }
 
 type ProjectFile struct {
@@ -157,6 +166,67 @@ type User struct {
 	Email         string        `json:"email"`
 	WorkspaceKind WorkspaceKind `json:"workspaceKind"`
 	TotpEnabled   bool          `json:"totpEnabled"`
+}
+
+type ActivateStatus string
+
+const (
+	ActivateStatusIdle     ActivateStatus = "IDLE"
+	ActivateStatusStarting ActivateStatus = "STARTING"
+	ActivateStatusRunning  ActivateStatus = "RUNNING"
+	ActivateStatusStopping ActivateStatus = "STOPPING"
+	ActivateStatusFailed   ActivateStatus = "FAILED"
+)
+
+var AllActivateStatus = []ActivateStatus{
+	ActivateStatusIdle,
+	ActivateStatusStarting,
+	ActivateStatusRunning,
+	ActivateStatusStopping,
+	ActivateStatusFailed,
+}
+
+func (e ActivateStatus) IsValid() bool {
+	switch e {
+	case ActivateStatusIdle, ActivateStatusStarting, ActivateStatusRunning, ActivateStatusStopping, ActivateStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ActivateStatus) String() string {
+	return string(e)
+}
+
+func (e *ActivateStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ActivateStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ActivateStatus", str)
+	}
+	return nil
+}
+
+func (e ActivateStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ActivateStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ActivateStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type ChatRole string

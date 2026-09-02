@@ -18,3 +18,5 @@ opencode.json
 apps/desktop/out/
 var/projects/
 services/api/var/
+vendor/bin/*
+!vendor/bin/README.md

@@ -45,5 +45,5 @@ UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya 
 
 ## Dilim durumu / Slice status
 
-Dilim 1–5 bitti. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki: dilim 6 (yerel aktif + Maestro MCP).
+Dilim 1–6 bitti. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki: dilim 7 (işçi B + kuyruk).
 

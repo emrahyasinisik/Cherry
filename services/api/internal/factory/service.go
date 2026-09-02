@@ -6,28 +6,45 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/gdpr"
 	"github.com/icerde/api/internal/llm"
+	"github.com/icerde/api/internal/maestro"
 	"github.com/icerde/api/internal/opencode"
 	"github.com/icerde/api/internal/store"
 )
 
+type MaestroRunner interface {
+	RunDir(ctx context.Context, maestroDir, localURL string) maestro.Report
+}
+
+type Activator interface {
+	Start(ctx context.Context, id, projectRoot string) (activate.Snapshot, error)
+	Stop(id string) activate.Snapshot
+	Snapshot(id string) activate.Snapshot
+}
+
 type Service struct {
-	Store     store.Store
-	Root      string
-	StepDelay time.Duration
-	AutoRun   bool
-	LLM       *llm.Service
-	OpenCode  opencode.Runner
+	Store      store.Store
+	Root       string
+	StepDelay  time.Duration
+	AutoRun    bool
+	LLM        *llm.Service
+	OpenCode   opencode.Runner
+	Activator  Activator
+	MaestroRun MaestroRunner
+	mu         sync.Mutex
+	reports    map[string]maestro.Report
 }
 
 func New(st store.Store, root string) *Service {
 	if strings.TrimSpace(root) == "" {
 		root = filepath.Join("var", "projects")
 	}
-	return &Service{Store: st, Root: root, StepDelay: 380 * time.Millisecond, AutoRun: true}
+	return &Service{Store: st, Root: root, StepDelay: 380 * time.Millisecond, AutoRun: true, reports: map[string]maestro.Report{}}
 }
 
 func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw string) (store.Project, error) {
@@ -155,7 +172,10 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.setStatus(ctx, project.ID, store.StatusTesting); err != nil {
 		return err
 	}
-	if err := s.log(ctx, project.ID, "Test aşaması. Maestro ekranı açılabilir — cihaz yok, akışlar SKIPPED (sahte geçiş yok)."); err != nil {
+	if err := s.log(ctx, project.ID, "Test aşaması. Yerel API + Maestro."); err != nil {
+		return err
+	}
+	if err := s.runLocalTest(ctx, project); err != nil {
 		return err
 	}
 	s.pause()
@@ -166,7 +186,111 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.setStatus(ctx, project.ID, store.StatusReady); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Yazıcı: OpenCode.")
+	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Yazıcı: OpenCode. Yerel API durdu.")
+}
+
+func (s *Service) runLocalTest(ctx context.Context, project store.Project) error {
+	url := ""
+	if s.Activator != nil {
+		snap, err := s.Activator.Start(ctx, project.ID, project.RootPath)
+		if err != nil {
+			if logErr := s.log(ctx, project.ID, "Yerel aktif olmadı: "+snap.Note); logErr != nil {
+				return logErr
+			}
+		} else {
+			url = snap.URL
+			if logErr := s.log(ctx, project.ID, "Yerel aktif: "+snap.Note); logErr != nil {
+				return logErr
+			}
+		}
+		defer func() { _ = s.Activator.Stop(project.ID) }()
+	} else if logErr := s.log(ctx, project.ID, "Yerel aktif bağlı değil — Maestro yine SKIPPED olabilir."); logErr != nil {
+		return logErr
+	}
+	if s.MaestroRun == nil {
+		return s.log(ctx, project.ID, "Maestro koşucu yok. Akışlar SKIPPED.")
+	}
+	report := s.MaestroRun.RunDir(ctx, filepath.Join(project.RootPath, "maestro"), url)
+	s.mu.Lock()
+	if s.reports == nil {
+		s.reports = map[string]maestro.Report{}
+	}
+	s.reports[project.ID] = report
+	s.mu.Unlock()
+	for _, flow := range report.Flows {
+		msg := flow.ID + ".yaml → " + string(flow.Result) + ". " + flow.Note
+		if err := s.log(ctx, project.ID, msg); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Service) Activate(ctx context.Context, userID, id string) (store.Project, error) {
+	project, err := s.Get(ctx, userID, id)
+	if err != nil {
+		return store.Project{}, err
+	}
+	if s.Activator == nil {
+		return project, fmt.Errorf("%w: yerel aktif yok", store.ErrNotFound)
+	}
+	snap, err := s.Activator.Start(ctx, project.ID, project.RootPath)
+	note := snap.Note
+	if err != nil {
+		_ = s.log(ctx, project.ID, "Yerel aktif hata: "+note)
+		return project, err
+	}
+	_ = s.log(ctx, project.ID, "Yerel aktif: "+note)
+	return s.Get(ctx, userID, id)
+}
+
+func (s *Service) Deactivate(ctx context.Context, userID, id string) (store.Project, error) {
+	project, err := s.Get(ctx, userID, id)
+	if err != nil {
+		return store.Project{}, err
+	}
+	if s.Activator == nil {
+		return project, nil
+	}
+	snap := s.Activator.Stop(project.ID)
+	_ = s.log(ctx, project.ID, snap.Note)
+	return s.Get(ctx, userID, id)
+}
+
+func (s *Service) RunMaestro(ctx context.Context, userID, id string) (store.Project, error) {
+	project, err := s.Get(ctx, userID, id)
+	if err != nil {
+		return store.Project{}, err
+	}
+	if s.MaestroRun == nil {
+		_ = s.log(ctx, project.ID, "Maestro koşucu yok.")
+		return project, nil
+	}
+	url := ""
+	if s.Activator != nil {
+		snap := s.Activator.Snapshot(project.ID)
+		if snap.Status == activate.StatusRunning {
+			url = snap.URL
+		}
+	}
+	report := s.MaestroRun.RunDir(ctx, filepath.Join(project.RootPath, "maestro"), url)
+	s.mu.Lock()
+	if s.reports == nil {
+		s.reports = map[string]maestro.Report{}
+	}
+	s.reports[project.ID] = report
+	s.mu.Unlock()
+	for _, flow := range report.Flows {
+		_ = s.log(ctx, project.ID, flow.ID+".yaml → "+string(flow.Result)+". "+flow.Note)
+	}
+	return s.Get(ctx, userID, id)
+}
+
+func (s *Service) ActivateSnap(id string) activate.Snapshot {
+	if s.Activator == nil {
+		return activate.Snapshot{Status: activate.StatusIdle, Note: "Yerel aktif bağlı değil."}
+	}
+	return s.Activator.Snapshot(id)
 }
 
 func (s *Service) runLLM(ctx context.Context, project store.Project) error {
@@ -489,8 +613,24 @@ func (s *Service) Maestro(ctx context.Context, userID, id string) (MaestroStudio
 			Name:   name + ".yaml",
 			YAML:   string(body),
 			Result: store.MaestroSkipped,
-			Note:   "Emülatör yok. SKIPPED — geçti sayılmaz. Dilim 6’da maestro mcp.",
+			Note:   "Henüz koşulmadı. Cihaz yoksa SKIPPED — geçti sayılmaz.",
 		})
+	}
+	s.mu.Lock()
+	report, ok := s.reports[project.ID]
+	s.mu.Unlock()
+	if ok {
+		studio.DeviceStatus = report.DeviceStatus
+		byID := map[string]maestro.FlowResult{}
+		for _, item := range report.Flows {
+			byID[item.ID] = item
+		}
+		for i, flow := range studio.Flows {
+			if hit, exists := byID[flow.ID]; exists {
+				studio.Flows[i].Result = hit.Result
+				studio.Flows[i].Note = hit.Note
+			}
+		}
 	}
 	return studio, nil
 }

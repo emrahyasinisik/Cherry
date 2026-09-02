@@ -7,7 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/llm"
+	"github.com/icerde/api/internal/maestro"
 	"github.com/icerde/api/internal/opencode"
 	"github.com/icerde/api/internal/store"
 )
@@ -25,6 +27,8 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
 	fake := &opencode.Fake{}
 	svc.OpenCode = fake
+	svc.MaestroRun = skipMaestro{}
+	svc.Activator = &fakeActivate{}
 
 	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
 	if err != nil {
@@ -209,4 +213,114 @@ func TestSlug(t *testing.T) {
 	if slugify("Kahve Sipariş!") != "kahve-sipari" && !strings.Contains(slugify("Kahve Sipariş"), "kahve") {
 		t.Fatalf("%q", slugify("Kahve Sipariş"))
 	}
+}
+
+func TestActivateAndRunMaestroNeverPassWithoutDevice(t *testing.T) {
+	mem := store.NewMemory()
+	svc := New(mem, t.TempDir())
+	svc.StepDelay = 0
+	svc.AutoRun = false
+	ctx := context.Background()
+	if err := llm.Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+	svc.OpenCode = &opencode.Fake{}
+	act := &fakeActivate{}
+	svc.Activator = act
+	svc.MaestroRun = skipMaestro{}
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.RunSync(ctx, project.ID); err != nil {
+		t.Fatal(err)
+	}
+	if act.snap.Status != activate.StatusIdle {
+		t.Fatalf("pipeline must stop child, got %s", act.snap.Status)
+	}
+	if _, err := svc.Activate(ctx, "u1", project.ID); err != nil {
+		t.Fatal(err)
+	}
+	if act.snap.Status != activate.StatusRunning || act.snap.Port != 47001 {
+		t.Fatalf("%+v", act.snap)
+	}
+	if _, err := svc.RunMaestro(ctx, "u1", project.ID); err != nil {
+		t.Fatal(err)
+	}
+	studio, err := svc.Maestro(ctx, "u1", project.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(studio.Flows) == 0 {
+		t.Fatal("expected flows")
+	}
+	for _, flow := range studio.Flows {
+		if flow.Result == store.MaestroPassed {
+			t.Fatal("passed without a device")
+		}
+		if flow.Result != store.MaestroSkipped {
+			t.Fatalf("got %s", flow.Result)
+		}
+		if !strings.Contains(flow.Note, "127.0.0.1:47001") {
+			t.Fatalf("local url missing: %s", flow.Note)
+		}
+	}
+	if _, err := svc.Deactivate(ctx, "u1", project.ID); err != nil {
+		t.Fatal(err)
+	}
+	if act.snap.Status != activate.StatusIdle {
+		t.Fatalf("%s", act.snap.Status)
+	}
+}
+
+type skipMaestro struct{}
+
+func (skipMaestro) RunDir(_ context.Context, maestroDir, localURL string) maestro.Report {
+	report := maestro.Report{DeviceStatus: "none", Note: "Cihaz yok. SKIPPED — geçti sayılmaz."}
+	entries, err := filepath.Glob(filepath.Join(maestroDir, "*.yaml"))
+	if err != nil {
+		report.Note = err.Error()
+		return report
+	}
+	for _, path := range entries {
+		name := strings.TrimSuffix(filepath.Base(path), ".yaml")
+		note := "Emülatör yok. SKIPPED — geçti sayılmaz."
+		if localURL != "" {
+			note += " Yerel API: " + localURL
+		}
+		report.Flows = append(report.Flows, maestro.FlowResult{
+			ID:     name,
+			Result: store.MaestroSkipped,
+			Note:   note,
+		})
+	}
+	return report
+}
+
+type fakeActivate struct {
+	snap activate.Snapshot
+}
+
+func (f *fakeActivate) Start(_ context.Context, _, _ string) (activate.Snapshot, error) {
+	f.snap = activate.Snapshot{
+		Status: activate.StatusRunning,
+		URL:    "http://127.0.0.1:47001",
+		Port:   47001,
+		PID:    1,
+		Note:   "fake running",
+	}
+	return f.snap, nil
+}
+
+func (f *fakeActivate) Stop(_ string) activate.Snapshot {
+	f.snap = activate.Snapshot{Status: activate.StatusIdle, Note: "Yerel API durdu."}
+	return f.snap
+}
+
+func (f *fakeActivate) Snapshot(_ string) activate.Snapshot {
+	if f.snap.Status == "" {
+		return activate.Snapshot{Status: activate.StatusIdle, Note: "Yerel API kapalı."}
+	}
+	return f.snap
 }

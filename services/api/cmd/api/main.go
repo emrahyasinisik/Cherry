@@ -17,11 +17,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/icerde/api/graph"
+	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/auth"
 	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/llm"
+	"github.com/icerde/api/internal/maestro"
 	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/opencode"
+	"github.com/icerde/api/internal/sidecar"
 	"github.com/icerde/api/internal/store"
 	"github.com/rs/cors"
 )
@@ -78,11 +81,18 @@ func main() {
 	fact.LLM = llmSvc
 	oc := opencode.NewCLI()
 	fact.OpenCode = oc
+	fact.Activator = activate.New()
+	fact.MaestroRun = maestro.New()
 	ocBin, ocVer, ocOK := oc.Probe()
 	if ocOK {
 		log.Printf("opencode bin=%s version=%s", ocBin, ocVer)
 	} else {
-		log.Printf("opencode CLI missing — factory keeps scaffold, no fake write")
+		log.Printf("opencode missing — scaffold kept, no fake write (bundle in vendor/bin)")
+	}
+	if hit, err := sidecar.Look("maestro"); err == nil {
+		log.Printf("maestro bin=%s source=%s", hit.Path, hit.Source)
+	} else {
+		log.Printf("maestro missing — flows SKIPPED without a device")
 	}
 	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
 	resolver := &graph.Resolver{Auth: authSvc, Factory: fact, LLM: llmSvc}
@@ -103,11 +113,12 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":       true,
 			"store":    status,
-			"version":  "0.5.1-chat",
+			"version":  "0.6.0-local",
 			"mail":     mail.Channel(),
 			"gdpr":     true,
 			"llm":      llmSvc.Completer.Channel(),
-			"opencode": ocStatus(ocOK),
+			"opencode": sidecarStatus("opencode"),
+			"maestro":  sidecarStatus("maestro"),
 		})
 	})
 	mux.HandleFunc("/export/", func(w http.ResponseWriter, r *http.Request) {
@@ -177,11 +188,12 @@ func withRequestMeta(next http.Handler) http.Handler {
 	})
 }
 
-func ocStatus(ok bool) string {
-	if ok {
-		return "cli"
+func sidecarStatus(name string) string {
+	hit, err := sidecar.Look(name)
+	if err != nil {
+		return "missing"
 	}
-	return "missing"
+	return hit.Source
 }
 
 func getenv(key, fallback string) string {

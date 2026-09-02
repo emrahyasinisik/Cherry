@@ -15,6 +15,6 @@ alwaysApply: false
 - Do not hard-code a single mobile stack as the only option. First implementation may ship one adapter; the interface must allow others.
 - OpenCode is the writer. The agent runs in the background.
 - The person only writes in **Icerde chat**. Never launch the OpenCode TUI. GraphQL `sendProjectMessage` → headless `opencode run --dir --auto` (`--continue` on follow-ups).
-- The **customer does not install OpenCode**. Icerde’s installer vendors the CLI. PATH lookup is only for developers until slice 6.
+- The **customer does not install OpenCode**. Icerde’s installer vendors the CLI into `vendor/bin`. PATH / `ICERDE_OPENCODE_BIN` is a developer fallback only.
 - Output layout: `frontend/`, `backend/`, `maestro/`, `README`.
 - Never upload the generated app to Icerde hosting. Read [docs/mobile-factory.md](docs/mobile-factory.md).

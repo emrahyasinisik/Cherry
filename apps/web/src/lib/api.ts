@@ -34,11 +34,13 @@ export type Project = {
   logs: JobLog[];
   files: ProjectFile[];
   maestro: MaestroStudio;
+  activate: LocalActivate;
 };
 
 export type ProjectStack = "EXPO" | "FLUTTER" | "NATIVE";
 export type ProjectStatus = "QUEUED" | "WRITING" | "TESTING" | "READY" | "FAILED";
 export type MaestroResult = "SKIPPED" | "PASSED" | "FAILED";
+export type ActivateStatus = "IDLE" | "STARTING" | "RUNNING" | "STOPPING" | "FAILED";
 
 export type ChatRole = "USER" | "AGENT" | "SYSTEM";
 
@@ -74,6 +76,14 @@ export type MaestroStudio = {
   flows: MaestroFlow[];
 };
 
+export type LocalActivate = {
+  status: ActivateStatus;
+  url?: string | null;
+  port?: number | null;
+  pid?: number | null;
+  note: string;
+};
+
 export const PROJECT_FIELDS = `
   id name brief stack status rootPath createdAt
   logs { at message role }
@@ -84,6 +94,7 @@ export const PROJECT_FIELDS = `
     screens { id name html }
     flows { id name yaml result note }
   }
+  activate { status url port pid note }
 `;
 
 export type Device = {
@@ -116,6 +127,8 @@ export type Health = {
   mail: string;
   gdpr: boolean;
   llm: string;
+  opencode?: string;
+  maestro?: string;
 };
 
 export type LlmStatus = {
@@ -308,6 +321,25 @@ export function maestroResultLabel(result: MaestroResult): string {
       return "Kaldı";
     default: {
       const exhaustive: never = result;
+      return exhaustive;
+    }
+  }
+}
+
+export function activateStatusLabel(status: ActivateStatus): string {
+  switch (status) {
+    case "IDLE":
+      return "Kapalı";
+    case "STARTING":
+      return "Kalkıyor";
+    case "RUNNING":
+      return "Çalışıyor";
+    case "STOPPING":
+      return "Durduruluyor";
+    case "FAILED":
+      return "Hata";
+    default: {
+      const exhaustive: never = status;
       return exhaustive;
     }
   }

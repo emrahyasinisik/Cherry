@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/auth"
 	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/mailer"
@@ -115,6 +116,7 @@ func mapProjects(rows []store.Project) ([]*Project, error) {
 		item.Logs = []*JobLog{}
 		item.Files = []*ProjectFile{}
 		item.Maestro = emptyMaestro()
+		item.Activate = mapActivate(activate.Snapshot{Status: activate.StatusIdle, Note: "Yerel API kapalı."})
 		out = append(out, item)
 	}
 	return out, nil
@@ -209,6 +211,44 @@ func mapMaestro(studio factory.MaestroStudio) (*MaestroStudio, error) {
 		})
 	}
 	return out, nil
+}
+
+func mapActivate(snap activate.Snapshot) *LocalActivate {
+	status, err := mapActivateStatus(snap.Status)
+	if err != nil {
+		status = ActivateStatusIdle
+	}
+	out := &LocalActivate{Status: status, Note: snap.Note}
+	if snap.URL != "" {
+		url := snap.URL
+		out.URL = &url
+	}
+	if snap.Port > 0 {
+		port := snap.Port
+		out.Port = &port
+	}
+	if snap.PID > 0 {
+		pid := snap.PID
+		out.Pid = &pid
+	}
+	return out
+}
+
+func mapActivateStatus(status activate.Status) (ActivateStatus, error) {
+	switch status {
+	case activate.StatusIdle:
+		return ActivateStatusIdle, nil
+	case activate.StatusStarting:
+		return ActivateStatusStarting, nil
+	case activate.StatusRunning:
+		return ActivateStatusRunning, nil
+	case activate.StatusStopping:
+		return ActivateStatusStopping, nil
+	case activate.StatusFailed:
+		return ActivateStatusFailed, nil
+	default:
+		return "", fmt.Errorf("unhandled activate status: %s", status)
+	}
 }
 
 func emptyMaestro() *MaestroStudio {

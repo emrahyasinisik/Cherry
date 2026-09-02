@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   PROJECT_FIELDS,
+  activateStatusLabel,
   getToken,
   graphql,
+  maestroResultLabel,
   projectStatusLabel,
   stackLabel,
+  type ActivateStatus,
   type ChatRole,
   type JobLog,
   type Project,
@@ -31,6 +34,8 @@ export default function StudioPage() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [busy, setBusy] = useState<"activate" | "stop" | "maestro" | null>(null);
+  const [sideError, setSideError] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -125,6 +130,57 @@ export default function StudioPage() {
     }
   }
 
+  async function runMutation(
+    kind: "activate" | "stop" | "maestro",
+    query: string,
+    variables: Record<string, unknown>,
+    key: "activateProject" | "deactivateProject" | "runMaestro",
+  ) {
+    setBusy(kind);
+    setSideError(null);
+    try {
+      const data = await graphql<Record<string, Project>>(query, variables);
+      setProject(data[key]);
+    } catch (err) {
+      setSideError(err instanceof Error ? err.message : "İşlem yapılamadı.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleActivate() {
+    await runMutation(
+      "activate",
+      `mutation Activate($id: ID!) {
+        activateProject(id: $id) { ${PROJECT_FIELDS} }
+      }`,
+      { id },
+      "activateProject",
+    );
+  }
+
+  async function handleDeactivate() {
+    await runMutation(
+      "stop",
+      `mutation Deactivate($id: ID!) {
+        deactivateProject(id: $id) { ${PROJECT_FIELDS} }
+      }`,
+      { id },
+      "deactivateProject",
+    );
+  }
+
+  async function handleRunMaestro() {
+    await runMutation(
+      "maestro",
+      `mutation RunMaestro($id: ID!) {
+        runMaestro(projectId: $id) { ${PROJECT_FIELDS} }
+      }`,
+      { id },
+      "runMaestro",
+    );
+  }
+
   return (
     <AppShell user={user} title={project.name} status={projectStatusLabel(project.status)}>
       <div className="icerde-enter grid min-h-full gap-px bg-border lg:grid-cols-[minmax(240px,1fr)_minmax(320px,1.4fr)_minmax(240px,1fr)]">
@@ -185,15 +241,72 @@ export default function StudioPage() {
           </form>
           {sendError ? <p className="mt-2 text-destructive">{sendError}</p> : null}
         </section>
-        <section className="flex flex-col gap-3 bg-background p-6">
-          <h2 className="text-sm font-medium">Maestro</h2>
+        <section className="flex flex-col gap-4 bg-background p-6">
+          <h2 className="text-sm font-medium">Yerel aktif</h2>
+          <p className="font-mono text-[11px] text-muted-foreground">
+            {activateStatusLabel(project.activate.status)}
+            {project.activate.port ? ` · 127.0.0.1:${project.activate.port}` : ""}
+          </p>
+          {project.activate.url ? (
+            <p className="break-all font-mono text-[12px] text-foreground">{project.activate.url}</p>
+          ) : (
+            <p className="text-muted-foreground">
+              Müşteri API’si bu makinede 47000–47999 aralığında kalkar. Public barındırma yok.
+            </p>
+          )}
+          <p className="text-muted-foreground">{project.activate.note}</p>
+          <div className="flex flex-wrap gap-2">
+            {project.activate.status === "RUNNING" ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy !== null}
+                onClick={() => {
+                  void handleDeactivate();
+                }}
+              >
+                {busy === "stop" ? "Duruyor…" : "Durdur"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                disabled={busy !== null || project.activate.status === "STARTING" || project.activate.status === "STOPPING"}
+                onClick={() => {
+                  void handleActivate();
+                }}
+              >
+                {activateButtonLabel(project.activate.status, busy)}
+              </Button>
+            )}
+          </div>
+
+          <h2 className="mt-4 text-sm font-medium">Maestro</h2>
           {project.maestro.ready ? (
             <>
               <p className="text-muted-foreground">
-                Test aşamasına gelindi. Tasarım ve YAML akışları hazır. Cihaz yok — sonuç SKIPPED.
+                {project.maestro.deviceStatus === "device"
+                  ? "Cihaz görüldü. Koşu gerçek sonuç yazar; PASSED uydurulmaz."
+                  : "Cihaz yok. Koşu SKIPPED olur — geçti sayılmaz."}
               </p>
-              <Button type="button" onClick={() => router.push(`/projects/${id}/maestro?from=test`)}>
-                Tasarımı ve testleri göster
+              {project.maestro.flows[0] ? (
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  {project.maestro.flows[0].name} · {maestroResultLabel(project.maestro.flows[0].result)}
+                </p>
+              ) : (
+                <p className="text-muted-foreground">YAML henüz yok.</p>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy !== null}
+                onClick={() => {
+                  void handleRunMaestro();
+                }}
+              >
+                {busy === "maestro" ? "Maestro koşuyor…" : "Maestro’yu koş"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => router.push(`/projects/${id}/maestro`)}>
+                Tasarımı ve YAML’i göster
               </Button>
             </>
           ) : (
@@ -201,6 +314,7 @@ export default function StudioPage() {
               Ajan yazmayı bitirince bu sütun ve Maestro ekranı açılır. İstediğin anda da açabilirsin.
             </p>
           )}
+          {sideError ? <p className="text-destructive">{sideError}</p> : null}
           <Link href="/projects" className="text-[13px] text-muted-foreground underline-offset-4 hover:underline">
             Projelere dön
           </Link>
@@ -265,6 +379,31 @@ function labelFor(role: ChatRole): string {
       return "Sistem";
     default: {
       const _never: never = role;
+      return _never;
+    }
+  }
+}
+
+function activateButtonLabel(status: ActivateStatus, busy: "activate" | "stop" | "maestro" | null): string {
+  if (busy === "activate") {
+    return "Kalkıyor…";
+  }
+  if (busy === "stop") {
+    return "Duruyor…";
+  }
+  switch (status) {
+    case "IDLE":
+      return "Yerelde başlat";
+    case "STARTING":
+      return "Kalkıyor…";
+    case "RUNNING":
+      return "Çalışıyor";
+    case "STOPPING":
+      return "Duruyor…";
+    case "FAILED":
+      return "Yeniden dene";
+    default: {
+      const _never: never = status;
       return _never;
     }
   }

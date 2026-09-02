@@ -22,7 +22,7 @@ flowchart TB
 
 - Sidebar 220px, collapse 64px (ikon). Mobil tab bar yok.
 - Titlebar: wordmark + proje adı + **LLM A | B** (sağ) — iki kapasite işçisi; meşgul/boş, kod vs test değil.
-- Statusbar: oturum, cihaz, GDPR, yerel URL.
+- Statusbar: oturum, cihaz, GDPR, OpenCode/Maestro sidecar, yerel URL.
 
 ## 1. Giriş / Login
 

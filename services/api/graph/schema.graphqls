@@ -37,9 +37,12 @@ type Mutation {
   revokeSession(id: ID!): Boolean!
   revokeDevice(id: ID!): Boolean!
   logout: Boolean!
-	createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
-	sendProjectMessage(projectId: ID!, body: String!): Project!
-	setActiveVersion(id: ID!): LlmAdmin!
+  createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
+  sendProjectMessage(projectId: ID!, body: String!): Project!
+  activateProject(id: ID!): Project!
+  deactivateProject(id: ID!): Project!
+  runMaestro(projectId: ID!): Project!
+  setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
@@ -98,6 +101,7 @@ type Project {
   logs: [JobLog!]!
   files: [ProjectFile!]!
   maestro: MaestroStudio!
+  activate: LocalActivate!
 }
 
 enum ProjectStack {
@@ -135,6 +139,22 @@ type JobLog {
 type ProjectFile {
   path: String!
   kind: String!
+}
+
+enum ActivateStatus {
+  IDLE
+  STARTING
+  RUNNING
+  STOPPING
+  FAILED
+}
+
+type LocalActivate {
+  status: ActivateStatus!
+  url: String
+  port: Int
+  pid: Int
+  note: String!
 }
 
 type MaestroStudio {

@@ -13,19 +13,19 @@ flowchart TB
   Main[main]
   Preload[preload]
   Renderer[Nextjs_renderer]
-  Tray[tray]
-  Runner[agent_runner]
-  Activate[local_activate]
-  McpHost[MCP_host]
+  Sidecar[vendor_or_resources_bin]
+  McpHost[maestro_mcp_stdio]
   Main --> Preload
   Preload --> Renderer
-  Main --> Tray
-  Main --> Runner
-  Main --> Activate
+  Main --> Sidecar
   Main --> McpHost
-  McpHost --> ReadFile[mcp_read_file]
-  McpHost --> Maestro[maestro_mcp]
+  Sidecar --> OC[opencode]
+  Sidecar --> Maestro[maestro]
 ```
+
+Go API çocuk müşteri sürecini başlatır (`activate`). Electron CLI’leri paketler ve `ICERDE_SIDECAR_DIR` yazar.
+
+The Go API starts the generated backend. Electron vendors the CLIs and sets `ICERDE_SIDECAR_DIR`.
 
 ## Güvenlik sınırı / Trust boundary
 
@@ -34,11 +34,13 @@ flowchart LR
   Renderer -->|ipc_whitelist| Preload
   Preload --> Main
   Main -->|GraphQL| API
-  Main --> Child[child_processes]
+  API --> Child[customer_backend_47xxx]
 ```
 
 - `nodeIntegration: false`, `contextIsolation: true`.
 - Device fingerprint in main only.
 - Generated project path stays in userData or a chosen workspace folder.
-- **Müşteri OpenCode kurmaz.** İçerde kurucusu CLI’yi paketler (dilim 6). Geliştirmede PATH / `ICERDE_OPENCODE_BIN` yeter.
-- **The customer does not install OpenCode.** The Icerde installer vendors the CLI (slice 6). PATH is only for us while developing.
+- **Müşteri OpenCode / Maestro kurmaz.** Kurucu `vendor/bin` veya `process.resourcesPath/bin` doldurur.
+- **The customer does not install OpenCode or Maestro.** The installer fills `vendor/bin` or `resources/bin`.
+- PATH / `ICERDE_OPENCODE_BIN` / `ICERDE_MAESTRO_BIN` is a **developer fallback** only.
+- Missing sidecar: keep scaffold / SKIPPED Maestro. No fake write, no fake pass.

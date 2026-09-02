@@ -42,6 +42,7 @@ export function AppShell({
   const [lastProject, setLastProject] = useState<string | null>(null);
   const [llm, setLlm] = useState<LlmStatus | null>(null);
   const [openCode, setOpenCode] = useState<string | null>(null);
+  const [maestro, setMaestro] = useState<string | null>(null);
 
   useEffect(() => {
     setLastProject(getLastProjectId());
@@ -54,11 +55,13 @@ export function AppShell({
       });
     void fetch("/health")
       .then((response) => (response.ok ? response.json() : null))
-      .then((data: { opencode?: string } | null) => {
+      .then((data: { opencode?: string; maestro?: string } | null) => {
         setOpenCode(data?.opencode ?? null);
+        setMaestro(data?.maestro ?? null);
       })
       .catch(() => {
         setOpenCode(null);
+        setMaestro(null);
       });
   }, [pathname]);
   const maestroHref = lastProject ? `/projects/${lastProject}/maestro` : "/maestro";
@@ -172,10 +175,28 @@ export function AppShell({
           </>
         ) : null}
         <span>·</span>
-        <span>{openCode === "cli" ? "OpenCode CLI" : "OpenCode yok"}</span>
+        <span>{sidecarChip("OpenCode", openCode)}</span>
+        <span>·</span>
+        <span>{sidecarChip("Maestro", maestro)}</span>
       </footer>
     </div>
   );
+}
+
+function sidecarChip(name: string, source: string | null): string {
+  switch (source) {
+    case "env":
+      return `${name} env`;
+    case "bundled":
+      return `${name} paket`;
+    case "path":
+      return `${name} PATH`;
+    case "missing":
+    case null:
+      return `${name} yok`;
+    default:
+      return `${name} ${source}`;
+  }
 }
 
 function headerTitle(pathname: string): string {

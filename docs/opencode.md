@@ -40,12 +40,12 @@ CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. Log: `llm/opencode.lo
 
 If the CLI is missing the scaffold stays. **No fake OpenCode write.** Log: `llm/opencode.log`.
 
-Proje köküne `opencode.json` yazılır. `maestro` PATH’teyse Maestro MCP bağlanır (çalıştırma dilim 6).
+Proje köküne `opencode.json` yazılır. Maestro sidecar varsa OpenCode ona bağlanır; yoksa yine yazım devam eder, test SKIPPED.
 
 **Kurulum / Install**
 
-Müşteri yalnızca **İçerde** kurar. OpenCode onun makinesine ayrı ürün olarak inmez; Electron sidecar (dilim 6).
+Müşteri yalnızca **İçerde** kurar. OpenCode ve Maestro `vendor/bin` (Electron `resources/bin`). PATH yalnızca geliştirici yedeği.
 
-The customer installs **Icerde only**. OpenCode is not a second app they set up; Electron vendors it (slice 6).
+The customer installs **Icerde only**. OpenCode is not a second app they set up.
 
 Geliştirici makinede şimdilik PATH’te `opencode` olabilir. Bu geçici; ürün deneyimi “OpenCode indir” değildir.

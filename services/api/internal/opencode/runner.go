@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/icerde/api/internal/gdpr"
+	"github.com/icerde/api/internal/sidecar"
 )
 
 type Status string
@@ -92,7 +93,11 @@ func (c *CLI) lookup() (string, error) {
 	if c.Bin != "" {
 		return c.Bin, nil
 	}
-	return exec.LookPath("opencode")
+	hit, err := sidecar.Look("opencode")
+	if err != nil {
+		return "", err
+	}
+	return hit.Path, nil
 }
 
 func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {

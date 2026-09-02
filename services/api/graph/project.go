@@ -2,6 +2,8 @@ package graph
 
 import (
 	"context"
+
+	"github.com/icerde/api/internal/activate"
 )
 
 func (r *Resolver) projectPayload(ctx context.Context, userID, id string, full bool) (*Project, error) {
@@ -17,6 +19,7 @@ func (r *Resolver) projectPayload(ctx context.Context, userID, id string, full b
 		out.Logs = []*JobLog{}
 		out.Files = []*ProjectFile{}
 		out.Maestro = emptyMaestro()
+		out.Activate = mapActivate(activate.Snapshot{Status: activate.StatusIdle, Note: "Yerel API kapalı."})
 		return out, nil
 	}
 	logs, err := r.Factory.Logs(ctx, userID, id)
@@ -41,5 +44,6 @@ func (r *Resolver) projectPayload(ctx context.Context, userID, id string, full b
 	}
 	out.Files = mapFiles(files)
 	out.Maestro = maestro
+	out.Activate = mapActivate(r.Factory.ActivateSnap(id))
 	return out, nil
 }

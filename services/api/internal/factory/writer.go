@@ -56,12 +56,12 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 		{
 			rel:  "backend/README.md",
 			kind: "backend",
-			body: "# Müşteri API\n\nBu, İçerde GraphQL’i değil üretilen uygulamanın backend’idir.\nYerel aktif (dilim 6) localhost’ta ayağa kaldırır.\n",
+			body: "# Müşteri API\n\nBu, İçerde GraphQL’i değil üretilen uygulamanın backend’idir.\nYerel aktif localhost’ta ayağa kaldırır (47000–47999).\n",
 		},
 		{
 			rel:  "backend/main.go",
 			kind: "backend",
-			body: "package main\n\nimport (\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n)\n\nfunc main() {\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, _ *http.Request) {\n\t\t_ = json.NewEncoder(w).Encode(map[string]any{\"ok\": true, \"app\": \"" + slug + "\"})\n\t})\n\tlog.Println(\"generated customer api on :18080\")\n\tlog.Fatal(http.ListenAndServe(\"127.0.0.1:18080\", nil))\n}\n",
+			body: "package main\n\nimport (\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\taddr := os.Getenv(\"ICERDE_CUSTOMER_ADDR\")\n\tif addr == \"\" {\n\t\taddr = \"127.0.0.1:18080\"\n\t}\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, _ *http.Request) {\n\t\t_ = json.NewEncoder(w).Encode(map[string]any{\"ok\": true, \"app\": \"" + slug + "\"})\n\t})\n\tlog.Println(\"generated customer api on\", addr)\n\tlog.Fatal(http.ListenAndServe(addr, nil))\n}\n",
 		},
 		{
 			rel:  "maestro/login.yaml",

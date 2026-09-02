@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-const apiVersion = "0.5.1-chat"
+const apiVersion = "0.6.0-local"
 
 func gqlErr(err error) error {
 	switch {
