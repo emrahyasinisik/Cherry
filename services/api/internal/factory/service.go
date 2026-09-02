@@ -319,7 +319,7 @@ func (s *Service) ActivateSnap(id string) activate.Snapshot {
 
 func (s *Service) runLLM(ctx context.Context, project store.Project) error {
 	if s.LLM == nil {
-		return s.log(ctx, project.ID, "LLM A bağlı değil — yalnızca stub dosyalar.")
+		return s.log(ctx, project.ID, "LLM bağlı değil — yalnızca stub dosyalar.")
 	}
 	if err := s.LLM.SetMcpRoot(ctx, project.RootPath); err != nil {
 		return err
@@ -343,11 +343,11 @@ func (s *Service) runLLM(ctx context.Context, project store.Project) error {
 	if err := os.MkdirAll(filepath.Dir(planPath), 0o755); err != nil {
 		return err
 	}
-	body := "# LLM A " + out.Version.Name + "\n\nkanal: " + out.Channel + "\nredaksiyon giriş/çıkış: " + fmt.Sprintf("%d/%d", out.InputN, out.OutputN) + "\n\n" + out.Text + "\n"
+	body := "# LLM " + string(out.Slot) + " " + out.Version.Name + "\n\nkanal: " + out.Channel + "\nredaksiyon giriş/çıkış: " + fmt.Sprintf("%d/%d", out.InputN, out.OutputN) + "\n\n" + out.Text + "\n"
 	if err := os.WriteFile(planPath, []byte(body), 0o644); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "GDPR → işçi A "+out.Version.Name+" ("+out.Channel+") redact="+fmt.Sprintf("%d/%d", out.InputN, out.OutputN)+". Plan: llm/plan.md")
+	return s.log(ctx, project.ID, "GDPR → işçi "+string(out.Slot)+" "+out.Version.Name+" ("+out.Channel+") redact="+fmt.Sprintf("%d/%d", out.InputN, out.OutputN)+". Plan: llm/plan.md")
 }
 
 func (s *Service) runOpenCode(ctx context.Context, project store.Project) error {

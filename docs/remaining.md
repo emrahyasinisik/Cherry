@@ -1,11 +1,11 @@
 # Duraklama notu / Pause note
 
-**Durum:** Dilim 1–6 bitti. Sıradaki kod **dilim 7 (işçi B + kuyruk)**.  
-**Status:** Slices 1–6 done. Next code is **slice 7 (worker B + queue)**.
+**Durum:** Dilim 1–7 bitti. Sıradaki kod **dilim 8 (Colab fine-tune)**.  
+**Status:** Slices 1–7 done. Next code is **slice 8 (Colab fine-tune)**.
 
-Kullanıcı notları (henüz dilim değil) aşağıda. Uygulama yokken spekülatif provider bağlama.
+Kullanıcı notları (henüz dilim değil) aşağıda.
 
-User notes below are not the current slice. Do not attach speculative providers.
+User notes below are not the current slice.
 
 ## Kullanıcı notları / User notes (kayıt)
 
@@ -17,13 +17,9 @@ User notes below are not the current slice. Do not attach speculative providers.
 
 ### 2. Bağlantılar menüsü / Connections menu
 
-**TR:** Kişi backend’i istediği platforma koyabilmeli (Supabase, Cloudflare, benzeri). GitHub, Vercel, Render da bağlanmalı. Sidebar **Bağlantılar**. **Kodda: logolar + OAuth 2.0 izin ekranı + token yedek + GitHub push.**
+**TR:** Sidebar **Bağlantılar**. OAuth 2.0 izin ekranı + logolar. İçerde host değil.
 
-**EN:** Person attaches their own backends. **In code: provider marks + OAuth 2.0 consent + token fallback + GitHub push.**
-
-İçerde hâlâ barındırmaz. Ayrıntı: [connections.md](connections.md).
-
-Sıra: dilim 7 → 8 Colab. Bağlantılar: OAuth 2.0 izin ekranı duruyor.
+**EN:** Connections: OAuth 2.0 consent + marks. Icerde does not host.
 
 ## Bitti / Done
 
@@ -33,12 +29,13 @@ Sıra: dilim 7 → 8 Colab. Bağlantılar: OAuth 2.0 izin ekranı duruyor.
 | 4 LLM A + GDPR | redact → işçi A → tarama → denetim |
 | 5 OpenCode | `opencode run --dir` GDPR’li prompt ile. CLI yoksa iskelet, sahte yazım yok. |
 | 6 Yerel aktif + Maestro | Çocuk `go run` 47000–47999. Sidecar `vendor/bin`. Cihaz yok → SKIPPED, PASSED yok. |
+| 7 LLM B + kuyruk | A ve B aynı iş. Boş olan alır; ikisi meşgulse kuyruk. Versiyon pointer’ı sonraki cevabı değiştirir; in-flight eski pointer’da biter. |
 
 LLM anahtarı yoksa `mock` kanal; `ICERDE_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`.
 
 ## Kalan / Remaining
 
-7 ikinci işçi B + kuyruk → 8 Colab.
+8 Colab fine-tune — brif + üretilen kod + Maestro izi birikince. Notebook yazma şimdi değil.
 
 ```bash
 npm run dev:api

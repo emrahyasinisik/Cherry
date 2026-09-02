@@ -17,13 +17,17 @@ type MockCompleter struct{}
 func (MockCompleter) Channel() string { return "mock" }
 
 func (MockCompleter) Complete(_ context.Context, version store.LlmVersion, prompt string) (string, error) {
+	who := "LLM A"
+	if version.Slot == store.SlotB {
+		who = "LLM B"
+	}
 	switch version.ID {
-	case "ver-a-2":
-		return "LLM A " + version.Name + " plan:\n- Ekranları yığın dosyalarına böl.\n- Maestro akışını giriş + ana ekran tut.\nKaynak (redakte):\n" + clip(prompt, 400), nil
-	case "ver-a-1":
-		return "LLM A " + version.Name + " iskelet:\n- README ve frontend/backend duruyor.\n- OpenCode bu planla dosyaları yazar.\nBrif (redakte):\n" + clip(prompt, 400), nil
+	case "ver-a-2", "ver-b-2":
+		return who + " " + version.Name + " plan:\n- Ekranları yığın dosyalarına böl.\n- Maestro akışını giriş + ana ekran tut.\nKaynak (redakte):\n" + clip(prompt, 400), nil
+	case "ver-a-1", "ver-b-1":
+		return who + " " + version.Name + " iskelet:\n- README ve frontend/backend duruyor.\n- OpenCode bu planla dosyaları yazar.\nBrif (redakte):\n" + clip(prompt, 400), nil
 	default:
-		return "LLM A " + version.Name + ":\n" + clip(prompt, 400), nil
+		return who + " " + version.Name + ":\n" + clip(prompt, 400), nil
 	}
 }
 

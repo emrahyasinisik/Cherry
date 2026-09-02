@@ -135,11 +135,18 @@ export type Health = {
   maestro?: string;
 };
 
+export type LlmOccupancy = "IDLE" | "BUSY";
+
 export type LlmStatus = {
   slot: string;
   versionName: string;
   channel: string;
   gdpr: boolean;
+  queued: number;
+  occupancyA: LlmOccupancy;
+  occupancyB: LlmOccupancy;
+  versionA: string;
+  versionB: string;
 };
 
 export type LlmVersion = {
@@ -152,6 +159,7 @@ export type LlmSlotCard = {
   slot: string;
   wired: boolean;
   role: string;
+  occupancy: LlmOccupancy;
   activeVersionId?: string | null;
   versions: LlmVersion[];
 };
@@ -159,6 +167,7 @@ export type LlmSlotCard = {
 export type LlmCompletion = {
   at: string;
   purpose: string;
+  slot: string;
   versionName: string;
   channel: string;
   inputRedactions: number;
@@ -171,17 +180,31 @@ export type LlmAdmin = {
   gdpr: boolean;
   activeSlot: string;
   mcpRoot: string;
+  queued: number;
   slotA: LlmSlotCard;
   slotB: LlmSlotCard;
   completions: LlmCompletion[];
 };
 
 export const LLM_ADMIN_FIELDS = `
-  gdpr activeSlot mcpRoot
-  slotA { slot wired role activeVersionId versions { id name note } }
-  slotB { slot wired role activeVersionId versions { id name note } }
-  completions { at purpose versionName channel inputRedactions outputRedactions promptPreview outputPreview }
+  gdpr activeSlot mcpRoot queued
+  slotA { slot wired role occupancy activeVersionId versions { id name note } }
+  slotB { slot wired role occupancy activeVersionId versions { id name note } }
+  completions { at purpose slot versionName channel inputRedactions outputRedactions promptPreview outputPreview }
 `;
+
+export function llmOccupancyLabel(occupancy: LlmOccupancy): string {
+  switch (occupancy) {
+    case "IDLE":
+      return "boş";
+    case "BUSY":
+      return "meşgul";
+    default: {
+      const exhaustive: never = occupancy;
+      return exhaustive;
+    }
+  }
+}
 
 type GraphQLResponse<T> = {
   data?: T;

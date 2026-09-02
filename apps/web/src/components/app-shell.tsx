@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getLastProjectId } from "@/lib/last-project";
-import { graphql, setToken, workspaceLabel, type LlmStatus, type User } from "@/lib/api";
+import { graphql, llmOccupancyLabel, setToken, workspaceLabel, type LlmStatus, type User } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -47,23 +47,44 @@ export function AppShell({
 
   useEffect(() => {
     setLastProject(getLastProjectId());
-    void graphql<{ llmStatus: LlmStatus }>(
-      `query Chip { llmStatus { slot versionName channel gdpr } }`,
-    )
-      .then((data) => setLlm(data.llmStatus))
-      .catch(() => {
-        setLlm(null);
-      });
-    void fetch("/health")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data: { opencode?: string; maestro?: string } | null) => {
-        setOpenCode(data?.opencode ?? null);
-        setMaestro(data?.maestro ?? null);
-      })
-      .catch(() => {
-        setOpenCode(null);
-        setMaestro(null);
-      });
+    let cancelled = false;
+    function refresh() {
+      void graphql<{ llmStatus: LlmStatus }>(
+        `query Chip {
+          llmStatus { slot versionName channel gdpr queued occupancyA occupancyB versionA versionB }
+        }`,
+      )
+        .then((data) => {
+          if (!cancelled) {
+            setLlm(data.llmStatus);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setLlm(null);
+          }
+        });
+      void fetch("/health")
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data: { opencode?: string; maestro?: string } | null) => {
+          if (!cancelled) {
+            setOpenCode(data?.opencode ?? null);
+            setMaestro(data?.maestro ?? null);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setOpenCode(null);
+            setMaestro(null);
+          }
+        });
+    }
+    refresh();
+    const timer = window.setInterval(refresh, 2000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, [pathname]);
   const maestroHref = lastProject ? `/projects/${lastProject}/maestro` : "/maestro";
   const agentHref = lastProject ? `/projects/${lastProject}` : "/projects";
@@ -97,16 +118,23 @@ export function AppShell({
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">{title ?? headerTitle(pathname)}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-border">
-            <span className="bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-              LLM A{llm ? ` · ${llm.versionName}` : ""}
-            </span>
-            <span className="px-2.5 py-1 text-[11px] text-muted-foreground">
-              LLM B
-            </span>
+          <div className="flex items-center gap-2">
+            <div className="flex overflow-hidden rounded-md border border-border">
+              <WorkerChip
+                label="LLM A"
+                version={llm?.versionA}
+                occupancy={llm?.occupancyA ?? "IDLE"}
+              />
+              <WorkerChip
+                label="LLM B"
+                version={llm?.versionB}
+                occupancy={llm?.occupancyB ?? "IDLE"}
+              />
+            </div>
+            {llm && llm.queued > 0 ? (
+              <span className="font-mono text-[11px] text-muted-foreground">kuyruk {llm.queued}</span>
+            ) : null}
           </div>
-        </div>
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -182,6 +210,30 @@ export function AppShell({
         <span>{sidecarChip("Maestro", maestro)}</span>
       </footer>
     </div>
+  );
+}
+
+function WorkerChip({
+  label,
+  version,
+  occupancy,
+}: {
+  label: string;
+  version?: string;
+  occupancy: LlmStatus["occupancyA"];
+}) {
+  const busy = occupancy === "BUSY";
+  return (
+    <span
+      className={cn(
+        "px-2.5 py-1 text-[11px] font-medium",
+        busy ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+      )}
+    >
+      {label}
+      {version ? ` · ${version}` : ""}
+      {` · ${llmOccupancyLabel(occupancy)}`}
+    </span>
   );
 }
 

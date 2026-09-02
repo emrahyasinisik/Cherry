@@ -99,6 +99,7 @@ type ComplexityRoot struct {
 		Completions func(childComplexity int) int
 		Gdpr        func(childComplexity int) int
 		McpRoot     func(childComplexity int) int
+		Queued      func(childComplexity int) int
 		SlotA       func(childComplexity int) int
 		SlotB       func(childComplexity int) int
 	}
@@ -111,11 +112,13 @@ type ComplexityRoot struct {
 		OutputRedactions func(childComplexity int) int
 		PromptPreview    func(childComplexity int) int
 		Purpose          func(childComplexity int) int
+		Slot             func(childComplexity int) int
 		VersionName      func(childComplexity int) int
 	}
 
 	LlmSlotCard struct {
 		ActiveVersionID func(childComplexity int) int
+		Occupancy       func(childComplexity int) int
 		Role            func(childComplexity int) int
 		Slot            func(childComplexity int) int
 		Versions        func(childComplexity int) int
@@ -125,7 +128,12 @@ type ComplexityRoot struct {
 	LlmStatus struct {
 		Channel     func(childComplexity int) int
 		Gdpr        func(childComplexity int) int
+		OccupancyA  func(childComplexity int) int
+		OccupancyB  func(childComplexity int) int
+		Queued      func(childComplexity int) int
 		Slot        func(childComplexity int) int
+		VersionA    func(childComplexity int) int
+		VersionB    func(childComplexity int) int
 		VersionName func(childComplexity int) int
 	}
 
@@ -520,6 +528,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LlmAdmin.McpRoot(childComplexity), true
+	case "LlmAdmin.queued":
+		if e.complexity.LlmAdmin.Queued == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.Queued(childComplexity), true
 	case "LlmAdmin.slotA":
 		if e.complexity.LlmAdmin.SlotA == nil {
 			break
@@ -575,6 +589,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LlmCompletion.Purpose(childComplexity), true
+	case "LlmCompletion.slot":
+		if e.complexity.LlmCompletion.Slot == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.Slot(childComplexity), true
 	case "LlmCompletion.versionName":
 		if e.complexity.LlmCompletion.VersionName == nil {
 			break
@@ -588,6 +608,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LlmSlotCard.ActiveVersionID(childComplexity), true
+	case "LlmSlotCard.occupancy":
+		if e.complexity.LlmSlotCard.Occupancy == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.Occupancy(childComplexity), true
 	case "LlmSlotCard.role":
 		if e.complexity.LlmSlotCard.Role == nil {
 			break
@@ -625,12 +651,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LlmStatus.Gdpr(childComplexity), true
+	case "LlmStatus.occupancyA":
+		if e.complexity.LlmStatus.OccupancyA == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.OccupancyA(childComplexity), true
+	case "LlmStatus.occupancyB":
+		if e.complexity.LlmStatus.OccupancyB == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.OccupancyB(childComplexity), true
+	case "LlmStatus.queued":
+		if e.complexity.LlmStatus.Queued == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.Queued(childComplexity), true
 	case "LlmStatus.slot":
 		if e.complexity.LlmStatus.Slot == nil {
 			break
 		}
 
 		return e.complexity.LlmStatus.Slot(childComplexity), true
+	case "LlmStatus.versionA":
+		if e.complexity.LlmStatus.VersionA == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.VersionA(childComplexity), true
+	case "LlmStatus.versionB":
+		if e.complexity.LlmStatus.VersionB == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.VersionB(childComplexity), true
 	case "LlmStatus.versionName":
 		if e.complexity.LlmStatus.VersionName == nil {
 			break
@@ -2777,6 +2833,35 @@ func (ec *executionContext) fieldContext_LlmAdmin_mcpRoot(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _LlmAdmin_queued(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_queued,
+		func(ctx context.Context) (any, error) {
+			return obj.Queued, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_queued(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LlmAdmin_slotA(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2807,6 +2892,8 @@ func (ec *executionContext) fieldContext_LlmAdmin_slotA(_ context.Context, field
 				return ec.fieldContext_LlmSlotCard_wired(ctx, field)
 			case "role":
 				return ec.fieldContext_LlmSlotCard_role(ctx, field)
+			case "occupancy":
+				return ec.fieldContext_LlmSlotCard_occupancy(ctx, field)
 			case "activeVersionId":
 				return ec.fieldContext_LlmSlotCard_activeVersionId(ctx, field)
 			case "versions":
@@ -2848,6 +2935,8 @@ func (ec *executionContext) fieldContext_LlmAdmin_slotB(_ context.Context, field
 				return ec.fieldContext_LlmSlotCard_wired(ctx, field)
 			case "role":
 				return ec.fieldContext_LlmSlotCard_role(ctx, field)
+			case "occupancy":
+				return ec.fieldContext_LlmSlotCard_occupancy(ctx, field)
 			case "activeVersionId":
 				return ec.fieldContext_LlmSlotCard_activeVersionId(ctx, field)
 			case "versions":
@@ -2887,6 +2976,8 @@ func (ec *executionContext) fieldContext_LlmAdmin_completions(_ context.Context,
 				return ec.fieldContext_LlmCompletion_at(ctx, field)
 			case "purpose":
 				return ec.fieldContext_LlmCompletion_purpose(ctx, field)
+			case "slot":
+				return ec.fieldContext_LlmCompletion_slot(ctx, field)
 			case "versionName":
 				return ec.fieldContext_LlmCompletion_versionName(ctx, field)
 			case "channel":
@@ -2952,6 +3043,35 @@ func (ec *executionContext) _LlmCompletion_purpose(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_LlmCompletion_purpose(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_slot(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_slot,
+		func(ctx context.Context) (any, error) {
+			return obj.Slot, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_slot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LlmCompletion",
 		Field:      field,
@@ -3225,6 +3345,35 @@ func (ec *executionContext) fieldContext_LlmSlotCard_role(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _LlmSlotCard_occupancy(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_occupancy,
+		func(ctx context.Context) (any, error) {
+			return obj.Occupancy, nil
+		},
+		nil,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_occupancy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type LlmOccupancy does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LlmSlotCard_activeVersionId(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -3402,6 +3551,151 @@ func (ec *executionContext) fieldContext_LlmStatus_gdpr(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_queued(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_queued,
+		func(ctx context.Context) (any, error) {
+			return obj.Queued, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_queued(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_occupancyA(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_occupancyA,
+		func(ctx context.Context) (any, error) {
+			return obj.OccupancyA, nil
+		},
+		nil,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_occupancyA(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type LlmOccupancy does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_occupancyB(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_occupancyB,
+		func(ctx context.Context) (any, error) {
+			return obj.OccupancyB, nil
+		},
+		nil,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_occupancyB(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type LlmOccupancy does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_versionA(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_versionA,
+		func(ctx context.Context) (any, error) {
+			return obj.VersionA, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_versionA(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_versionB(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_versionB,
+		func(ctx context.Context) (any, error) {
+			return obj.VersionB, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_versionB(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5385,6 +5679,8 @@ func (ec *executionContext) fieldContext_Mutation_setActiveVersion(ctx context.C
 				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
 			case "mcpRoot":
 				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "queued":
+				return ec.fieldContext_LlmAdmin_queued(ctx, field)
 			case "slotA":
 				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
 			case "slotB":
@@ -5440,6 +5736,8 @@ func (ec *executionContext) fieldContext_Mutation_setMcpRoot(ctx context.Context
 				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
 			case "mcpRoot":
 				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "queued":
+				return ec.fieldContext_LlmAdmin_queued(ctx, field)
 			case "slotA":
 				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
 			case "slotB":
@@ -6493,6 +6791,8 @@ func (ec *executionContext) fieldContext_Query_llmAdmin(_ context.Context, field
 				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
 			case "mcpRoot":
 				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "queued":
+				return ec.fieldContext_LlmAdmin_queued(ctx, field)
 			case "slotA":
 				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
 			case "slotB":
@@ -6538,6 +6838,16 @@ func (ec *executionContext) fieldContext_Query_llmStatus(_ context.Context, fiel
 				return ec.fieldContext_LlmStatus_channel(ctx, field)
 			case "gdpr":
 				return ec.fieldContext_LlmStatus_gdpr(ctx, field)
+			case "queued":
+				return ec.fieldContext_LlmStatus_queued(ctx, field)
+			case "occupancyA":
+				return ec.fieldContext_LlmStatus_occupancyA(ctx, field)
+			case "occupancyB":
+				return ec.fieldContext_LlmStatus_occupancyB(ctx, field)
+			case "versionA":
+				return ec.fieldContext_LlmStatus_versionA(ctx, field)
+			case "versionB":
+				return ec.fieldContext_LlmStatus_versionB(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LlmStatus", field.Name)
 		},
@@ -8915,6 +9225,11 @@ func (ec *executionContext) _LlmAdmin(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "queued":
+			out.Values[i] = ec._LlmAdmin_queued(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "slotA":
 			out.Values[i] = ec._LlmAdmin_slotA(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8971,6 +9286,11 @@ func (ec *executionContext) _LlmCompletion(ctx context.Context, sel ast.Selectio
 			}
 		case "purpose":
 			out.Values[i] = ec._LlmCompletion_purpose(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "slot":
+			out.Values[i] = ec._LlmCompletion_slot(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -9053,6 +9373,11 @@ func (ec *executionContext) _LlmSlotCard(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "occupancy":
+			out.Values[i] = ec._LlmSlotCard_occupancy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "activeVersionId":
 			out.Values[i] = ec._LlmSlotCard_activeVersionId(ctx, field, obj)
 		case "versions":
@@ -9111,6 +9436,31 @@ func (ec *executionContext) _LlmStatus(ctx context.Context, sel ast.SelectionSet
 			}
 		case "gdpr":
 			out.Values[i] = ec._LlmStatus_gdpr(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "queued":
+			out.Values[i] = ec._LlmStatus_queued(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "occupancyA":
+			out.Values[i] = ec._LlmStatus_occupancyA(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "occupancyB":
+			out.Values[i] = ec._LlmStatus_occupancyB(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "versionA":
+			out.Values[i] = ec._LlmStatus_versionA(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "versionB":
+			out.Values[i] = ec._LlmStatus_versionB(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -11132,6 +11482,16 @@ func (ec *executionContext) marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapi
 		return graphql.Null
 	}
 	return ec._LlmCompletion(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, v any) (LlmOccupancy, error) {
+	var res LlmOccupancy
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, sel ast.SelectionSet, v LlmOccupancy) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard(ctx context.Context, sel ast.SelectionSet, v *LlmSlotCard) graphql.Marshaler {

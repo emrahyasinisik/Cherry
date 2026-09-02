@@ -35,9 +35,9 @@ flowchart TB
   Versions --> VB
 ```
 
-Dilim 4: yalnızca **işçi A**. B kartı “bağlı değil — yoğunluk işçisi sonra”. Versiyon değiştirmek A’daki sonraki tamamlamaları değiştirir (in-flight eski pointer’da biter).
+Dilim 4: yalnızca **işçi A**. Dilim 7: A ve B kuyruğu paylaşır. Versiyon değiştirmek o işçideki sonraki tamamlamaları değiştirir (in-flight eski pointer’da biter).
 
-Slice 4: **worker A** only. B card is “not wired — capacity worker later”.
+Slice 4: **worker A** only. Slice 7 wires B and the queue.
 
 ## Versiyon pointer / Version pointer
 

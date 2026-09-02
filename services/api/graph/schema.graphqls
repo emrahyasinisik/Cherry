@@ -271,21 +271,33 @@ type LlmStatus {
   versionName: String!
   channel: String!
   gdpr: Boolean!
+  queued: Int!
+  occupancyA: LlmOccupancy!
+  occupancyB: LlmOccupancy!
+  versionA: String!
+  versionB: String!
 }
 
 type LlmAdmin {
   gdpr: Boolean!
   activeSlot: String!
   mcpRoot: String!
+  queued: Int!
   slotA: LlmSlotCard!
   slotB: LlmSlotCard!
   completions: [LlmCompletion!]!
+}
+
+enum LlmOccupancy {
+  IDLE
+  BUSY
 }
 
 type LlmSlotCard {
   slot: String!
   wired: Boolean!
   role: String!
+  occupancy: LlmOccupancy!
   activeVersionId: ID
   versions: [LlmVersion!]!
 }
@@ -299,6 +311,7 @@ type LlmVersion {
 type LlmCompletion {
   at: String!
   purpose: String!
+  slot: String!
   versionName: String!
   channel: String!
   inputRedactions: Int!

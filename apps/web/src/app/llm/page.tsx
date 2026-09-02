@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ import {
   LLM_ADMIN_FIELDS,
   getToken,
   graphql,
+  llmOccupancyLabel,
   type LlmAdmin,
+  type LlmSlotCard,
   type User,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,7 @@ export default function LlmAdminPage() {
   const [mcpRoot, setMcpRoot] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const rooted = useRef(false);
 
   async function load() {
     const data = await graphql<{ me: User | null; llmAdmin: LlmAdmin }>(
@@ -36,7 +39,10 @@ export default function LlmAdminPage() {
     }
     setUser(data.me);
     setAdmin(data.llmAdmin);
-    setMcpRoot(data.llmAdmin.mcpRoot);
+    if (!rooted.current) {
+      setMcpRoot(data.llmAdmin.mcpRoot);
+      rooted.current = true;
+    }
   }
 
   useEffect(() => {
@@ -49,13 +55,19 @@ export default function LlmAdminPage() {
         setError(err instanceof Error ? err.message : "Yüklenemedi.");
       });
     }, 0);
+    const poll = window.setInterval(() => {
+      void load().catch(() => {
+        /* occupancy poll; keep last */
+      });
+    }, 1500);
     return () => {
       window.clearTimeout(timer);
+      window.clearInterval(poll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount
   }, [router]);
 
-  if (error) {
+  if (error && !user) {
     return (
       <div className="flex min-h-full items-center justify-center text-destructive">{error}</div>
     );
@@ -70,58 +82,55 @@ export default function LlmAdminPage() {
 
   return (
     <AppShell user={user} title="LLM yönetici" status="GDPR katmanı bağlı">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 p-8">
+      <div className="icerde-enter mx-auto flex max-w-5xl flex-col gap-6 p-8">
         <div>
           <h1 className="text-base font-medium">LLM yönetici</h1>
           <p className="text-muted-foreground">
-            Her çağrı redact → model → tarama → denetim. Yazıcı OpenCode (`opencode run`).
-            A ve B aynı işi yapar; B ikinci kapasite işçisidir. B ve Colab henüz yok.
+            A ve B aynı işi yapar. Boş olan alır; ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Colab yok —
+            fine-tune sonra.
           </p>
         </div>
+        {error ? (
+          <p className="text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+        <p className="font-mono text-[11px] text-muted-foreground">
+          kuyruk {admin.queued} · son işçi {admin.activeSlot}
+        </p>
         <div className="grid gap-4 md:grid-cols-2">
-          <article className="rounded-[10px] border border-primary bg-card/40 p-4">
-            <p className="text-[11px] text-primary">AKTİF</p>
-            <h2 className="text-base font-medium">LLM A — {admin.slotA.role}</h2>
-            <p className="mt-2 text-muted-foreground">MCP read-file kökü proje klasörü. Versiyon pointer’ı sonraki cevapları değiştirir.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {admin.slotA.versions.map((version) => (
-                <Button
-                  key={version.id}
-                  type="button"
-                  size="sm"
-                  variant={admin.slotA.activeVersionId === version.id ? "default" : "outline"}
-                  disabled={pending}
-                  onClick={() => {
-                    setPending(true);
-                    void graphql<{ setActiveVersion: LlmAdmin }>(
-                      `mutation Set($id: ID!) { setActiveVersion(id: $id) { ${LLM_ADMIN_FIELDS} } }`,
-                      { id: version.id },
-                    )
-                      .then((data) => {
-                        setAdmin(data.setActiveVersion);
-                      })
-                      .catch((err: unknown) => {
-                        setError(err instanceof Error ? err.message : "Değiştirilemedi.");
-                      })
-                      .finally(() => setPending(false));
-                  }}
-                >
-                  {version.name}
-                </Button>
-              ))}
-            </div>
-            <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-              {admin.slotA.versions.find((item) => item.id === admin.slotA.activeVersionId)?.note}
-            </p>
-          </article>
-          <article className="rounded-[10px] border border-border bg-card/40 p-4">
-            <p className="text-[11px] text-muted-foreground">SONRA</p>
-            <h2 className="text-base font-medium">LLM B — {admin.slotB.role}</h2>
-            <p className="mt-2 text-muted-foreground">
-              Dilim 7: ikinci işçi. On kişi aynı anda üretince boş olan alır; ikisi de
-              meşgulse kuyruk. Sahte rol yok — B bağlı değil.
-            </p>
-          </article>
+          <SlotCard
+            card={admin.slotA}
+            pending={pending}
+            onSelect={(id) => {
+              setPending(true);
+              void graphql<{ setActiveVersion: LlmAdmin }>(
+                `mutation Set($id: ID!) { setActiveVersion(id: $id) { ${LLM_ADMIN_FIELDS} } }`,
+                { id },
+              )
+                .then((data) => setAdmin(data.setActiveVersion))
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : "Değiştirilemedi.");
+                })
+                .finally(() => setPending(false));
+            }}
+          />
+          <SlotCard
+            card={admin.slotB}
+            pending={pending}
+            onSelect={(id) => {
+              setPending(true);
+              void graphql<{ setActiveVersion: LlmAdmin }>(
+                `mutation Set($id: ID!) { setActiveVersion(id: $id) { ${LLM_ADMIN_FIELDS} } }`,
+                { id },
+              )
+                .then((data) => setAdmin(data.setActiveVersion))
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : "Değiştirilemedi.");
+                })
+                .finally(() => setPending(false));
+            }}
+          />
         </div>
         <section className="flex flex-col gap-2 rounded-[10px] border border-border p-4">
           <h2 className="text-sm font-medium">MCP kök</h2>
@@ -163,6 +172,7 @@ export default function LlmAdminPage() {
                 <thead className="border-b border-border text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2 font-medium">Zaman</th>
+                    <th className="px-3 py-2 font-medium">İşçi</th>
                     <th className="px-3 py-2 font-medium">Sürüm</th>
                     <th className="px-3 py-2 font-medium">Redakt</th>
                     <th className="px-3 py-2 font-medium">Çıktı</th>
@@ -170,8 +180,9 @@ export default function LlmAdminPage() {
                 </thead>
                 <tbody>
                   {admin.completions.map((row) => (
-                    <tr key={row.at + row.outputPreview} className="border-b border-border last:border-0">
+                    <tr key={row.at + row.slot + row.outputPreview} className="border-b border-border last:border-0">
                       <td className="px-3 py-2 font-mono text-[11px] whitespace-nowrap">{row.at}</td>
+                      <td className="px-3 py-2 font-mono text-[11px]">{row.slot || "A"}</td>
                       <td className="px-3 py-2">
                         {row.versionName}
                         <span className="block font-mono text-[11px] text-muted-foreground">{row.channel}</span>
@@ -189,5 +200,48 @@ export default function LlmAdminPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function SlotCard({
+  card,
+  pending,
+  onSelect,
+}: {
+  card: LlmSlotCard;
+  pending: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const busy = card.occupancy === "BUSY";
+  return (
+    <article
+      className={cn(
+        "rounded-[10px] border bg-card/40 p-4",
+        busy ? "border-primary" : "border-border",
+      )}
+    >
+      <p className="font-mono text-[11px] text-muted-foreground">
+        {busy ? "MEŞGUL" : "BOŞ"} · {llmOccupancyLabel(card.occupancy)}
+      </p>
+      <h2 className="text-base font-medium">LLM {card.slot}</h2>
+      <p className="mt-2 text-muted-foreground">{card.role}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {card.versions.map((version) => (
+          <Button
+            key={version.id}
+            type="button"
+            size="sm"
+            variant={card.activeVersionId === version.id ? "default" : "outline"}
+            disabled={pending}
+            onClick={() => onSelect(version.id)}
+          >
+            {version.name}
+          </Button>
+        ))}
+      </div>
+      <p className="mt-3 font-mono text-[11px] text-muted-foreground">
+        {card.versions.find((item) => item.id === card.activeVersionId)?.note}
+      </p>
+    </article>
   );
 }

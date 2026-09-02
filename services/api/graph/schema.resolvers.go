@@ -331,7 +331,7 @@ func (r *mutationResolver) SetActiveVersion(ctx context.Context, id string) (*Ll
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	if err := r.LLM.SetActiveA(ctx, id); err != nil {
+	if err := r.LLM.SetActive(ctx, id); err != nil {
 		return nil, gqlErr(err)
 	}
 	return r.llmAdminPayload(ctx, user.ID)
@@ -531,11 +531,29 @@ func (r *queryResolver) LlmStatus(ctx context.Context) (*LlmStatus, error) {
 	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
 		return nil, gqlErr(err)
 	}
-	version, channel, err := r.LLM.Status(ctx)
+	snap, err := r.LLM.Snapshot(ctx)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	return &LlmStatus{Slot: "A", VersionName: version.Name, Channel: channel, Gdpr: true}, nil
+	slot := string(snap.LastSlot)
+	if slot == "" {
+		slot = "A"
+	}
+	versionName := snap.VersionA
+	if snap.LastSlot == "B" {
+		versionName = snap.VersionB
+	}
+	return &LlmStatus{
+		Slot:        slot,
+		VersionName: versionName,
+		Channel:     snap.Channel,
+		Gdpr:        true,
+		Queued:      snap.Queued,
+		OccupancyA:  occupancyFromBusy(snap.BusyA),
+		OccupancyB:  occupancyFromBusy(snap.BusyB),
+		VersionA:    snap.VersionA,
+		VersionB:    snap.VersionB,
+	}, nil
 }
 
 // McpReadFile is the resolver for the mcpReadFile field.

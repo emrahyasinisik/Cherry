@@ -18,69 +18,86 @@ type Completer interface {
 type Service struct {
 	Store     store.Store
 	Completer Completer
+	q         *queue
+}
+
+func (s *Service) ensureQueue() *queue {
+	if s.q == nil {
+		s.q = newQueue()
+	}
+	return s.q
 }
 
 func Seed(ctx context.Context, st store.Store) error {
-	v1 := store.LlmVersion{
-		ID:        "ver-a-1",
-		Slot:      store.SlotA,
-		Name:      "v1.0",
-		Note:      "İşçi A — stub / yerel",
-		CreatedAt: time.Now().UTC(),
+	versions := []store.LlmVersion{
+		{ID: "ver-a-1", Slot: store.SlotA, Name: "v1.0", Note: "İşçi A — stub / yerel", CreatedAt: time.Now().UTC()},
+		{ID: "ver-a-2", Slot: store.SlotA, Name: "v1.1", Note: "İşçi A — alternatif pointer (cevap değişir)", CreatedAt: time.Now().UTC()},
+		{ID: "ver-b-1", Slot: store.SlotB, Name: "v1.0", Note: "İşçi B — aynı tarif, yoğunluk", CreatedAt: time.Now().UTC()},
+		{ID: "ver-b-2", Slot: store.SlotB, Name: "v1.1", Note: "İşçi B — alternatif pointer (cevap değişir)", CreatedAt: time.Now().UTC()},
 	}
-	v2 := store.LlmVersion{
-		ID:        "ver-a-2",
-		Slot:      store.SlotA,
-		Name:      "v1.1",
-		Note:      "İşçi A — alternatif pointer (cevap değişir)",
-		CreatedAt: time.Now().UTC(),
-	}
-	if err := st.PutLlmVersion(ctx, v1); err != nil {
-		return err
-	}
-	if err := st.PutLlmVersion(ctx, v2); err != nil {
-		return err
+	for _, version := range versions {
+		if err := st.PutLlmVersion(ctx, version); err != nil {
+			return err
+		}
 	}
 	state, err := st.GetLlmState(ctx)
 	if err != nil {
 		return err
 	}
 	if state.ActiveAID == "" {
-		state.ActiveAID = v1.ID
-		return st.SetLlmState(ctx, state)
+		state.ActiveAID = "ver-a-1"
 	}
-	return nil
+	if state.ActiveBID == "" {
+		state.ActiveBID = "ver-b-1"
+	}
+	return st.SetLlmState(ctx, state)
 }
 
-func (s *Service) ActiveVersion(ctx context.Context) (store.LlmVersion, error) {
+func (s *Service) versionFor(ctx context.Context, slot store.LlmSlot) (store.LlmVersion, error) {
 	state, err := s.Store.GetLlmState(ctx)
 	if err != nil {
 		return store.LlmVersion{}, err
 	}
-	if state.ActiveAID == "" {
+	id := state.ActiveAID
+	if slot == store.SlotB {
+		id = state.ActiveBID
+	}
+	if id == "" {
 		return store.LlmVersion{}, store.ErrNotFound
 	}
-	version, err := s.Store.GetLlmVersion(ctx, state.ActiveAID)
+	version, err := s.Store.GetLlmVersion(ctx, id)
 	if err != nil {
 		return store.LlmVersion{}, err
 	}
 	return *version, nil
 }
 
-func (s *Service) SetActiveA(ctx context.Context, versionID string) error {
+func (s *Service) ActiveVersion(ctx context.Context) (store.LlmVersion, error) {
+	return s.versionFor(ctx, store.SlotA)
+}
+
+func (s *Service) SetActive(ctx context.Context, versionID string) error {
 	version, err := s.Store.GetLlmVersion(ctx, versionID)
 	if err != nil {
 		return err
-	}
-	if version.Slot != store.SlotA {
-		return store.ErrValidation
 	}
 	state, err := s.Store.GetLlmState(ctx)
 	if err != nil {
 		return err
 	}
-	state.ActiveAID = version.ID
+	switch version.Slot {
+	case store.SlotA:
+		state.ActiveAID = version.ID
+	case store.SlotB:
+		state.ActiveBID = version.ID
+	default:
+		return store.ErrValidation
+	}
 	return s.Store.SetLlmState(ctx, state)
+}
+
+func (s *Service) SetActiveA(ctx context.Context, versionID string) error {
+	return s.SetActive(ctx, versionID)
 }
 
 func (s *Service) SetMcpRoot(ctx context.Context, root string) error {
@@ -101,19 +118,26 @@ type CompleteInput struct {
 }
 
 type CompleteResult struct {
-	Text     string
-	Version  store.LlmVersion
-	Channel  string
-	InputN   int
-	OutputN  int
-	AuditID  string
+	Text    string
+	Version store.LlmVersion
+	Slot    store.LlmSlot
+	Channel string
+	InputN  int
+	OutputN int
+	AuditID string
 }
 
 func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResult, error) {
 	if s.Completer == nil {
 		return CompleteResult{}, fmt.Errorf("%w: completer yok", store.ErrLLMFailed)
 	}
-	version, err := s.ActiveVersion(ctx)
+	slot, err := s.ensureQueue().acquire(ctx)
+	if err != nil {
+		return CompleteResult{}, err
+	}
+	held := lease{Slot: slot, q: s.q}
+	defer held.Release()
+	version, err := s.versionFor(ctx, slot)
 	if err != nil {
 		return CompleteResult{}, err
 	}
@@ -128,7 +152,7 @@ func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResul
 		ProjectID:        in.ProjectID,
 		Purpose:          in.Purpose,
 		LegalBasis:       in.LegalBasis,
-		Slot:             store.SlotA,
+		Slot:             slot,
 		VersionID:        version.ID,
 		VersionName:      version.Name,
 		Channel:          s.Completer.Channel(),
@@ -144,6 +168,7 @@ func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResul
 	return CompleteResult{
 		Text:    safe,
 		Version: version,
+		Slot:    slot,
 		Channel: s.Completer.Channel(),
 		InputN:  inCounts.Total(),
 		OutputN: outCounts.Total(),
@@ -164,8 +189,43 @@ func (s *Service) ReadProjectFile(ctx context.Context, rel string) (string, erro
 	return safe, nil
 }
 
+type StatusView struct {
+	Channel  string
+	Queued   int
+	BusyA    bool
+	BusyB    bool
+	VersionA string
+	VersionB string
+	LastSlot store.LlmSlot
+}
+
+func (s *Service) Snapshot(ctx context.Context) (StatusView, error) {
+	occ := s.ensureQueue().snapshot()
+	a, err := s.versionFor(ctx, store.SlotA)
+	if err != nil {
+		return StatusView{}, err
+	}
+	b, err := s.versionFor(ctx, store.SlotB)
+	if err != nil {
+		return StatusView{}, err
+	}
+	channel := "none"
+	if s.Completer != nil {
+		channel = s.Completer.Channel()
+	}
+	return StatusView{
+		Channel:  channel,
+		Queued:   occ.Queued,
+		BusyA:    occ.BusyA,
+		BusyB:    occ.BusyB,
+		VersionA: a.Name,
+		VersionB: b.Name,
+		LastSlot: occ.Last,
+	}, nil
+}
+
 func (s *Service) Status(ctx context.Context) (store.LlmVersion, string, error) {
-	version, err := s.ActiveVersion(ctx)
+	version, err := s.versionFor(ctx, store.SlotA)
 	if err != nil {
 		return store.LlmVersion{}, "", err
 	}

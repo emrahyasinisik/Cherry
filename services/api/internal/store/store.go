@@ -262,6 +262,7 @@ type LlmVersion struct {
 
 type LlmState struct {
 	ActiveAID string
+	ActiveBID string
 	McpRoot   string
 }
 

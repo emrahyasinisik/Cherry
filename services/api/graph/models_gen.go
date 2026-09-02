@@ -61,6 +61,7 @@ type LlmAdmin struct {
 	Gdpr        bool             `json:"gdpr"`
 	ActiveSlot  string           `json:"activeSlot"`
 	McpRoot     string           `json:"mcpRoot"`
+	Queued      int              `json:"queued"`
 	SlotA       *LlmSlotCard     `json:"slotA"`
 	SlotB       *LlmSlotCard     `json:"slotB"`
 	Completions []*LlmCompletion `json:"completions"`
@@ -69,6 +70,7 @@ type LlmAdmin struct {
 type LlmCompletion struct {
 	At               string `json:"at"`
 	Purpose          string `json:"purpose"`
+	Slot             string `json:"slot"`
 	VersionName      string `json:"versionName"`
 	Channel          string `json:"channel"`
 	InputRedactions  int    `json:"inputRedactions"`
@@ -81,15 +83,21 @@ type LlmSlotCard struct {
 	Slot            string        `json:"slot"`
 	Wired           bool          `json:"wired"`
 	Role            string        `json:"role"`
+	Occupancy       LlmOccupancy  `json:"occupancy"`
 	ActiveVersionID *string       `json:"activeVersionId,omitempty"`
 	Versions        []*LlmVersion `json:"versions"`
 }
 
 type LlmStatus struct {
-	Slot        string `json:"slot"`
-	VersionName string `json:"versionName"`
-	Channel     string `json:"channel"`
-	Gdpr        bool   `json:"gdpr"`
+	Slot        string       `json:"slot"`
+	VersionName string       `json:"versionName"`
+	Channel     string       `json:"channel"`
+	Gdpr        bool         `json:"gdpr"`
+	Queued      int          `json:"queued"`
+	OccupancyA  LlmOccupancy `json:"occupancyA"`
+	OccupancyB  LlmOccupancy `json:"occupancyB"`
+	VersionA    string       `json:"versionA"`
+	VersionB    string       `json:"versionB"`
 }
 
 type LlmVersion struct {
@@ -537,6 +545,61 @@ func (e *ConnectionStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e ConnectionStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type LlmOccupancy string
+
+const (
+	LlmOccupancyIdle LlmOccupancy = "IDLE"
+	LlmOccupancyBusy LlmOccupancy = "BUSY"
+)
+
+var AllLlmOccupancy = []LlmOccupancy{
+	LlmOccupancyIdle,
+	LlmOccupancyBusy,
+}
+
+func (e LlmOccupancy) IsValid() bool {
+	switch e {
+	case LlmOccupancyIdle, LlmOccupancyBusy:
+		return true
+	}
+	return false
+}
+
+func (e LlmOccupancy) String() string {
+	return string(e)
+}
+
+func (e *LlmOccupancy) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LlmOccupancy(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LlmOccupancy", str)
+	}
+	return nil
+}
+
+func (e LlmOccupancy) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *LlmOccupancy) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e LlmOccupancy) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

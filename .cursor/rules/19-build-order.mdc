@@ -10,6 +10,6 @@ alwaysApply: false
 # Build order
 
 - Follow [docs/build-order.md](docs/build-order.md). Pause checklist: [docs/remaining.md](docs/remaining.md).
-- Next implementation slice is **7 — LLM B + queue**. Slices 1–6 are done. Do not stand up Colab until two interchangeable workers share a real job queue.
+- Next implementation slice is **8 — Colab fine-tune**. Slices 1–7 are done. Do not stand up Colab until traces (brief + generated code + Maestro) exist.
 - OpenCode is the writer (`opencode run --dir`). Do not reimplement it. Missing CLI keeps the scaffold; do not fake an OpenCode write.
 - Local activate is a **child** customer API on `127.0.0.1:47000–47999`. Maestro SKIPPED if no device; never fake PASSED. Sidecars live in `vendor/bin`.

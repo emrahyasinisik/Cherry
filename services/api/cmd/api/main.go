@@ -133,7 +133,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":       true,
 			"store":    status,
-			"version":  "0.6.1-local",
+			"version":  "0.7.0-local",
 			"mail":     mail.Channel(),
 			"gdpr":     true,
 			"llm":      llmSvc.Completer.Channel(),
