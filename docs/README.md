@@ -77,4 +77,4 @@ flowchart TB
 | 16 | Hareket | [16-motion.mdc](../.cursor/rules/16-motion.mdc) | [motion.md](motion.md) |
 | 17 | MCP / CLI | [17-integrations.mdc](../.cursor/rules/17-integrations.mdc) | [integrations.md](integrations.md) |
 | 18 | E-posta / 6 hane | [18-email-verification.mdc](../.cursor/rules/18-email-verification.mdc) | [email-verification.md](email-verification.md) |
-| 19 | Yapım sırası | [19-build-order.mdc](../.cursor/rules/19-build-order.mdc) | [build-order.md](build-order.md) |
+| 19 | Yapım sırası | [19-build-order.mdc](../.cursor/rules/19-build-order.mdc) | [build-order.md](build-order.md) · [remaining.md](remaining.md) |
