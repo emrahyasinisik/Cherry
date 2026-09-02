@@ -2,7 +2,6 @@ package factory
 
 import (
 	"archive/zip"
-	"fmt"
 	"html"
 	"os"
 	"path/filepath"
@@ -51,7 +50,7 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 		{
 			rel:  "README.md",
 			kind: "readme",
-			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\n\nİçerde bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git.\n",
+			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\nMimari: Clean Architecture (domain / data / presentation).\n\nİçerde bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git — seçilen dil, HTML değil.\n",
 		},
 		{
 			rel:  "backend/README.md",
@@ -89,29 +88,6 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 		return nil, err
 	}
 	return append(out, fe...), nil
-}
-
-func frontendFiles(stack store.ProjectStack, name, slug, brief string) ([]fileSpec, error) {
-	switch stack {
-	case store.StackExpo:
-		return []fileSpec{
-			{rel: "frontend/package.json", kind: "frontend", body: "{\n  \"name\": \"" + slug + "\",\n  \"private\": true,\n  \"main\": \"expo-router/entry\"\n}\n"},
-			{rel: "frontend/app/index.tsx", kind: "frontend", body: "import { Text, View } from \"react-native\";\n\nexport default function Home() {\n  return (\n    <View>\n      <Text>" + name + "</Text>\n      <Text>" + strings.ReplaceAll(brief, "\"", "'") + "</Text>\n    </View>\n  );\n}\n"},
-		}, nil
-	case store.StackFlutter:
-		return []fileSpec{
-			{rel: "frontend/pubspec.yaml", kind: "frontend", body: "name: " + slug + "\ndescription: " + strings.ReplaceAll(brief, "\n", " ") + "\n"},
-			{rel: "frontend/lib/main.dart", kind: "frontend", body: "import 'package:flutter/material.dart';\n\nvoid main() => runApp(const MaterialApp(home: Scaffold(body: Center(child: Text('" + name + "')))));\n"},
-		}, nil
-	case store.StackNative:
-		return []fileSpec{
-			{rel: "frontend/README.md", kind: "frontend", body: "# Native stub\n\n" + name + " — iOS + Android iskeleti. Tam native adaptör henüz bağlı değil; sahte başarı yok, klasör duruyor.\n"},
-			{rel: "frontend/ios/README.md", kind: "frontend", body: "iOS hedefi (stub).\n"},
-			{rel: "frontend/android/README.md", kind: "frontend", body: "Android hedefi (stub).\n"},
-		}, nil
-	default:
-		return nil, fmt.Errorf("unhandled stack: %s", stack)
-	}
 }
 
 func screenHTML(app, title, lead, detail, variant string) string {

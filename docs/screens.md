@@ -93,7 +93,7 @@ flowchart TB
 
 Kartlar (ilk set): Supabase, Cloudflare, GitHub, Vercel, Render. Boş: “Hesap bağla”. Hata: yetki yok / token yok — yeşil tik yok.
 
-Proje: yığın (Expo/TS, Flutter/Dart, native Swift+Kotlin) + **backend hedefi** (yerel / bağlı sağlayıcı). Zip o dilin kaynağıdır; `preview/` HTML teslim değildir.
+Proje: yığın (Expo SDK 57 / Flutter 3.47 / SwiftUI) + Clean Architecture + **backend hedefi**. Zip o dilin kaynağıdır; `preview/` HTML teslim değildir.
 
 ## 8. Maestro
 

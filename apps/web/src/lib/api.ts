@@ -288,11 +288,11 @@ export function purposeLabel(purpose: VerifyPurpose): string {
 export function stackLabel(stack: ProjectStack): string {
   switch (stack) {
     case "EXPO":
-      return "Expo / React Native";
+      return "Expo";
     case "FLUTTER":
       return "Flutter";
     case "NATIVE":
-      return "Native iOS + Android";
+      return "SwiftUI";
     default: {
       const exhaustive: never = stack;
       return exhaustive;
@@ -303,11 +303,11 @@ export function stackLabel(stack: ProjectStack): string {
 export function stackSourceHint(stack: ProjectStack): string {
   switch (stack) {
     case "EXPO":
-      return "TypeScript / React Native";
+      return "SDK 57 · TypeScript · Clean Architecture";
     case "FLUTTER":
-      return "Dart";
+      return "3.47 · Dart 3.13 · Clean Architecture";
     case "NATIVE":
-      return "Swift + Kotlin";
+      return "Swift 6 · iOS 18 · Clean Architecture";
     default: {
       const exhaustive: never = stack;
       return exhaustive;

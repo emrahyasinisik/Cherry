@@ -105,7 +105,7 @@ export default function NewProjectPage() {
         <div>
           <h1 className="text-base font-medium">Ne üretilsin?</h1>
           <p className="text-muted-foreground">
-            Brifi yaz, yığını seç. Ajan o dilde yazar (TypeScript, Dart, Swift/Kotlin) — HTML site değil.
+            Brifi yaz, yığını seç. Ajan o dilde, Clean Architecture ile yazar (Expo SDK 57, Flutter 3.47, SwiftUI) — HTML site değil.
             Stüdyo sohbetine düşersin; OpenCode açılmaz.
           </p>
         </div>

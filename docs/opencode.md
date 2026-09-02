@@ -25,9 +25,9 @@ opencode run --dir <absoluteProjectRoot> --auto
 
 `--dir` mutlak olmalı. Göreli yol `chdir` hatası verir.
 
-Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü. Prompt seçilen yığının dilini zorunlu kılar (TS / Dart / Swift+Kotlin); HTML site yazdırmaz.
+Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü. Prompt seçilen yığının dilini ve Clean Architecture katmanlarını zorunlu kılar (Expo SDK 57 TS / Flutter Dart 3.13 / SwiftUI); HTML site yazdırmaz.
 
-The prompt is stdin; already redacted. Working directory is the customer folder only. It requires the selected stack’s language — never an HTML website as the app.
+The prompt is stdin; already redacted. Working directory is the customer folder only. It requires the selected stack’s current language **and** Clean Architecture — never an HTML website as the app.
 
 **Kişi OpenCode görmez.** Yalnızca İçerde sohbetine yazar. TUI açılmaz. Program `sendProjectMessage` → `opencode run --dir --auto` (sonraki mesajda `--continue`).
 

@@ -45,7 +45,21 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	if got.Status != store.StatusReady {
 		t.Fatalf("status %s", got.Status)
 	}
-	for _, rel := range []string{"README.md", "frontend/app/index.tsx", "backend/main.go", "maestro/login.yaml", "preview/home.html", "llm/plan.md", "llm/opencode.ran", "opencode.json", "AGENTS.md", "icerde.zip"} {
+	for _, rel := range []string{
+		"README.md",
+		"frontend/app/index.tsx",
+		"frontend/src/domain/entities/item.ts",
+		"frontend/src/data/repositories/item-repository-impl.ts",
+		"frontend/src/presentation/screens/home-screen.tsx",
+		"backend/main.go",
+		"maestro/login.yaml",
+		"preview/home.html",
+		"llm/plan.md",
+		"llm/opencode.ran",
+		"opencode.json",
+		"AGENTS.md",
+		"icerde.zip",
+	} {
 		if _, err := os.Stat(filepath.Join(got.RootPath, rel)); err != nil {
 			t.Fatalf("%s: %v", rel, err)
 		}
@@ -297,9 +311,9 @@ func TestHandoffZipIsStackSourceNotHTML(t *testing.T) {
 		want  string
 		lang  string
 	}{
-		{stack: "EXPO", want: "frontend/app/index.tsx", lang: "TypeScript"},
-		{stack: "FLUTTER", want: "frontend/lib/main.dart", lang: "Dart"},
-		{stack: "NATIVE", want: "frontend/ios/README.md", lang: "Swift"},
+		{stack: "EXPO", want: "frontend/src/domain/entities/item.ts", lang: "TypeScript"},
+		{stack: "FLUTTER", want: "frontend/lib/features/home/domain/entities/home_item.dart", lang: "Dart"},
+		{stack: "NATIVE", want: "frontend/Presentation/Home/HomeView.swift", lang: "SwiftUI"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.stack, func(t *testing.T) {

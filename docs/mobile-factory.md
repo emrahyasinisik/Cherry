@@ -33,13 +33,15 @@ flowchart TB
   Root --> D[docker_compose_optional]
 ```
 
-**Teslim / Handoff:** Zip ve git, seçilen yığının **dilinde** kaynaktır — HTML site değildir.
+**Teslim / Handoff:** Zip ve git, seçilen yığının **dilinde** ve **Clean Architecture** ile kaynaktır — HTML site değildir.
 
-| Yığın | Dil | Örnek |
-| --- | --- | --- |
-| Expo | TypeScript / React Native | `frontend/app/*.tsx` |
-| Flutter | Dart | `frontend/lib/*.dart` |
-| Native | Swift + Kotlin | `frontend/ios`, `frontend/android` |
+| Yığın | Dil (güncel) | Mimari | Örnek |
+| --- | --- | --- | --- |
+| Expo | SDK 57, TypeScript strict, React 19, RN 0.86 | `src/domain` `src/data` `src/presentation` `src/app` + Expo Router `app/` | `frontend/src/domain/entities` |
+| Flutter | 3.47 / Dart 3.13 | `lib/features/<özellik>/{domain,data,presentation}` | `frontend/lib/features/home/domain` |
+| SwiftUI (`NATIVE`) | Swift 6, iOS 18+, `@Observable` | `Domain` `Data` `Presentation` `App` | `frontend/Presentation/Home` |
+
+OpenCode mevcut katmanları genişletir; tek `App.js` / `main.dart` / `ContentView.swift` içine yığmaz.
 
 `preview/*.html` stüdyo / Maestro maketidir; zip’e **girmez**. Stüdyo dosya listesi `frontend/` öne çıkar.
 
@@ -49,11 +51,11 @@ flowchart TB
 
 Adapters behind one interface, for example:
 
-- Expo / React Native
-- Flutter
-- Native iOS + Android
+- Expo (SDK 57, TypeScript, Clean Architecture)
+- Flutter (3.47 / Dart 3.13, Clean Architecture)
+- SwiftUI (Swift 6, Clean Architecture; GraphQL değeri `NATIVE`)
 
-v1 may implement one adapter fully; others stay as explicit “not wired” rather than fake success.
+v1 üç adaptör de Clean Architecture iskeleti yazar; OpenCode katmanları doldurur. Sahte “tamamlandı” yok.
 
 ## Stüdyo akışı / Studio flow
 

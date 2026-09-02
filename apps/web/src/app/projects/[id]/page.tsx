@@ -192,7 +192,7 @@ export default function StudioPage() {
             {stackLabel(project.stack)} · {stackSourceHint(project.stack)} · {projectStatusLabel(project.status)}
           </p>
           <p className="text-muted-foreground">
-            Teslim bu dilin kaynağıdır. HTML maket yalnızca Maestro ekranında; zip’e girmez.
+            Teslim bu dilin kaynağıdır (Clean Architecture). HTML maket yalnızca Maestro ekranında; zip’e girmez.
           </p>
           <p className="break-all font-mono text-[11px] text-muted-foreground">{project.rootPath}</p>
           <Button type="button" variant="outline" onClick={() => router.push(`/projects/${id}/maestro`)}>

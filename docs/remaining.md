@@ -11,9 +11,9 @@ User notes below are not the current slice. Do not attach speculative providers.
 
 ### 1. Zip HTML verdi, kaynak dil vermedi / Zip looked like HTML, not the stack language
 
-**TR:** Teslim HTML değil. Seçilen yığının dili: Expo → TypeScript, Flutter → Dart, Native → Swift+Kotlin. `preview/` yalnızca stüdyo maketi; zip’e girmez. **Kodda düzeltildi.**
+**TR:** Teslim HTML değil. Expo SDK 57 / Flutter 3.47 / SwiftUI, Clean Architecture. `preview/` zip’e girmez. **Kodda düzeltildi.**
 
-**EN:** Handoff is never an HTML site. Expo → TypeScript, Flutter → Dart, Native → Swift+Kotlin. `preview/` is a studio mock only; it is not in the zip.
+**EN:** Handoff is never an HTML site. Expo SDK 57 / Flutter 3.47 / SwiftUI with Clean Architecture. `preview/` is not in the zip. **Fixed in code.**
 
 ### 2. Bağlantılar menüsü / Connections menu
 

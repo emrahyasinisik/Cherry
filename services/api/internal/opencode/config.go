@@ -40,6 +40,8 @@ func WriteAgents(dir, name, stack, brief, sourceRule string) error {
 		"- Brif: " + brief + "\n" +
 		"- " + sourceRule + "\n" +
 		"- Asıl çıktı: `frontend/` (seçilen dil), `backend/`, `maestro/`.\n" +
+		"- Mimari: Clean Architecture. domain / data / presentation / app (composition). Katmanları tek dosyaya yığma.\n" +
+		"- Dil güncel kalsın: Expo SDK 57 + TS strict; Flutter 3.47 / Dart 3.13; SwiftUI Swift 6.\n" +
 		"- `preview/*.html` stüdyo maketidir. Uygulamayı HTML ile değiştirme; zip’e HTML site koyma.\n" +
 		"- Barındırma yok. Teslim klasör / zip / git — seçilen dilin kaynağı.\n" +
 		"- Maestro YAML yaz; cihaz yoksa test çalıştırma, SKIPPED bırak.\n" +

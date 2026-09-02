@@ -316,7 +316,7 @@ func (s *Service) runLLM(ctx context.Context, project store.Project) error {
 	if err != nil {
 		readme = ""
 	}
-	prompt := "Amaç: codegen. Yalnızca proje kökündeki dosyalar.\nYığın: " + string(project.Stack) + "\nAd: " + project.Name + "\nBrif: " + project.Brief + "\nUygulamayı seçilen dilde yaz; HTML site değil.\nREADME:\n" + readme
+	prompt := "Amaç: codegen. Yalnızca proje kökündeki dosyalar.\nYığın: " + string(project.Stack) + "\nAd: " + project.Name + "\nBrif: " + project.Brief + "\nClean Architecture katmanlarını koru. Uygulamayı seçilen dilde yaz; HTML site değil.\nREADME:\n" + readme
 	out, err := s.LLM.Complete(ctx, llm.CompleteInput{
 		UserID:     project.UserID,
 		ProjectID:  project.ID,
@@ -368,7 +368,8 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		rule,
 		"Ad: " + nameSafe,
 		"Brif: " + briefSafe,
-		"Asıl klasörler: frontend/ (seçilen dil), backend/, maestro/.",
+		"Asıl klasörler: frontend/ (seçilen dil, Clean Architecture), backend/, maestro/.",
+		"Mevcut domain/data/presentation katmanlarını koru ve genişlet. Tek dosyaya yığma.",
 		"preview/ HTML makettir; uygulamayı HTML ile yazma. Teslim zip HTML site olmasın.",
 		"Barındırma yok. Teslim dosya. Maestro YAML yaz; emülatör yoksa test çalıştırma.",
 		"İçerde platform GraphQL’ine dokunma.",
@@ -440,7 +441,7 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 		"İçerde sohbeti. OpenCode TUI açma. Yalnızca bu dizin.",
 		"Kullanıcı: " + safe,
 		rule,
-		"Gerekirse frontend/, backend/, maestro/ güncelle. HTML site yazma.",
+		"Gerekirse frontend/, backend/, maestro/ güncelle. Clean Architecture katmanlarını bozma. HTML site yazma.",
 	}, "\n")
 	res, err := s.OpenCode.Run(ctx, opencode.Request{
 		Dir:      project.RootPath,
