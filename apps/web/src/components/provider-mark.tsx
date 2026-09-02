@@ -1,4 +1,5 @@
 import type { ConnectionKind } from "@/lib/api";
+import { tileClass } from "@/lib/oauth";
 import { cn } from "@/lib/utils";
 
 type MarkProps = {
@@ -56,10 +57,9 @@ export function ProviderMark({ kind, className, title }: MarkProps) {
       return (
         <svg viewBox="0 0 24 24" className={cn("size-8", className)} role="img" aria-label={label}>
           <title>{label}</title>
-          <rect width="24" height="24" rx="6" fill="currentColor" opacity="0.18" />
           <path
             fill="currentColor"
-            d="M8 6.5h5.1c2.6 0 4.4 1.6 4.4 4 0 1.8-1 3.1-2.6 3.7L17.6 17.5h-2.7l-2.4-3.2H10.4v3.2H8V6.5Zm2.4 2v3.1h2.5c1.3 0 2.1-.7 2.1-1.6 0-.9-.8-1.5-2.1-1.5H10.4Z"
+            d="M7.2 4h6.1c3.2 0 5.5 2 5.5 5.1 0 2.4-1.3 4.1-3.4 4.8L19 20h-3.4l-3.2-5.2H10v5.2H7.2V4Zm2.8 2.4v5.1h2.9c1.7 0 2.7-.9 2.7-2.5s-1-2.6-2.7-2.6H10Z"
           />
         </svg>
       );
@@ -68,6 +68,26 @@ export function ProviderMark({ kind, className, title }: MarkProps) {
       return exhaustive;
     }
   }
+}
+
+export function ProviderTile({
+  kind,
+  className,
+}: {
+  kind: ConnectionKind;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "flex size-10 shrink-0 items-center justify-center rounded-[8px] border",
+        tileClass(kind),
+        className,
+      )}
+    >
+      <ProviderMark kind={kind} className="size-5" />
+    </span>
+  );
 }
 
 export function IcerdeMark({ className }: { className?: string }) {

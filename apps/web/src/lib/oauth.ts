@@ -105,6 +105,44 @@ export function oauthHeadline(kind: ConnectionKind): string {
   return `İçerde, ${connectionKindLabel(kind)} hesabına erişmek istiyor`;
 }
 
+export function providerPurpose(kind: ConnectionKind): string {
+  switch (kind) {
+    case "SUPABASE":
+      return "Müşteri backend’i bu projede durur";
+    case "CLOUDFLARE":
+      return "Workers, D1 ve R2 — senin hesabın";
+    case "GITHUB":
+      return "Gelişen projeyi kendi reposuna gönder";
+    case "VERCEL":
+      return "Frontend’i kendi hesabına deploy et";
+    case "RENDER":
+      return "Servisi kendi hesabına deploy et";
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
+}
+
+export function tileClass(kind: ConnectionKind): string {
+  switch (kind) {
+    case "GITHUB":
+      return "border-[#30363d] bg-[#0d1117] text-[#e6edf3]";
+    case "VERCEL":
+      return "border-[#333] bg-[#000] text-[#fafafa]";
+    case "SUPABASE":
+      return "border-[#2e2e2e] bg-[#171717] text-[#3ecf8e]";
+    case "CLOUDFLARE":
+      return "border-[#3a2a18] bg-[#1a1510] text-[#f38020]";
+    case "RENDER":
+      return "border-[#3b2a55] bg-[#160c27] text-[#46e3b6]";
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
+}
+
 export function isConnectionKind(value: string | null): value is ConnectionKind {
   switch (value) {
     case "SUPABASE":

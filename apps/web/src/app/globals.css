@@ -121,6 +121,27 @@
   animation: icerde-enter var(--motion-medium) var(--ease-out);
 }
 
+.icerde-stagger > * {
+  animation: icerde-enter var(--motion-medium) var(--ease-out);
+  animation-fill-mode: both;
+}
+
+.icerde-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.icerde-stagger > *:nth-child(2) {
+  animation-delay: 30ms;
+}
+.icerde-stagger > *:nth-child(3) {
+  animation-delay: 60ms;
+}
+.icerde-stagger > *:nth-child(4) {
+  animation-delay: 90ms;
+}
+.icerde-stagger > *:nth-child(5) {
+  animation-delay: 120ms;
+}
+
 .icerde-focus {
   transition:
     border-color var(--motion-instant) var(--ease-out),

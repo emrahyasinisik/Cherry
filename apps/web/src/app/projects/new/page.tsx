@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { AppShell } from "@/components/app-shell";
-import { ProviderMark } from "@/components/provider-mark";
+import { ProviderTile } from "@/components/provider-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -185,7 +185,7 @@ export default function NewProjectPage() {
                 >
                   <span className="flex items-center gap-2">
                     {item === "LOCAL" ? null : (
-                      <ProviderMark kind={item} className="size-4 shrink-0" />
+                      <ProviderTile kind={item} className="size-7 [&_svg]:size-3.5" />
                     )}
                     {backendTargetLabel(item)}
                   </span>

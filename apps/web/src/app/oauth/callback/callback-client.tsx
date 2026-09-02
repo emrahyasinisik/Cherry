@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { IcerdeMark } from "@/components/provider-mark";
 import { getToken, graphql, type Connection } from "@/lib/api";
 
 export function CallbackClient() {
@@ -48,7 +49,7 @@ export function CallbackClient() {
         <p className="text-destructive" role="alert">
           {error}
         </p>
-        <button type="button" className="text-sm underline" onClick={() => router.replace("/connections")}>
+        <button type="button" className="text-[13px] text-primary" onClick={() => router.replace("/connections")}>
           Bağlantılar’a dön
         </button>
       </div>
@@ -56,6 +57,9 @@ export function CallbackClient() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center text-muted-foreground">OAuth 2.0 kodu değiş tokuş…</div>
+    <div className="flex min-h-full flex-col items-center justify-center gap-3">
+      <IcerdeMark className="size-8" />
+      <p className="text-muted-foreground">OAuth 2.0 kodu değiş tokuş…</p>
+    </div>
   );
 }

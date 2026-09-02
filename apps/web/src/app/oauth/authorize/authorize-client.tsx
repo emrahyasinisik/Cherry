@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,6 +12,7 @@ import {
   markClass,
   oauthHeadline,
   oauthPermissions,
+  tileClass,
 } from "@/lib/oauth";
 
 export function AuthorizeClient() {
@@ -51,7 +53,7 @@ export function AuthorizeClient() {
 
   if (!isConnectionKind(kindRaw) || !state) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-[#0d1117] px-6 text-center text-[#e6edf3]">
+      <div className="flex min-h-full items-center justify-center bg-background px-6 text-center text-muted-foreground">
         OAuth isteği eksik. Bağlantılar’dan yeniden dene.
       </div>
     );
@@ -59,13 +61,15 @@ export function AuthorizeClient() {
 
   if (loadError) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-[#0d1117] text-[#f85149]">{loadError}</div>
+      <div className="flex min-h-full items-center justify-center bg-background text-destructive">{loadError}</div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-[#0d1117] text-[#8b949e]">Yükleniyor…</div>
+      <div className="flex min-h-full items-center justify-center bg-background text-muted-foreground">
+        Yükleniyor…
+      </div>
     );
   }
 
@@ -84,81 +88,107 @@ export function AuthorizeClient() {
   }
 
   return (
-    <div className="flex min-h-full items-center justify-center px-4 py-10" style={{ background: theme.bg, color: theme.text }}>
-      <div className="w-full max-w-[480px]">
-        <p className="mb-6 text-center font-mono text-[11px] tracking-wide uppercase" style={{ color: theme.muted }}>
-          {theme.host} · OAuth 2.0 · Authorization Code
-        </p>
-        <div className="rounded-xl border p-6 shadow-2xl" style={{ background: theme.card, borderColor: theme.border }}>
-          <div className="mb-6 flex items-center justify-center gap-4">
-            <IcerdeMark className="size-10" />
-            <span className="text-2xl" style={{ color: theme.muted }} aria-hidden>
-              →
-            </span>
-            <ProviderMark kind={kind} className={`size-10 ${markClass(kind)}`} />
-          </div>
-          <h1 className="text-center text-lg font-semibold leading-snug">{oauthHeadline(kind)}</h1>
-          <p className="mt-2 text-center text-sm" style={{ color: theme.muted }}>
-            {user.email} olarak İçerde’den geliyorsun. Onay, {name} hesabındaki izinleri İçerde’ye verir. İçerde
-            uygulamanı barındırmaz.
-          </p>
+    <div className="flex min-h-full flex-col" style={{ background: theme.bg, color: theme.text }}>
+      <header
+        className="flex h-12 shrink-0 items-center justify-between border-b px-4"
+        style={{ borderColor: theme.border }}
+      >
+        <span className="flex items-center gap-2 text-[13px]">
+          <ProviderMark kind={kind} className={`size-4 ${markClass(kind)}`} />
+          {theme.host}
+        </span>
+        <span className="text-[12px]" style={{ color: theme.muted }}>
+          OAuth 2.0
+        </span>
+      </header>
 
-          <label className="mt-5 block text-[12px] font-medium" htmlFor="oauth-account">
-            {name} hesabı
-          </label>
-          <input
-            id="oauth-account"
-            value={account}
-            autoComplete="off"
-            onChange={(event) => setAccount(event.target.value)}
-            className="mt-1 h-10 w-full rounded-md border bg-transparent px-3 text-sm outline-none"
-            style={{ borderColor: theme.border, color: theme.text }}
-          />
-          {error ? (
-            <p className="mt-2 text-sm text-[#f85149]" role="alert">
-              {error}
+      <div className="flex flex-1 items-center justify-center px-4 py-10">
+        <div className="icerde-enter w-full max-w-[440px]">
+          <div
+            className="rounded-[10px] border p-6"
+            style={{ background: theme.card, borderColor: theme.border }}
+          >
+            <div className="mb-5 flex items-center justify-center gap-3">
+              <span
+                className="flex size-12 items-center justify-center rounded-[8px] border"
+                style={{ borderColor: theme.border, background: theme.bg }}
+              >
+                <IcerdeMark className="size-7" />
+              </span>
+              <span className="h-px w-8" style={{ background: theme.border }} aria-hidden />
+              <span
+                className={`flex size-12 items-center justify-center rounded-[8px] border ${tileClass(kind)}`}
+              >
+                <ProviderMark kind={kind} className="size-6" />
+              </span>
+            </div>
+
+            <h1 className="text-center text-base leading-6 font-medium">{oauthHeadline(kind)}</h1>
+            <p className="mt-2 text-center text-[13px] leading-5" style={{ color: theme.muted }}>
+              {user.email} olarak devam ediyorsun. Onay, {name} izinlerini İçerde’ye verir. İçerde uygulamanı
+              barındırmaz.
             </p>
-          ) : null}
 
-          <p className="mt-5 text-[12px] font-medium">Bu uygulama şunları yapabilecek</p>
-          <ul className="mt-2 flex flex-col gap-2 text-sm" style={{ color: theme.muted }}>
-            {oauthPermissions(kind).map((item) => (
-              <li key={item} className="flex gap-2">
-                <span aria-hidden>✓</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+            <label className="mt-5 block text-[12px] font-medium" htmlFor="oauth-account">
+              {name} hesabı
+            </label>
+            <input
+              id="oauth-account"
+              value={account}
+              autoComplete="off"
+              onChange={(event) => setAccount(event.target.value)}
+              className="mt-1 h-9 w-full rounded-[8px] border bg-transparent px-3 text-[13px] outline-none"
+              style={{ borderColor: theme.border, color: theme.text }}
+            />
+            {error ? (
+              <p className="mt-2 text-[13px] text-[#c45c4a]" role="alert">
+                {error}
+              </p>
+            ) : null}
 
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row-reverse">
-            <button
-              type="button"
-              className="h-10 flex-1 rounded-md text-sm font-semibold"
-              style={{ background: theme.authorizeBg, color: theme.authorizeFg }}
-              onClick={() => {
-                if (account.trim().length < 2) {
-                  setError("Hesap adı gerekli.");
-                  return;
-                }
-                go("allow");
-              }}
+            <p className="mt-5 text-[12px] font-medium">Bu uygulama şunları yapabilecek</p>
+            <ul
+              className="mt-2 divide-y rounded-[8px] border"
+              style={{ borderColor: theme.border, color: theme.muted }}
             >
-              İçerde’yi yetkilendir
-            </button>
-            <button
-              type="button"
-              className="h-10 flex-1 rounded-md border text-sm"
-              style={{ borderColor: theme.border, color: theme.text, background: "transparent" }}
-              onClick={() => go("deny")}
-            >
-              İptal
-            </button>
+              {oauthPermissions(kind).map((item) => (
+                <li key={item} className="flex items-start gap-2 px-3 py-2 text-[13px] leading-5">
+                  <Check className="mt-0.5 size-4 shrink-0" strokeWidth={1.5} aria-hidden />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row">
+              <button
+                type="button"
+                className="h-9 flex-1 rounded-[8px] border text-[13px]"
+                style={{ borderColor: theme.border, color: theme.text, background: "transparent" }}
+                onClick={() => go("deny")}
+              >
+                İptal
+              </button>
+              <button
+                type="button"
+                className="h-9 flex-1 rounded-[8px] text-[13px] font-medium"
+                style={{ background: theme.authorizeBg, color: theme.authorizeFg }}
+                onClick={() => {
+                  if (account.trim().length < 2) {
+                    setError("Hesap adı gerekli.");
+                    return;
+                  }
+                  go("allow");
+                }}
+              >
+                İçerde’yi yetkilendir
+              </button>
+            </div>
           </div>
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[11px]" style={{ color: theme.muted }}>
+            <Lock className="size-3" strokeWidth={1.5} aria-hidden />
+            İzin vermezsen bağlantı kurulmaz. Client id varsa gerçek {theme.host} açılır.
+          </p>
         </div>
-        <p className="mt-4 text-center text-[11px]" style={{ color: theme.muted }}>
-          İzin vermezsen bağlantı kurulmaz. Client id yoksa bu ekran yerel OAuth izin ekranıdır; GitHub/Vercel client
-          id tanımlandıysa gerçek siteye gidilir.
-        </p>
       </div>
     </div>
   );

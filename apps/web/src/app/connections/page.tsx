@@ -2,12 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { Cable } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
-import { ProviderMark } from "@/components/provider-mark";
+import { ProviderTile } from "@/components/provider-mark";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,20 +22,22 @@ import {
   type User,
 } from "@/lib/api";
 import { getLastProjectId } from "@/lib/last-project";
-import { markClass } from "@/lib/oauth";
+import { isConnectionKind, providerPurpose } from "@/lib/oauth";
+import { cn } from "@/lib/utils";
 
 const CONN_FIELDS = `kind status account tokenHint note authMethod scopes`;
 
-function oauthBanner(status: string | null, kind: string | null): string | null {
+function oauthBanner(status: string | null, kind: string | null): { tone: "ok" | "warn"; text: string } | null {
+  const name = isConnectionKind(kind) ? connectionKindLabel(kind) : null;
   switch (status) {
     case "connected":
-      return kind ? `${kind} OAuth 2.0 ile bağlandı.` : "OAuth 2.0 ile bağlandı.";
+      return { tone: "ok", text: name ? `${name} bağlandı.` : "Hesap bağlandı." };
     case "denied":
-      return "İzin verilmedi. Hesap bağlanmadı.";
+      return { tone: "warn", text: "İzin verilmedi. Hesap bağlanmadı." };
     case "expired":
-      return "OAuth isteğinin süresi doldu. Yeniden bağla.";
+      return { tone: "warn", text: "OAuth isteğinin süresi doldu. Yeniden bağla." };
     case "error":
-      return "OAuth tamamlanamadı.";
+      return { tone: "warn", text: "OAuth tamamlanamadı." };
     default:
       return null;
   }
@@ -50,7 +50,9 @@ function ConnectionsBody() {
   const [list, setList] = useState<Connection[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(oauthBanner(params.get("oauth"), params.get("kind")));
+  const [info, setInfo] = useState<{ tone: "ok" | "warn"; text: string } | null>(
+    oauthBanner(params.get("oauth"), params.get("kind")),
+  );
   const [busy, setBusy] = useState<ConnectionKind | "push" | null>(null);
   const [drafts, setDrafts] = useState<Record<string, { account: string; token: string }>>({});
   const [repo, setRepo] = useState("");
@@ -135,7 +137,7 @@ function ConnectionsBody() {
       );
       setDrafts((prev) => ({ ...prev, [kind]: { account: "", token: "" } }));
       await load();
-      setInfo(`${connectionKindLabel(kind)} token ile bağlandı. Token ekranda durmaz.`);
+      setInfo({ tone: "ok", text: `${connectionKindLabel(kind)} token ile bağlandı.` });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Bağlanamadı.");
     } finally {
@@ -178,7 +180,7 @@ function ConnectionsBody() {
         { projectId, repo: repo.trim() },
       );
       if (data.pushProjectGithub.ok) {
-        setInfo(data.pushProjectGithub.note);
+        setInfo({ tone: "ok", text: data.pushProjectGithub.note });
       } else {
         setError(data.pushProjectGithub.note);
       }
@@ -203,69 +205,69 @@ function ConnectionsBody() {
   }
 
   const github = list.find((item) => item.kind === "GITHUB");
-  const noneConnected = list.every((item) => item.status !== "CONNECTED");
+  const connectedCount = list.filter((item) => item.status === "CONNECTED").length;
 
   return (
     <AppShell user={user} title="Bağlantılar">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 p-8">
+      <div className="icerde-enter mx-auto flex max-w-[720px] flex-col gap-8 p-8">
         <div>
-          <h1 className="flex items-center gap-2 text-base font-medium">
-            <Cable className="size-4" />
-            Bağlantılar
-          </h1>
+          <h1 className="text-base font-medium">Bağlantılar</h1>
           <p className="text-muted-foreground">
-            Bu <strong className="font-medium text-foreground">OAuth 2.0</strong> (izin / consent). Bağla deyince
-            sağlayıcının onay ekranına gidersin: “İçerde hesabına erişmek istiyor” — yetkilendir veya iptal. İçerde
-            barındırmaz. Token sohbete ve zip’e gitmez.
+            Kendi hesapların. Bağla deyince OAuth 2.0 izin ekranı açılır — İçerde barındırmaz.
           </p>
         </div>
+
         {error ? (
-          <p className="text-destructive" role="alert">
+          <p className="rounded-[8px] border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive" role="alert">
             {error}
           </p>
         ) : null}
-        {info ? <p className="text-muted-foreground">{info}</p> : null}
-        {noneConnected ? (
-          <p className="text-muted-foreground">Henüz bağlı hesap yok. Logoya basıp OAuth ile bağla.</p>
+        {info ? (
+          <p
+            className={cn(
+              "rounded-[8px] border px-3 py-2",
+              info.tone === "ok"
+                ? "border-success/40 bg-success/10 text-success"
+                : "border-border text-muted-foreground",
+            )}
+          >
+            {info.text}
+          </p>
         ) : null}
 
-        <div className="grid gap-3">
-          {list.map((item) => {
-            const form = draft(item.kind);
-            const connected = item.status === "CONNECTED";
-            const name = connectionKindLabel(item.kind);
-            return (
-              <Card key={item.kind} className="py-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-3">
-                      <span className={`flex size-11 items-center justify-center rounded-[10px] bg-muted ${markClass(item.kind)}`}>
-                        <ProviderMark kind={item.kind} className="size-7" />
-                      </span>
-                      <span>
+        <section className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-medium">Hesaplar</h2>
+            <p className="font-mono text-[11px] text-muted-foreground">
+              {connectedCount === 0 ? "Hiç bağlı yok" : `${connectedCount} bağlı`}
+            </p>
+          </div>
+          <ul className="icerde-stagger divide-y divide-border overflow-hidden rounded-[10px] border border-border">
+            {list.map((item) => {
+              const form = draft(item.kind);
+              const connected = item.status === "CONNECTED";
+              const name = connectionKindLabel(item.kind);
+              return (
+                <li key={item.kind} className="bg-card px-4 py-3 transition-colors hover:bg-muted/40">
+                  <div className="flex items-center gap-3">
+                    <ProviderTile kind={item.kind} />
+                    <div className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-2">
                         {name}
-                        <span className="mt-0.5 block font-mono text-[11px] font-normal text-muted-foreground">
-                          {connectionStatusLabel(item.status)}
-                          {item.authMethod !== "NONE" ? ` · ${connectionAuthLabel(item.authMethod)}` : " · OAuth 2.0"}
-                        </span>
-                      </span>
-                    </span>
-                  </CardTitle>
-                  <CardDescription>{item.note}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  {item.scopes.length > 0 ? (
-                    <p className="font-mono text-[11px] text-muted-foreground">{item.scopes.join(" · ")}</p>
-                  ) : null}
-                  {connected ? (
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-mono text-[12px]">
-                        {item.account}
-                        {item.tokenHint ? ` · ${item.tokenHint}` : ""}
+                        <StatusDot connected={connected} label={connectionStatusLabel(item.status)} />
                       </p>
+                      <p className="text-[11px] leading-4 text-muted-foreground">
+                        {connected
+                          ? `${item.account}${item.authMethod !== "NONE" ? ` · ${connectionAuthLabel(item.authMethod)}` : ""}`
+                          : providerPurpose(item.kind)}
+                      </p>
+                    </div>
+                    {connected ? (
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
                         disabled={busy === item.kind}
                         onClick={() => {
                           void handleDisconnect(item.kind);
@@ -273,35 +275,40 @@ function ConnectionsBody() {
                       >
                         {busy === item.kind ? "Kopuyor…" : "Kopar"}
                       </Button>
-                    </div>
-                  ) : (
-                    <>
+                    ) : (
                       <Button
                         type="button"
+                        size="sm"
                         disabled={busy === item.kind}
                         onClick={() => {
                           void handleOAuth(item.kind);
                         }}
                       >
-                        {busy === item.kind ? "Yönlendiriliyor…" : `${name} ile bağlan`}
+                        {busy === item.kind ? "…" : "Bağlan"}
                       </Button>
-                      <details className="rounded-md border border-border px-3 py-2">
-                        <summary className="cursor-pointer text-[12px] text-muted-foreground">
-                          Gelişmiş: token yapıştır
-                        </summary>
-                        <form
-                          className="mt-3 flex flex-col gap-2"
-                          onSubmit={(event) => {
-                            event.preventDefault();
-                            void handleConnect(item.kind);
-                          }}
-                        >
-                          <Label htmlFor={`${item.kind}-account`}>Hesap</Label>
+                    )}
+                  </div>
+                  {connected ? null : (
+                    <details className="mt-2 pl-[52px]">
+                      <summary className="cursor-pointer text-[11px] text-muted-foreground">
+                        Token yapıştır
+                      </summary>
+                      <form
+                        className="mt-2 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          void handleConnect(item.kind);
+                        }}
+                      >
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor={`${item.kind}-account`} className="text-[11px]">
+                            Hesap
+                          </Label>
                           <Input
                             id={`${item.kind}-account`}
                             value={form.account}
                             autoComplete="off"
-                            placeholder="kullanıcı veya proje"
+                            className="h-8"
                             onChange={(event) => {
                               const value = event.target.value;
                               setDrafts((prev) => ({
@@ -310,12 +317,17 @@ function ConnectionsBody() {
                               }));
                             }}
                           />
-                          <Label htmlFor={`${item.kind}-token`}>{connectionTokenHint(item.kind)}</Label>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor={`${item.kind}-token`} className="text-[11px]">
+                            {connectionTokenHint(item.kind)}
+                          </Label>
                           <Input
                             id={`${item.kind}-token`}
                             type="password"
                             value={form.token}
                             autoComplete="off"
+                            className="h-8"
                             onChange={(event) => {
                               const value = event.target.value;
                               setDrafts((prev) => ({
@@ -324,50 +336,59 @@ function ConnectionsBody() {
                               }));
                             }}
                           />
-                          <Button type="submit" variant="outline" disabled={busy === item.kind}>
-                            {busy === item.kind ? "Bağlanıyor…" : "Token ile bağla"}
-                          </Button>
-                        </form>
-                      </details>
-                    </>
+                        </div>
+                        <Button type="submit" variant="outline" size="sm" disabled={busy === item.kind}>
+                          Yapıştır
+                        </Button>
+                      </form>
+                    </details>
                   )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
-        <section className="flex flex-col gap-3 rounded-[10px] border border-border p-4">
-          <h2 className="text-sm font-medium">Projeyi GitHub’a gönder</h2>
+        <section className="flex flex-col gap-3">
+          <h2 className="font-medium">GitHub’a gönder</h2>
           <p className="text-muted-foreground">
-            GitHub OAuth veya PAT. Sahte başarı yok; yerel izin ekranı gerçek push yapmaz.
+            Sahte başarı yok. Yerel izin ekranı gerçek push yapmaz.
           </p>
           {github?.status !== "CONNECTED" ? (
-            <p className="text-muted-foreground">Önce GitHub bağla.</p>
+            <p className="rounded-[10px] border border-dashed border-border px-4 py-6 text-muted-foreground">
+              Önce GitHub’ı bağla.
+            </p>
           ) : projects.length === 0 ? (
-            <p className="text-muted-foreground">Gönderilecek proje yok.</p>
+            <p className="rounded-[10px] border border-dashed border-border px-4 py-6 text-muted-foreground">
+              Gönderilecek proje yok.
+            </p>
           ) : (
-            <>
-              <Label htmlFor="push-project">Proje</Label>
-              <select
-                id="push-project"
-                className="h-9 rounded-md border border-border bg-background px-2 text-sm"
-                value={projectId}
-                onChange={(event) => setProjectId(event.target.value)}
-              >
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-              <Label htmlFor="push-repo">Repo (owner/ad)</Label>
-              <Input
-                id="push-repo"
-                value={repo}
-                placeholder="emrah/kahve"
-                onChange={(event) => setRepo(event.target.value)}
-              />
+            <div className="grid gap-3 rounded-[10px] border border-border bg-card p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="push-project">Proje</Label>
+                <select
+                  id="push-project"
+                  className="h-8 rounded-md border border-border bg-background px-2 text-[13px]"
+                  value={projectId}
+                  onChange={(event) => setProjectId(event.target.value)}
+                >
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="push-repo">Repo (owner/ad)</Label>
+                <Input
+                  id="push-repo"
+                  value={repo}
+                  className="h-8"
+                  placeholder="emrah/kahve"
+                  onChange={(event) => setRepo(event.target.value)}
+                />
+              </div>
               <Button
                 type="button"
                 disabled={busy === "push"}
@@ -375,13 +396,22 @@ function ConnectionsBody() {
                   void handlePush();
                 }}
               >
-                {busy === "push" ? "Gönderiliyor…" : "GitHub’a gönder"}
+                {busy === "push" ? "Gönderiliyor…" : "Gönder"}
               </Button>
-            </>
+            </div>
           )}
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function StatusDot({ connected, label }: { connected: boolean; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-normal text-muted-foreground">
+      <span className={cn("size-1.5 rounded-full", connected ? "bg-success" : "bg-muted-foreground/40")} />
+      {label}
+    </span>
   );
 }
 
