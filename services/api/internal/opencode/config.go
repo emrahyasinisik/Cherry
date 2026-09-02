@@ -1,9 +1,11 @@
 package opencode
 
 import (
+	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
+
+	"github.com/icerde/api/internal/sidecar"
 )
 
 const configBare = `{
@@ -11,21 +13,19 @@ const configBare = `{
 }
 `
 
-const configMaestro = `{
+func WriteConfig(dir string) error {
+	body := configBare
+	if hit, err := sidecar.Look("maestro"); err == nil {
+		body = fmt.Sprintf(`{
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "maestro": {
       "type": "local",
-      "command": ["maestro", "mcp"]
+      "command": [%q, "mcp"]
     }
   }
 }
-`
-
-func WriteConfig(dir string) error {
-	body := configBare
-	if _, err := exec.LookPath("maestro"); err == nil {
-		body = configMaestro
+`, hit.Path)
 	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err

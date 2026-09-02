@@ -36,16 +36,17 @@ The prompt is stdin; already redacted. Working directory is the customer folder 
 | `ICERDE_OPENCODE_REQUIRE=1` | CLI yoksa iş başarısız |
 | `ICERDE_LLM_API_KEY` | varsa `OPENAI_API_KEY` olarak OpenCode’a geçer |
 
-CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. Log: `llm/opencode.log`.
-
-If the CLI is missing the scaffold stays. **No fake OpenCode write.** Log: `llm/opencode.log`.
-
-Proje köküne `opencode.json` yazılır. Maestro sidecar varsa OpenCode ona bağlanır; yoksa yine yazım devam eder, test SKIPPED.
-
 **Kurulum / Install**
 
 Müşteri yalnızca **İçerde** kurar. OpenCode ve Maestro `vendor/bin` (Electron `resources/bin`). PATH yalnızca geliştirici yedeği.
 
-The customer installs **Icerde only**. OpenCode is not a second app they set up.
+```bash
+./scripts/vendor-sidecars.sh
+```
+
+CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. CLI var, model anahtarı yoksa yazım düşer; yine sahte dosya yok. `ICERDE_LLM_API_KEY` → OpenCode `OPENAI_API_KEY`.
+
+If the CLI is missing the scaffold stays. **No fake OpenCode write.** If the CLI is present but there is no model key, the run fails honestly.
+
 
 Geliştirici makinede şimdilik PATH’te `opencode` olabilir. Bu geçici; ürün deneyimi “OpenCode indir” değildir.

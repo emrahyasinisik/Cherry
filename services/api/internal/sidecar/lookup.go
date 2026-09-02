@@ -63,6 +63,7 @@ func bundledDirs() []string {
 	var out []string
 	if dir := strings.TrimSpace(os.Getenv("ICERDE_SIDECAR_DIR")); dir != "" {
 		out = append(out, dir)
+		return unique(out)
 	}
 	if exe, err := os.Executable(); err == nil {
 		base := filepath.Dir(exe)
