@@ -16,6 +16,9 @@ type Memory struct {
 	mail       map[string]Mail
 	projects   map[string]Project
 	logs       map[string][]JobLog
+	versions   map[string]LlmVersion
+	audits     []AuditEvent
+	llmState   LlmState
 }
 
 func NewMemory() *Memory {
@@ -28,6 +31,8 @@ func NewMemory() *Memory {
 		mail:       make(map[string]Mail),
 		projects:   make(map[string]Project),
 		logs:       make(map[string][]JobLog),
+		versions:   make(map[string]LlmVersion),
+		audits:     make([]AuditEvent, 0),
 	}
 }
 
@@ -349,4 +354,119 @@ func (m *Memory) ListLogs(_ context.Context, projectID string) ([]JobLog, error)
 	out := make([]JobLog, len(src))
 	copy(out, src)
 	return out, nil
+}
+
+func (m *Memory) PutLlmVersion(_ context.Context, version LlmVersion) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if version.ID == "" {
+		version.ID = NewID()
+	}
+	m.versions[version.ID] = version
+	return nil
+}
+
+func (m *Memory) ListLlmVersions(_ context.Context, slot LlmSlot) ([]LlmVersion, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]LlmVersion, 0)
+	for _, version := range m.versions {
+		if version.Slot == slot {
+			out = append(out, version)
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) GetLlmVersion(_ context.Context, id string) (*LlmVersion, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	version, ok := m.versions[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	copy := version
+	return &copy, nil
+}
+
+func (m *Memory) GetLlmState(_ context.Context) (LlmState, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.llmState, nil
+}
+
+func (m *Memory) SetLlmState(_ context.Context, state LlmState) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.llmState = state
+	return nil
+}
+
+func (m *Memory) AddAudit(_ context.Context, event AuditEvent) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if event.ID == "" {
+		event.ID = NewID()
+	}
+	m.audits = append(m.audits, event)
+	return nil
+}
+
+func (m *Memory) ListAudit(_ context.Context, userID string) ([]AuditEvent, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]AuditEvent, 0)
+	for i := len(m.audits) - 1; i >= 0; i-- {
+		if m.audits[i].UserID == userID {
+			out = append(out, m.audits[i])
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) DeleteUserData(_ context.Context, userID string, wipeProjects bool) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	user, ok := m.usersByID[userID]
+	if !ok {
+		return ErrNotFound
+	}
+	delete(m.users, user.Email)
+	delete(m.usersByID, userID)
+	for id, session := range m.sessions {
+		if session.UserID == userID {
+			delete(m.sessions, id)
+		}
+	}
+	for id, device := range m.devices {
+		if device.UserID == userID {
+			delete(m.devices, id)
+		}
+	}
+	for id, mail := range m.mail {
+		if mail.UserID == userID {
+			delete(m.mail, id)
+		}
+	}
+	for id, challenge := range m.challenges {
+		if challenge.UserID == userID {
+			delete(m.challenges, id)
+		}
+	}
+	kept := make([]AuditEvent, 0)
+	for _, event := range m.audits {
+		if event.UserID != userID {
+			kept = append(kept, event)
+		}
+	}
+	m.audits = kept
+	if wipeProjects {
+		for id, project := range m.projects {
+			if project.UserID == userID {
+				delete(m.projects, id)
+				delete(m.logs, id)
+			}
+		}
+	}
+	return nil
 }

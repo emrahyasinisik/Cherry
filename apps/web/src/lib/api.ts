@@ -111,7 +111,57 @@ export type Health = {
   store: string;
   version: string;
   mail: string;
+  gdpr: boolean;
+  llm: string;
 };
+
+export type LlmStatus = {
+  slot: string;
+  versionName: string;
+  channel: string;
+  gdpr: boolean;
+};
+
+export type LlmVersion = {
+  id: string;
+  name: string;
+  note: string;
+};
+
+export type LlmSlotCard = {
+  slot: string;
+  wired: boolean;
+  role: string;
+  activeVersionId?: string | null;
+  versions: LlmVersion[];
+};
+
+export type LlmCompletion = {
+  at: string;
+  purpose: string;
+  versionName: string;
+  channel: string;
+  inputRedactions: number;
+  outputRedactions: number;
+  promptPreview: string;
+  outputPreview: string;
+};
+
+export type LlmAdmin = {
+  gdpr: boolean;
+  activeSlot: string;
+  mcpRoot: string;
+  slotA: LlmSlotCard;
+  slotB: LlmSlotCard;
+  completions: LlmCompletion[];
+};
+
+export const LLM_ADMIN_FIELDS = `
+  gdpr activeSlot mcpRoot
+  slotA { slot wired role activeVersionId versions { id name note } }
+  slotB { slot wired role activeVersionId versions { id name note } }
+  completions { at purpose versionName channel inputRedactions outputRedactions promptPreview outputPreview }
+`;
 
 type GraphQLResponse<T> = {
   data?: T;

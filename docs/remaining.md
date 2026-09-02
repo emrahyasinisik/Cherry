@@ -1,7 +1,7 @@
 # Duraklama notu / Pause note
 
-**Durum:** Dilim 1–3 bitti. Sıradaki iş **dilim 4 (LLM A + GDPR)**.  
-**Status:** Slices 1–3 done. Next is **slice 4 (LLM A + GDPR)**.
+**Durum:** Dilim 1–4 bitti. Sıradaki iş **dilim 5 (OpenCode)**.  
+**Status:** Slices 1–4 done. Next is **slice 5 (OpenCode)**.
 
 Repo (private): https://cursor.com/codebase/emrahisik/agent-forge
 
@@ -9,19 +9,14 @@ Repo (private): https://cursor.com/codebase/emrahisik/agent-forge
 
 | Dilim | Ne |
 | --- | --- |
-| 1 İskele | Electron + Next.js + Go GraphQL |
-| 2 Auth + posta | Şifre, 6 hane, TOTP, SMTP/Resend |
-| 3 Proje diski | Brif → arka plan stub yazıcı → `frontend/` `backend/` `maestro/` → zip. Test aşamasında veya talepte Maestro ekranı (tasarım + YAML, cihaz yoksa SKIPPED) |
+| 1–3 | İskele, auth, proje diski + Maestro viewer |
+| 4 LLM A + GDPR | redact → LLM A → tarama → denetim. Versiyon pointer’ı sonraki cevapları değiştirir. MCP kök = proje klasörü. B ve Colab yok. |
 
-## Ürün akışı (dilim 3) / Product flow
-
-Kişi uygulamayı tarif eder → ajan arka planda yazar → **test aşamasında Maestro kendiliğinden açılır** veya yan menüden istenir. Ekran maketleri + flow YAML görünür. Emülatör yok = SKIPPED, sahte geçiş yok. Gerçek `maestro mcp` dilim 6.
+LLM anahtarı yoksa `mock` kanal; `ICERDE_LLM_API_KEY` varsa HTTP. Her iki yol da GDPR’den geçer.
 
 ## Kalan / Remaining
 
-4 LLM A + GDPR → 5 OpenCode (stub yerine gerçek yazıcı) → 6 yerel aktif + Maestro MCP → 7 LLM B switch → 8 Colab.
-
-Açık uç: Mongo bellek, gerçek mail `.env`, Electron installer yok.
+5 OpenCode → 6 yerel aktif + Maestro MCP → 7 LLM B switch → 8 Colab.
 
 ```bash
 npm run dev:api

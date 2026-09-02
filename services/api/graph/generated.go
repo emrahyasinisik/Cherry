@@ -60,7 +60,13 @@ type ComplexityRoot struct {
 		Trusted    func(childComplexity int) int
 	}
 
+	ExportBundle struct {
+		JSON func(childComplexity int) int
+	}
+
 	Health struct {
+		Gdpr    func(childComplexity int) int
+		Llm     func(childComplexity int) int
 		Mail    func(childComplexity int) int
 		Ok      func(childComplexity int) int
 		Store   func(childComplexity int) int
@@ -70,6 +76,47 @@ type ComplexityRoot struct {
 	JobLog struct {
 		At      func(childComplexity int) int
 		Message func(childComplexity int) int
+	}
+
+	LlmAdmin struct {
+		ActiveSlot  func(childComplexity int) int
+		Completions func(childComplexity int) int
+		Gdpr        func(childComplexity int) int
+		McpRoot     func(childComplexity int) int
+		SlotA       func(childComplexity int) int
+		SlotB       func(childComplexity int) int
+	}
+
+	LlmCompletion struct {
+		At               func(childComplexity int) int
+		Channel          func(childComplexity int) int
+		InputRedactions  func(childComplexity int) int
+		OutputPreview    func(childComplexity int) int
+		OutputRedactions func(childComplexity int) int
+		PromptPreview    func(childComplexity int) int
+		Purpose          func(childComplexity int) int
+		VersionName      func(childComplexity int) int
+	}
+
+	LlmSlotCard struct {
+		ActiveVersionID func(childComplexity int) int
+		Role            func(childComplexity int) int
+		Slot            func(childComplexity int) int
+		Versions        func(childComplexity int) int
+		Wired           func(childComplexity int) int
+	}
+
+	LlmStatus struct {
+		Channel     func(childComplexity int) int
+		Gdpr        func(childComplexity int) int
+		Slot        func(childComplexity int) int
+		VersionName func(childComplexity int) int
+	}
+
+	LlmVersion struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+		Note func(childComplexity int) int
 	}
 
 	LoginResult struct {
@@ -105,18 +152,21 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ConfirmTotp   func(childComplexity int, code string) int
-		CreateProject func(childComplexity int, name string, brief string, stack ProjectStack) int
-		DisableTotp   func(childComplexity int, code string) int
-		EnableTotp    func(childComplexity int) int
-		Login         func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		Logout        func(childComplexity int) int
-		Register      func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		RevokeDevice  func(childComplexity int, id string) int
-		RevokeSession func(childComplexity int, id string) int
-		VerifyCode    func(childComplexity int, challengeID string, code string, trustDevice bool) int
-		VerifyLink    func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
-		VerifyTotp    func(childComplexity int, challengeID string, code string) int
+		ConfirmTotp      func(childComplexity int, code string) int
+		CreateProject    func(childComplexity int, name string, brief string, stack ProjectStack) int
+		DeleteMe         func(childComplexity int, wipeProjects bool) int
+		DisableTotp      func(childComplexity int, code string) int
+		EnableTotp       func(childComplexity int) int
+		Login            func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		Logout           func(childComplexity int) int
+		Register         func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		RevokeDevice     func(childComplexity int, id string) int
+		RevokeSession    func(childComplexity int, id string) int
+		SetActiveVersion func(childComplexity int, id string) int
+		SetMcpRoot       func(childComplexity int, path string) int
+		VerifyCode       func(childComplexity int, challengeID string, code string, trustDevice bool) int
+		VerifyLink       func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
+		VerifyTotp       func(childComplexity int, challengeID string, code string) int
 	}
 
 	Project struct {
@@ -140,9 +190,13 @@ type ComplexityRoot struct {
 	Query struct {
 		ChallengeMailbox func(childComplexity int, challengeID string) int
 		Devices          func(childComplexity int) int
+		ExportMe         func(childComplexity int) int
 		Health           func(childComplexity int) int
+		LlmAdmin         func(childComplexity int) int
+		LlmStatus        func(childComplexity int) int
 		MaestroStudio    func(childComplexity int, projectID string) int
 		Mailbox          func(childComplexity int) int
+		McpReadFile      func(childComplexity int, relativePath string) int
 		Me               func(childComplexity int) int
 		Project          func(childComplexity int, id string) int
 		Projects         func(childComplexity int) int
@@ -182,6 +236,9 @@ type MutationResolver interface {
 	RevokeDevice(ctx context.Context, id string) (bool, error)
 	Logout(ctx context.Context) (bool, error)
 	CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error)
+	SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error)
+	SetMcpRoot(ctx context.Context, path string) (*LlmAdmin, error)
+	DeleteMe(ctx context.Context, wipeProjects bool) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*Health, error)
@@ -193,6 +250,10 @@ type QueryResolver interface {
 	Sessions(ctx context.Context) ([]*Session, error)
 	Mailbox(ctx context.Context) ([]*MailMessage, error)
 	ChallengeMailbox(ctx context.Context, challengeID string) (*MailMessage, error)
+	LlmAdmin(ctx context.Context) (*LlmAdmin, error)
+	LlmStatus(ctx context.Context) (*LlmStatus, error)
+	McpReadFile(ctx context.Context, relativePath string) (string, error)
+	ExportMe(ctx context.Context) (*ExportBundle, error)
 }
 
 type executableSchema struct {
@@ -264,6 +325,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Device.Trusted(childComplexity), true
 
+	case "ExportBundle.json":
+		if e.complexity.ExportBundle.JSON == nil {
+			break
+		}
+
+		return e.complexity.ExportBundle.JSON(childComplexity), true
+
+	case "Health.gdpr":
+		if e.complexity.Health.Gdpr == nil {
+			break
+		}
+
+		return e.complexity.Health.Gdpr(childComplexity), true
+	case "Health.llm":
+		if e.complexity.Health.Llm == nil {
+			break
+		}
+
+		return e.complexity.Health.Llm(childComplexity), true
 	case "Health.mail":
 		if e.complexity.Health.Mail == nil {
 			break
@@ -301,6 +381,167 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.JobLog.Message(childComplexity), true
+
+	case "LlmAdmin.activeSlot":
+		if e.complexity.LlmAdmin.ActiveSlot == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.ActiveSlot(childComplexity), true
+	case "LlmAdmin.completions":
+		if e.complexity.LlmAdmin.Completions == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.Completions(childComplexity), true
+	case "LlmAdmin.gdpr":
+		if e.complexity.LlmAdmin.Gdpr == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.Gdpr(childComplexity), true
+	case "LlmAdmin.mcpRoot":
+		if e.complexity.LlmAdmin.McpRoot == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.McpRoot(childComplexity), true
+	case "LlmAdmin.slotA":
+		if e.complexity.LlmAdmin.SlotA == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.SlotA(childComplexity), true
+	case "LlmAdmin.slotB":
+		if e.complexity.LlmAdmin.SlotB == nil {
+			break
+		}
+
+		return e.complexity.LlmAdmin.SlotB(childComplexity), true
+
+	case "LlmCompletion.at":
+		if e.complexity.LlmCompletion.At == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.At(childComplexity), true
+	case "LlmCompletion.channel":
+		if e.complexity.LlmCompletion.Channel == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.Channel(childComplexity), true
+	case "LlmCompletion.inputRedactions":
+		if e.complexity.LlmCompletion.InputRedactions == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.InputRedactions(childComplexity), true
+	case "LlmCompletion.outputPreview":
+		if e.complexity.LlmCompletion.OutputPreview == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.OutputPreview(childComplexity), true
+	case "LlmCompletion.outputRedactions":
+		if e.complexity.LlmCompletion.OutputRedactions == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.OutputRedactions(childComplexity), true
+	case "LlmCompletion.promptPreview":
+		if e.complexity.LlmCompletion.PromptPreview == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.PromptPreview(childComplexity), true
+	case "LlmCompletion.purpose":
+		if e.complexity.LlmCompletion.Purpose == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.Purpose(childComplexity), true
+	case "LlmCompletion.versionName":
+		if e.complexity.LlmCompletion.VersionName == nil {
+			break
+		}
+
+		return e.complexity.LlmCompletion.VersionName(childComplexity), true
+
+	case "LlmSlotCard.activeVersionId":
+		if e.complexity.LlmSlotCard.ActiveVersionID == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.ActiveVersionID(childComplexity), true
+	case "LlmSlotCard.role":
+		if e.complexity.LlmSlotCard.Role == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.Role(childComplexity), true
+	case "LlmSlotCard.slot":
+		if e.complexity.LlmSlotCard.Slot == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.Slot(childComplexity), true
+	case "LlmSlotCard.versions":
+		if e.complexity.LlmSlotCard.Versions == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.Versions(childComplexity), true
+	case "LlmSlotCard.wired":
+		if e.complexity.LlmSlotCard.Wired == nil {
+			break
+		}
+
+		return e.complexity.LlmSlotCard.Wired(childComplexity), true
+
+	case "LlmStatus.channel":
+		if e.complexity.LlmStatus.Channel == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.Channel(childComplexity), true
+	case "LlmStatus.gdpr":
+		if e.complexity.LlmStatus.Gdpr == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.Gdpr(childComplexity), true
+	case "LlmStatus.slot":
+		if e.complexity.LlmStatus.Slot == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.Slot(childComplexity), true
+	case "LlmStatus.versionName":
+		if e.complexity.LlmStatus.VersionName == nil {
+			break
+		}
+
+		return e.complexity.LlmStatus.VersionName(childComplexity), true
+
+	case "LlmVersion.id":
+		if e.complexity.LlmVersion.ID == nil {
+			break
+		}
+
+		return e.complexity.LlmVersion.ID(childComplexity), true
+	case "LlmVersion.name":
+		if e.complexity.LlmVersion.Name == nil {
+			break
+		}
+
+		return e.complexity.LlmVersion.Name(childComplexity), true
+	case "LlmVersion.note":
+		if e.complexity.LlmVersion.Note == nil {
+			break
+		}
+
+		return e.complexity.LlmVersion.Note(childComplexity), true
 
 	case "LoginResult.challengeId":
 		if e.complexity.LoginResult.ChallengeID == nil {
@@ -448,6 +689,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateProject(childComplexity, args["name"].(string), args["brief"].(string), args["stack"].(ProjectStack)), true
+	case "Mutation.deleteMe":
+		if e.complexity.Mutation.DeleteMe == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteMe_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteMe(childComplexity, args["wipeProjects"].(bool)), true
 	case "Mutation.disableTotp":
 		if e.complexity.Mutation.DisableTotp == nil {
 			break
@@ -515,6 +767,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.RevokeSession(childComplexity, args["id"].(string)), true
+	case "Mutation.setActiveVersion":
+		if e.complexity.Mutation.SetActiveVersion == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setActiveVersion_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetActiveVersion(childComplexity, args["id"].(string)), true
+	case "Mutation.setMcpRoot":
+		if e.complexity.Mutation.SetMcpRoot == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setMcpRoot_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetMcpRoot(childComplexity, args["path"].(string)), true
 	case "Mutation.verifyCode":
 		if e.complexity.Mutation.VerifyCode == nil {
 			break
@@ -640,12 +914,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Devices(childComplexity), true
+	case "Query.exportMe":
+		if e.complexity.Query.ExportMe == nil {
+			break
+		}
+
+		return e.complexity.Query.ExportMe(childComplexity), true
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
+	case "Query.llmAdmin":
+		if e.complexity.Query.LlmAdmin == nil {
+			break
+		}
+
+		return e.complexity.Query.LlmAdmin(childComplexity), true
+	case "Query.llmStatus":
+		if e.complexity.Query.LlmStatus == nil {
+			break
+		}
+
+		return e.complexity.Query.LlmStatus(childComplexity), true
 	case "Query.maestroStudio":
 		if e.complexity.Query.MaestroStudio == nil {
 			break
@@ -663,6 +955,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Mailbox(childComplexity), true
+	case "Query.mcpReadFile":
+		if e.complexity.Query.McpReadFile == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mcpReadFile_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.McpReadFile(childComplexity, args["relativePath"].(string)), true
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
 			break
@@ -911,6 +1214,17 @@ func (ec *executionContext) field_Mutation_createProject_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteMe_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "wipeProjects", ec.unmarshalNBoolean2bool)
+	if err != nil {
+		return nil, err
+	}
+	args["wipeProjects"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_disableTotp_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -993,6 +1307,28 @@ func (ec *executionContext) field_Mutation_revokeSession_args(ctx context.Contex
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setActiveVersion_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_setMcpRoot_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "path", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["path"] = arg0
 	return args, nil
 }
 
@@ -1084,6 +1420,17 @@ func (ec *executionContext) field_Query_maestroStudio_args(ctx context.Context, 
 		return nil, err
 	}
 	args["projectId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mcpReadFile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "relativePath", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["relativePath"] = arg0
 	return args, nil
 }
 
@@ -1382,6 +1729,35 @@ func (ec *executionContext) fieldContext_Device_lastSeenAt(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _ExportBundle_json(ctx context.Context, field graphql.CollectedField, obj *ExportBundle) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ExportBundle_json,
+		func(ctx context.Context) (any, error) {
+			return obj.JSON, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ExportBundle_json(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ExportBundle",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Health_ok(ctx context.Context, field graphql.CollectedField, obj *Health) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1498,6 +1874,64 @@ func (ec *executionContext) fieldContext_Health_mail(_ context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _Health_gdpr(ctx context.Context, field graphql.CollectedField, obj *Health) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Health_gdpr,
+		func(ctx context.Context) (any, error) {
+			return obj.Gdpr, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Health_gdpr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Health",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Health_llm(ctx context.Context, field graphql.CollectedField, obj *Health) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Health_llm,
+		func(ctx context.Context) (any, error) {
+			return obj.Llm, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Health_llm(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Health",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _JobLog_at(ctx context.Context, field graphql.CollectedField, obj *JobLog) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1546,6 +1980,810 @@ func (ec *executionContext) _JobLog_message(ctx context.Context, field graphql.C
 func (ec *executionContext) fieldContext_JobLog_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "JobLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_gdpr(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_gdpr,
+		func(ctx context.Context) (any, error) {
+			return obj.Gdpr, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_gdpr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_activeSlot(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_activeSlot,
+		func(ctx context.Context) (any, error) {
+			return obj.ActiveSlot, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_activeSlot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_mcpRoot(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_mcpRoot,
+		func(ctx context.Context) (any, error) {
+			return obj.McpRoot, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_mcpRoot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_slotA(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_slotA,
+		func(ctx context.Context) (any, error) {
+			return obj.SlotA, nil
+		},
+		nil,
+		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_slotA(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "slot":
+				return ec.fieldContext_LlmSlotCard_slot(ctx, field)
+			case "wired":
+				return ec.fieldContext_LlmSlotCard_wired(ctx, field)
+			case "role":
+				return ec.fieldContext_LlmSlotCard_role(ctx, field)
+			case "activeVersionId":
+				return ec.fieldContext_LlmSlotCard_activeVersionId(ctx, field)
+			case "versions":
+				return ec.fieldContext_LlmSlotCard_versions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmSlotCard", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_slotB(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_slotB,
+		func(ctx context.Context) (any, error) {
+			return obj.SlotB, nil
+		},
+		nil,
+		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_slotB(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "slot":
+				return ec.fieldContext_LlmSlotCard_slot(ctx, field)
+			case "wired":
+				return ec.fieldContext_LlmSlotCard_wired(ctx, field)
+			case "role":
+				return ec.fieldContext_LlmSlotCard_role(ctx, field)
+			case "activeVersionId":
+				return ec.fieldContext_LlmSlotCard_activeVersionId(ctx, field)
+			case "versions":
+				return ec.fieldContext_LlmSlotCard_versions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmSlotCard", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmAdmin_completions(ctx context.Context, field graphql.CollectedField, obj *LlmAdmin) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmAdmin_completions,
+		func(ctx context.Context) (any, error) {
+			return obj.Completions, nil
+		},
+		nil,
+		ec.marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmAdmin_completions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "at":
+				return ec.fieldContext_LlmCompletion_at(ctx, field)
+			case "purpose":
+				return ec.fieldContext_LlmCompletion_purpose(ctx, field)
+			case "versionName":
+				return ec.fieldContext_LlmCompletion_versionName(ctx, field)
+			case "channel":
+				return ec.fieldContext_LlmCompletion_channel(ctx, field)
+			case "inputRedactions":
+				return ec.fieldContext_LlmCompletion_inputRedactions(ctx, field)
+			case "outputRedactions":
+				return ec.fieldContext_LlmCompletion_outputRedactions(ctx, field)
+			case "promptPreview":
+				return ec.fieldContext_LlmCompletion_promptPreview(ctx, field)
+			case "outputPreview":
+				return ec.fieldContext_LlmCompletion_outputPreview(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmCompletion", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_at(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_at,
+		func(ctx context.Context) (any, error) {
+			return obj.At, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_purpose(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_purpose,
+		func(ctx context.Context) (any, error) {
+			return obj.Purpose, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_purpose(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_versionName(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_versionName,
+		func(ctx context.Context) (any, error) {
+			return obj.VersionName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_versionName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_channel(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_channel,
+		func(ctx context.Context) (any, error) {
+			return obj.Channel, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_channel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_inputRedactions(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_inputRedactions,
+		func(ctx context.Context) (any, error) {
+			return obj.InputRedactions, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_inputRedactions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_outputRedactions(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_outputRedactions,
+		func(ctx context.Context) (any, error) {
+			return obj.OutputRedactions, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_outputRedactions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_promptPreview(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_promptPreview,
+		func(ctx context.Context) (any, error) {
+			return obj.PromptPreview, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_promptPreview(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmCompletion_outputPreview(ctx context.Context, field graphql.CollectedField, obj *LlmCompletion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmCompletion_outputPreview,
+		func(ctx context.Context) (any, error) {
+			return obj.OutputPreview, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmCompletion_outputPreview(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmCompletion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmSlotCard_slot(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_slot,
+		func(ctx context.Context) (any, error) {
+			return obj.Slot, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_slot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmSlotCard_wired(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_wired,
+		func(ctx context.Context) (any, error) {
+			return obj.Wired, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_wired(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmSlotCard_role(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_role,
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmSlotCard_activeVersionId(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_activeVersionId,
+		func(ctx context.Context) (any, error) {
+			return obj.ActiveVersionID, nil
+		},
+		nil,
+		ec.marshalOID2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_activeVersionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmSlotCard_versions(ctx context.Context, field graphql.CollectedField, obj *LlmSlotCard) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmSlotCard_versions,
+		func(ctx context.Context) (any, error) {
+			return obj.Versions, nil
+		},
+		nil,
+		ec.marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmSlotCard_versions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmSlotCard",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_LlmVersion_id(ctx, field)
+			case "name":
+				return ec.fieldContext_LlmVersion_name(ctx, field)
+			case "note":
+				return ec.fieldContext_LlmVersion_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmVersion", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_slot(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_slot,
+		func(ctx context.Context) (any, error) {
+			return obj.Slot, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_slot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_versionName(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_versionName,
+		func(ctx context.Context) (any, error) {
+			return obj.VersionName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_versionName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_channel(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_channel,
+		func(ctx context.Context) (any, error) {
+			return obj.Channel, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_channel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmStatus_gdpr(ctx context.Context, field graphql.CollectedField, obj *LlmStatus) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmStatus_gdpr,
+		func(ctx context.Context) (any, error) {
+			return obj.Gdpr, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmStatus_gdpr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmStatus",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmVersion_id(ctx context.Context, field graphql.CollectedField, obj *LlmVersion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmVersion_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmVersion_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmVersion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmVersion_name(ctx context.Context, field graphql.CollectedField, obj *LlmVersion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmVersion_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmVersion_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmVersion",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LlmVersion_note(ctx context.Context, field graphql.CollectedField, obj *LlmVersion) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LlmVersion_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LlmVersion_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LlmVersion",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2732,6 +3970,157 @@ func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_setActiveVersion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setActiveVersion,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetActiveVersion(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setActiveVersion(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "gdpr":
+				return ec.fieldContext_LlmAdmin_gdpr(ctx, field)
+			case "activeSlot":
+				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
+			case "mcpRoot":
+				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "slotA":
+				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
+			case "slotB":
+				return ec.fieldContext_LlmAdmin_slotB(ctx, field)
+			case "completions":
+				return ec.fieldContext_LlmAdmin_completions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmAdmin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setActiveVersion_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_setMcpRoot(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setMcpRoot,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetMcpRoot(ctx, fc.Args["path"].(string))
+		},
+		nil,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setMcpRoot(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "gdpr":
+				return ec.fieldContext_LlmAdmin_gdpr(ctx, field)
+			case "activeSlot":
+				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
+			case "mcpRoot":
+				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "slotA":
+				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
+			case "slotB":
+				return ec.fieldContext_LlmAdmin_slotB(ctx, field)
+			case "completions":
+				return ec.fieldContext_LlmAdmin_completions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmAdmin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setMcpRoot_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteMe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteMe,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DeleteMe(ctx, fc.Args["wipeProjects"].(bool))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteMe(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteMe_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Project_id(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -3134,6 +4523,10 @@ func (ec *executionContext) fieldContext_Query_health(_ context.Context, field g
 				return ec.fieldContext_Health_version(ctx, field)
 			case "mail":
 				return ec.fieldContext_Health_mail(ctx, field)
+			case "gdpr":
+				return ec.fieldContext_Health_gdpr(ctx, field)
+			case "llm":
+				return ec.fieldContext_Health_llm(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Health", field.Name)
 		},
@@ -3515,6 +4908,162 @@ func (ec *executionContext) fieldContext_Query_challengeMailbox(ctx context.Cont
 	if fc.Args, err = ec.field_Query_challengeMailbox_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_llmAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_llmAdmin,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().LlmAdmin(ctx)
+		},
+		nil,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_llmAdmin(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "gdpr":
+				return ec.fieldContext_LlmAdmin_gdpr(ctx, field)
+			case "activeSlot":
+				return ec.fieldContext_LlmAdmin_activeSlot(ctx, field)
+			case "mcpRoot":
+				return ec.fieldContext_LlmAdmin_mcpRoot(ctx, field)
+			case "slotA":
+				return ec.fieldContext_LlmAdmin_slotA(ctx, field)
+			case "slotB":
+				return ec.fieldContext_LlmAdmin_slotB(ctx, field)
+			case "completions":
+				return ec.fieldContext_LlmAdmin_completions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmAdmin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_llmStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_llmStatus,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().LlmStatus(ctx)
+		},
+		nil,
+		ec.marshalNLlmStatus2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_llmStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "slot":
+				return ec.fieldContext_LlmStatus_slot(ctx, field)
+			case "versionName":
+				return ec.fieldContext_LlmStatus_versionName(ctx, field)
+			case "channel":
+				return ec.fieldContext_LlmStatus_channel(ctx, field)
+			case "gdpr":
+				return ec.fieldContext_LlmStatus_gdpr(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LlmStatus", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_mcpReadFile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_mcpReadFile,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().McpReadFile(ctx, fc.Args["relativePath"].(string))
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_mcpReadFile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_mcpReadFile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_exportMe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_exportMe,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().ExportMe(ctx)
+		},
+		nil,
+		ec.marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_exportMe(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "json":
+				return ec.fieldContext_ExportBundle_json(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ExportBundle", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -5479,6 +7028,45 @@ func (ec *executionContext) _Device(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var exportBundleImplementors = []string{"ExportBundle"}
+
+func (ec *executionContext) _ExportBundle(ctx context.Context, sel ast.SelectionSet, obj *ExportBundle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, exportBundleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExportBundle")
+		case "json":
+			out.Values[i] = ec._ExportBundle_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var healthImplementors = []string{"Health"}
 
 func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, obj *Health) graphql.Marshaler {
@@ -5507,6 +7095,16 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "mail":
 			out.Values[i] = ec._Health_mail(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "gdpr":
+			out.Values[i] = ec._Health_gdpr(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "llm":
+			out.Values[i] = ec._Health_llm(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5551,6 +7149,303 @@ func (ec *executionContext) _JobLog(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "message":
 			out.Values[i] = ec._JobLog_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var llmAdminImplementors = []string{"LlmAdmin"}
+
+func (ec *executionContext) _LlmAdmin(ctx context.Context, sel ast.SelectionSet, obj *LlmAdmin) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, llmAdminImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LlmAdmin")
+		case "gdpr":
+			out.Values[i] = ec._LlmAdmin_gdpr(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "activeSlot":
+			out.Values[i] = ec._LlmAdmin_activeSlot(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "mcpRoot":
+			out.Values[i] = ec._LlmAdmin_mcpRoot(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "slotA":
+			out.Values[i] = ec._LlmAdmin_slotA(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "slotB":
+			out.Values[i] = ec._LlmAdmin_slotB(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completions":
+			out.Values[i] = ec._LlmAdmin_completions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var llmCompletionImplementors = []string{"LlmCompletion"}
+
+func (ec *executionContext) _LlmCompletion(ctx context.Context, sel ast.SelectionSet, obj *LlmCompletion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, llmCompletionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LlmCompletion")
+		case "at":
+			out.Values[i] = ec._LlmCompletion_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "purpose":
+			out.Values[i] = ec._LlmCompletion_purpose(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "versionName":
+			out.Values[i] = ec._LlmCompletion_versionName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "channel":
+			out.Values[i] = ec._LlmCompletion_channel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "inputRedactions":
+			out.Values[i] = ec._LlmCompletion_inputRedactions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "outputRedactions":
+			out.Values[i] = ec._LlmCompletion_outputRedactions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "promptPreview":
+			out.Values[i] = ec._LlmCompletion_promptPreview(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "outputPreview":
+			out.Values[i] = ec._LlmCompletion_outputPreview(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var llmSlotCardImplementors = []string{"LlmSlotCard"}
+
+func (ec *executionContext) _LlmSlotCard(ctx context.Context, sel ast.SelectionSet, obj *LlmSlotCard) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, llmSlotCardImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LlmSlotCard")
+		case "slot":
+			out.Values[i] = ec._LlmSlotCard_slot(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "wired":
+			out.Values[i] = ec._LlmSlotCard_wired(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "role":
+			out.Values[i] = ec._LlmSlotCard_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "activeVersionId":
+			out.Values[i] = ec._LlmSlotCard_activeVersionId(ctx, field, obj)
+		case "versions":
+			out.Values[i] = ec._LlmSlotCard_versions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var llmStatusImplementors = []string{"LlmStatus"}
+
+func (ec *executionContext) _LlmStatus(ctx context.Context, sel ast.SelectionSet, obj *LlmStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, llmStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LlmStatus")
+		case "slot":
+			out.Values[i] = ec._LlmStatus_slot(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "versionName":
+			out.Values[i] = ec._LlmStatus_versionName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "channel":
+			out.Values[i] = ec._LlmStatus_channel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "gdpr":
+			out.Values[i] = ec._LlmStatus_gdpr(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var llmVersionImplementors = []string{"LlmVersion"}
+
+func (ec *executionContext) _LlmVersion(ctx context.Context, sel ast.SelectionSet, obj *LlmVersion) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, llmVersionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LlmVersion")
+		case "id":
+			out.Values[i] = ec._LlmVersion_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._LlmVersion_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._LlmVersion_note(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5907,6 +7802,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "setActiveVersion":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setActiveVersion(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "setMcpRoot":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setMcpRoot(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteMe":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteMe(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6257,6 +8173,94 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_challengeMailbox(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "llmAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_llmAdmin(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "llmStatus":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_llmStatus(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "mcpReadFile":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_mcpReadFile(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "exportMe":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_exportMe(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -6908,6 +8912,20 @@ func (ec *executionContext) marshalNDevice2ᚖgithubᚗcomᚋicerdeᚋapiᚋgrap
 	return ec._Device(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNExportBundle2githubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v ExportBundle) graphql.Marshaler {
+	return ec._ExportBundle(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v *ExportBundle) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ExportBundle(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNHealth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v Health) graphql.Marshaler {
 	return ec._Health(ctx, sel, &v)
 }
@@ -6930,6 +8948,22 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (str
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6990,6 +9024,152 @@ func (ec *executionContext) marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgrap
 		return graphql.Null
 	}
 	return ec._JobLog(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLlmAdmin2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v LlmAdmin) graphql.Marshaler {
+	return ec._LlmAdmin(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v *LlmAdmin) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LlmAdmin(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmCompletion) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletion(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletion(ctx context.Context, sel ast.SelectionSet, v *LlmCompletion) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LlmCompletion(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard(ctx context.Context, sel ast.SelectionSet, v *LlmSlotCard) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LlmSlotCard(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLlmStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v LlmStatus) graphql.Marshaler {
+	return ec._LlmStatus(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNLlmStatus2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v *LlmStatus) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LlmStatus(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmVersion) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLlmVersion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersion(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLlmVersion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersion(ctx context.Context, sel ast.SelectionSet, v *LlmVersion) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LlmVersion(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNLoginNext2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginNext(ctx context.Context, v any) (LoginNext, error) {

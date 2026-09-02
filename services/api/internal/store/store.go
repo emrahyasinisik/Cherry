@@ -15,6 +15,8 @@ var (
 	ErrLocked             = errors.New("locked")
 	ErrExpired            = errors.New("expired")
 	ErrMailFailed         = errors.New("mail failed")
+	ErrLLMFailed          = errors.New("llm failed")
+	ErrPath               = errors.New("path")
 )
 
 type WorkspaceKind string
@@ -167,4 +169,50 @@ type Store interface {
 	UpdateProject(ctx context.Context, project Project) error
 	AppendLog(ctx context.Context, log JobLog) error
 	ListLogs(ctx context.Context, projectID string) ([]JobLog, error)
+
+	PutLlmVersion(ctx context.Context, version LlmVersion) error
+	ListLlmVersions(ctx context.Context, slot LlmSlot) ([]LlmVersion, error)
+	GetLlmVersion(ctx context.Context, id string) (*LlmVersion, error)
+	GetLlmState(ctx context.Context) (LlmState, error)
+	SetLlmState(ctx context.Context, state LlmState) error
+	AddAudit(ctx context.Context, event AuditEvent) error
+	ListAudit(ctx context.Context, userID string) ([]AuditEvent, error)
+	DeleteUserData(ctx context.Context, userID string, wipeProjects bool) error
+}
+
+type LlmSlot string
+
+const (
+	SlotA LlmSlot = "A"
+	SlotB LlmSlot = "B"
+)
+
+type LlmVersion struct {
+	ID        string
+	Slot      LlmSlot
+	Name      string
+	Note      string
+	CreatedAt time.Time
+}
+
+type LlmState struct {
+	ActiveAID string
+	McpRoot   string
+}
+
+type AuditEvent struct {
+	ID                string
+	UserID            string
+	ProjectID         string
+	Purpose           string
+	LegalBasis        string
+	Slot              LlmSlot
+	VersionID         string
+	VersionName       string
+	Channel           string
+	InputRedactions   int
+	OutputRedactions  int
+	PromptPreview     string
+	OutputPreview     string
+	CreatedAt         time.Time
 }

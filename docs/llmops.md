@@ -41,6 +41,9 @@ Default: in-flight jobs finish on the old assignment; queued/new jobs use the ne
 
 Admin sets allowed root (the generated project path). Models read files only under that root.
 
+Dilim 4: yalnızca **LLM A**. B kartı “bağlı değil”. Versiyon değiştirmek sonraki tamamlamaları değiştirir (in-flight eski pointer’da biter).
+
+
 ```mermaid
 flowchart LR
   LLM --> MCP[mcp_read_file]

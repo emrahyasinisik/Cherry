@@ -5,9 +5,11 @@ package graph
 import (
 	"github.com/icerde/api/internal/auth"
 	"github.com/icerde/api/internal/factory"
+	"github.com/icerde/api/internal/llm"
 )
 
 type Resolver struct {
 	Auth    *auth.Service
 	Factory *factory.Service
+	LLM     *llm.Service
 }

@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getLastProjectId } from "@/lib/last-project";
-import { graphql, setToken, workspaceLabel, type User } from "@/lib/api";
+import { graphql, setToken, workspaceLabel, type LlmStatus, type User } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -40,9 +40,17 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const [lastProject, setLastProject] = useState<string | null>(null);
+  const [llm, setLlm] = useState<LlmStatus | null>(null);
 
   useEffect(() => {
     setLastProject(getLastProjectId());
+    void graphql<{ llmStatus: LlmStatus }>(
+      `query Chip { llmStatus { slot versionName channel gdpr } }`,
+    )
+      .then((data) => setLlm(data.llmStatus))
+      .catch(() => {
+        setLlm(null);
+      });
   }, [pathname]);
   const maestroHref = lastProject ? `/projects/${lastProject}/maestro` : "/maestro";
   const agentHref = lastProject ? `/projects/${lastProject}` : "/projects";
@@ -53,8 +61,8 @@ export function AppShell({
     { href: maestroHref, label: "Maestro", icon: Smartphone, enabled: true },
     { href: "/security", label: "Güvenlik", icon: Shield, enabled: true },
     { href: "/projects", label: "Organizasyon", icon: Building2, enabled: false },
-    { href: "/projects", label: "LLM", icon: Cpu, enabled: false },
-    { href: "/projects", label: "Gizlilik", icon: Scale, enabled: false },
+    { href: "/llm", label: "LLM", icon: Cpu, enabled: true },
+    { href: "/privacy", label: "Gizlilik", icon: Scale, enabled: true },
   ];
 
   async function handleLogout() {
@@ -78,7 +86,7 @@ export function AppShell({
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
             <span className="bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
-              LLM A
+              LLM A{llm ? ` · ${llm.versionName}` : ""}
             </span>
             <span className="px-2.5 py-1 text-[11px] text-muted-foreground">
               LLM B
@@ -147,13 +155,25 @@ export function AppShell({
         <span>·</span>
         <span>{status ?? "kayıtlı cihaz"}</span>
         <span>·</span>
-        <span>GDPR katmanı henüz bağlı değil</span>
+        <span>{llm?.gdpr ? "GDPR katmanı bağlı" : "GDPR katmanı henüz bağlı değil"}</span>
+        {llm ? (
+          <>
+            <span>·</span>
+            <span>{llm.channel}</span>
+          </>
+        ) : null}
       </footer>
     </div>
   );
 }
 
 function headerTitle(pathname: string): string {
+  if (pathname.startsWith("/llm")) {
+    return "LLM yönetici";
+  }
+  if (pathname.startsWith("/privacy")) {
+    return "Gizlilik";
+  }
   if (pathname.includes("/maestro")) {
     return "Maestro";
   }
@@ -179,6 +199,10 @@ function navActive(pathname: string, label: string, href: string): boolean {
       return pathname === "/projects" || pathname === "/projects/new";
     case "Güvenlik":
       return pathname.startsWith("/security");
+    case "LLM":
+      return pathname.startsWith("/llm");
+    case "Gizlilik":
+      return pathname.startsWith("/privacy");
     default:
       return pathname.startsWith(href);
   }

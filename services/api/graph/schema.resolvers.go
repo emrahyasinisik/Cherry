@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -167,6 +168,41 @@ func (r *mutationResolver) CreateProject(ctx context.Context, name string, brief
 	return r.projectPayload(ctx, user.ID, row.ID, true)
 }
 
+// SetActiveVersion is the resolver for the setActiveVersion field.
+func (r *mutationResolver) SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if err := r.LLM.SetActiveA(ctx, id); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.llmAdminPayload(ctx, user.ID)
+}
+
+func (r *mutationResolver) SetMcpRoot(ctx context.Context, path string) (*LlmAdmin, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if err := r.LLM.SetMcpRoot(ctx, path); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.llmAdminPayload(ctx, user.ID)
+}
+
+func (r *mutationResolver) DeleteMe(ctx context.Context, wipeProjects bool) (bool, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return false, gqlErr(err)
+	}
+	_ = r.Auth.Logout(ctx, TokenFrom(ctx))
+	if err := r.Auth.Store.DeleteUserData(ctx, user.ID, wipeProjects); err != nil {
+		return false, gqlErr(err)
+	}
+	return true, nil
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*Health, error) {
 	ok := r.Auth.Store.Ping(ctx) == nil
@@ -174,7 +210,13 @@ func (r *queryResolver) Health(ctx context.Context) (*Health, error) {
 	if r.Auth.Mailer != nil {
 		mail = r.Auth.Mailer.Channel()
 	}
-	return &Health{Ok: ok, Store: r.Auth.Store.Name(), Version: apiVersion, Mail: mail}, nil
+	llmName := "off"
+	if r.LLM != nil {
+		if version, channel, err := r.LLM.Status(ctx); err == nil {
+			llmName = version.Name + "/" + channel
+		}
+	}
+	return &Health{Ok: ok, Store: r.Auth.Store.Name(), Version: apiVersion, Mail: mail, Gdpr: r.LLM != nil, Llm: llmName}, nil
 }
 
 // Me is the resolver for the me field.
@@ -310,6 +352,69 @@ func (r *queryResolver) ChallengeMailbox(ctx context.Context, challengeID string
 		return nil, gqlErr(err)
 	}
 	return mapMail(*mail)
+}
+
+// LlmAdmin is the resolver for the llmAdmin field.
+func (r *queryResolver) LlmAdmin(ctx context.Context) (*LlmAdmin, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := r.llmAdminPayload(ctx, user.ID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
+}
+
+func (r *queryResolver) LlmStatus(ctx context.Context) (*LlmStatus, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return nil, gqlErr(err)
+	}
+	version, channel, err := r.LLM.Status(ctx)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return &LlmStatus{Slot: "A", VersionName: version.Name, Channel: channel, Gdpr: true}, nil
+}
+
+func (r *queryResolver) McpReadFile(ctx context.Context, relativePath string) (string, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return "", gqlErr(err)
+	}
+	body, err := r.LLM.ReadProjectFile(ctx, relativePath)
+	if err != nil {
+		return "", gqlErr(err)
+	}
+	return body, nil
+}
+
+func (r *queryResolver) ExportMe(ctx context.Context) (*ExportBundle, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	projects, err := r.Factory.List(ctx, user.ID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	audits, err := r.LLM.Store.ListAudit(ctx, user.ID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	names := make([]string, 0, len(projects))
+	for _, project := range projects {
+		names = append(names, project.Name)
+	}
+	payload, err := json.Marshal(map[string]any{
+		"email":    user.Email,
+		"projects": names,
+		"audits":   len(audits),
+	})
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return &ExportBundle{JSON: string(payload)}, nil
 }
 
 // Mutation returns MutationResolver implementation.

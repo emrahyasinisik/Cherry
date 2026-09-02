@@ -19,6 +19,7 @@ import (
 	"github.com/icerde/api/graph"
 	"github.com/icerde/api/internal/auth"
 	"github.com/icerde/api/internal/factory"
+	"github.com/icerde/api/internal/llm"
 	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 	"github.com/rs/cors"
@@ -61,10 +62,21 @@ func main() {
 	}
 	log.Printf("mailer channel=%s require=%v", mail.Channel(), mail.Require)
 	authSvc := auth.New(memory, mail, pepper, webOrigin)
-	projectsRoot := getenv("ICERDE_PROJECTS_ROOT", filepath.Join("var", "projects"))
+	if err := llm.Seed(context.Background(), memory); err != nil {
+		log.Fatalf("llm seed: %v", err)
+	}
+	llmSvc := &llm.Service{
+		Store:     memory,
+		Completer: llm.NewCompleter(os.Getenv("ICERDE_LLM_API_KEY"), os.Getenv("ICERDE_LLM_BASE_URL"), os.Getenv("ICERDE_LLM_MODEL")),
+	}
+	projectsRoot := getenv("ICERDE_PROJECTS_ROOT", "")
+	if projectsRoot == "" {
+		projectsRoot = filepath.Join("..", "..", "var", "projects")
+	}
 	fact := factory.New(memory, projectsRoot)
-	log.Printf("projects root=%s", projectsRoot)
-	resolver := &graph.Resolver{Auth: authSvc, Factory: fact}
+	fact.LLM = llmSvc
+	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
+	resolver := &graph.Resolver{Auth: authSvc, Factory: fact, LLM: llmSvc}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -82,8 +94,10 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":      true,
 			"store":   status,
-			"version": "0.3.0-disk",
+			"version": "0.4.0-llm",
 			"mail":    mail.Channel(),
+			"gdpr":    true,
+			"llm":     llmSvc.Completer.Channel(),
 		})
 	})
 	mux.HandleFunc("/export/", func(w http.ResponseWriter, r *http.Request) {

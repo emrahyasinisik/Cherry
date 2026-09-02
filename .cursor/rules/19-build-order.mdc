@@ -10,6 +10,6 @@ alwaysApply: false
 # Build order
 
 - Follow [docs/build-order.md](docs/build-order.md). Pause checklist: [docs/remaining.md](docs/remaining.md).
-- Next implementation slice is **4 — LLM A + GDPR**. Slices 1–3 are done (scaffold, auth, project disk + Maestro viewer). Do not start LLM B or Colab.
+- Next implementation slice is **5 — OpenCode**. Slices 1–4 are done. Do not stand up LLM B or Colab until OpenCode writes real files behind GDPR.
 - Do not fine-tune or stand up LLM B until LLM A runs behind the GDPR layer on a real project folder.
 - A stub writer on disk is allowed before OpenCode (slice 3 before 5).

@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-const apiVersion = "0.3.0-disk"
+const apiVersion = "0.4.0-llm"
 
 func gqlErr(err error) error {
 	switch {
@@ -23,6 +23,10 @@ func gqlErr(err error) error {
 		return &gqlerror.Error{Message: "Kod veya link süresi doldu."}
 	case errors.Is(err, store.ErrMailFailed):
 		return &gqlerror.Error{Message: "E-posta gönderilemedi. SMTP veya Resend ayarını kontrol et."}
+	case errors.Is(err, store.ErrLLMFailed):
+		return &gqlerror.Error{Message: "LLM çağrısı başarısız. Anahtar veya sarmalayıcıyı kontrol et."}
+	case errors.Is(err, store.ErrPath):
+		return &gqlerror.Error{Message: "MCP kökü dışına çıkılamaz."}
 	case errors.Is(err, store.ErrUnauthorized):
 		return &gqlerror.Error{Message: "Oturum gerekli."}
 	case errors.Is(err, store.ErrNotFound):

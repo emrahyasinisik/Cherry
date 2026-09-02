@@ -23,16 +23,63 @@ type Device struct {
 	LastSeenAt string `json:"lastSeenAt"`
 }
 
+type ExportBundle struct {
+	JSON string `json:"json"`
+}
+
 type Health struct {
 	Ok      bool   `json:"ok"`
 	Store   string `json:"store"`
 	Version string `json:"version"`
 	Mail    string `json:"mail"`
+	Gdpr    bool   `json:"gdpr"`
+	Llm     string `json:"llm"`
 }
 
 type JobLog struct {
 	At      string `json:"at"`
 	Message string `json:"message"`
+}
+
+type LlmAdmin struct {
+	Gdpr        bool             `json:"gdpr"`
+	ActiveSlot  string           `json:"activeSlot"`
+	McpRoot     string           `json:"mcpRoot"`
+	SlotA       *LlmSlotCard     `json:"slotA"`
+	SlotB       *LlmSlotCard     `json:"slotB"`
+	Completions []*LlmCompletion `json:"completions"`
+}
+
+type LlmCompletion struct {
+	At               string `json:"at"`
+	Purpose          string `json:"purpose"`
+	VersionName      string `json:"versionName"`
+	Channel          string `json:"channel"`
+	InputRedactions  int    `json:"inputRedactions"`
+	OutputRedactions int    `json:"outputRedactions"`
+	PromptPreview    string `json:"promptPreview"`
+	OutputPreview    string `json:"outputPreview"`
+}
+
+type LlmSlotCard struct {
+	Slot            string        `json:"slot"`
+	Wired           bool          `json:"wired"`
+	Role            string        `json:"role"`
+	ActiveVersionID *string       `json:"activeVersionId,omitempty"`
+	Versions        []*LlmVersion `json:"versions"`
+}
+
+type LlmStatus struct {
+	Slot        string `json:"slot"`
+	VersionName string `json:"versionName"`
+	Channel     string `json:"channel"`
+	Gdpr        bool   `json:"gdpr"`
+}
+
+type LlmVersion struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Note string `json:"note"`
 }
 
 type LoginResult struct {

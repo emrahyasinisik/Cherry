@@ -45,5 +45,5 @@ UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya 
 
 ## Dilim durumu / Slice status
 
-Dilim 1–3 bitti. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki: dilim 4 (LLM A + GDPR).
+Dilim 1–4 bitti. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki: dilim 5 (OpenCode).
 

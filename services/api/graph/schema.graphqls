@@ -9,6 +9,10 @@ type Query {
   sessions: [Session!]!
   mailbox: [MailMessage!]!
   challengeMailbox(challengeId: ID!): MailMessage
+  llmAdmin: LlmAdmin!
+  llmStatus: LlmStatus!
+  mcpReadFile(relativePath: String!): String!
+  exportMe: ExportBundle!
 }
 
 type Mutation {
@@ -34,6 +38,9 @@ type Mutation {
   revokeDevice(id: ID!): Boolean!
   logout: Boolean!
   createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
+  setActiveVersion(id: ID!): LlmAdmin!
+  setMcpRoot(path: String!): LlmAdmin!
+  deleteMe(wipeProjects: Boolean!): Boolean!
 }
 
 enum LoginNext {
@@ -63,6 +70,8 @@ type Health {
   store: String!
   version: String!
   mail: String!
+  gdpr: Boolean!
+  llm: String!
 }
 
 type User {
@@ -167,4 +176,49 @@ type MailMessage {
 type TotpSetup {
   secret: String!
   otpauthUrl: String!
+}
+
+type LlmStatus {
+  slot: String!
+  versionName: String!
+  channel: String!
+  gdpr: Boolean!
+}
+
+type LlmAdmin {
+  gdpr: Boolean!
+  activeSlot: String!
+  mcpRoot: String!
+  slotA: LlmSlotCard!
+  slotB: LlmSlotCard!
+  completions: [LlmCompletion!]!
+}
+
+type LlmSlotCard {
+  slot: String!
+  wired: Boolean!
+  role: String!
+  activeVersionId: ID
+  versions: [LlmVersion!]!
+}
+
+type LlmVersion {
+  id: ID!
+  name: String!
+  note: String!
+}
+
+type LlmCompletion {
+  at: String!
+  purpose: String!
+  versionName: String!
+  channel: String!
+  inputRedactions: Int!
+  outputRedactions: Int!
+  promptPreview: String!
+  outputPreview: String!
+}
+
+type ExportBundle {
+  json: String!
 }

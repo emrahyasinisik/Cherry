@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/icerde/api/internal/llm"
 	"github.com/icerde/api/internal/store"
 )
 
@@ -16,6 +17,7 @@ type Service struct {
 	Root      string
 	StepDelay time.Duration
 	AutoRun   bool
+	LLM       *llm.Service
 }
 
 func New(st store.Store, root string) *Service {
@@ -129,6 +131,10 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 		return err
 	}
 	s.pause()
+	if err := s.runLLM(ctx, project); err != nil {
+		return err
+	}
+	s.pause()
 	if err := s.setStatus(ctx, project.ID, store.StatusTesting); err != nil {
 		return err
 	}
@@ -143,7 +149,40 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.setStatus(ctx, project.ID, store.StatusReady); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. OpenCode henüz bağlı değil (stub).")
+	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Kod iskeleti stub; OpenCode dilim 5.")
+}
+
+func (s *Service) runLLM(ctx context.Context, project store.Project) error {
+	if s.LLM == nil {
+		return s.log(ctx, project.ID, "LLM A bağlı değil — yalnızca stub dosyalar.")
+	}
+	if err := s.LLM.SetMcpRoot(ctx, project.RootPath); err != nil {
+		return err
+	}
+	readme, err := s.LLM.ReadProjectFile(ctx, "README.md")
+	if err != nil {
+		readme = ""
+	}
+	prompt := "Amaç: codegen. Yalnızca proje kökündeki dosyalar.\nAd: " + project.Name + "\nBrif: " + project.Brief + "\nREADME:\n" + readme
+	out, err := s.LLM.Complete(ctx, llm.CompleteInput{
+		UserID:     project.UserID,
+		ProjectID:  project.ID,
+		Purpose:    "codegen",
+		LegalBasis: "contract",
+		Prompt:     prompt,
+	})
+	if err != nil {
+		return err
+	}
+	planPath := filepath.Join(project.RootPath, "llm", "plan.md")
+	if err := os.MkdirAll(filepath.Dir(planPath), 0o755); err != nil {
+		return err
+	}
+	body := "# LLM A " + out.Version.Name + "\n\nkanal: " + out.Channel + "\nredaksiyon giriş/çıkış: " + fmt.Sprintf("%d/%d", out.InputN, out.OutputN) + "\n\n" + out.Text + "\n"
+	if err := os.WriteFile(planPath, []byte(body), 0o644); err != nil {
+		return err
+	}
+	return s.log(ctx, project.ID, "GDPR → LLM A "+out.Version.Name+" ("+out.Channel+") redact="+fmt.Sprintf("%d/%d", out.InputN, out.OutputN)+". Plan: llm/plan.md")
 }
 
 func (s *Service) setStatus(ctx context.Context, id string, status store.ProjectStatus) error {
@@ -186,6 +225,8 @@ func fileKind(rel string) string {
 		return "backend"
 	case strings.HasPrefix(rel, "maestro/"):
 		return "maestro"
+	case strings.HasPrefix(rel, "llm/"):
+		return "llm"
 	case strings.HasPrefix(rel, "preview/"):
 		return "preview"
 	default:
