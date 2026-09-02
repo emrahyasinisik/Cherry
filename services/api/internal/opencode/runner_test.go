@@ -2,6 +2,7 @@ package opencode
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -82,5 +83,38 @@ func TestStatusLabelExhaustive(t *testing.T) {
 		if status.Label() == "" {
 			t.Fatalf("empty label for %s", status)
 		}
+	}
+}
+
+func TestAbsDir(t *testing.T) {
+	rel := filepath.Join(".", "opencode-abs-test")
+	if err := os.MkdirAll(rel, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(rel) })
+	got, err := absDir(rel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want, err := filepath.Abs(rel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Fatalf("got %s want %s", got, want)
+	}
+	if _, err := absDir(filepath.Join(rel, "missing")); err == nil {
+		t.Fatal("expected missing dir error")
+	}
+}
+
+func TestFailErrPrefersOpenCodeLine(t *testing.T) {
+	raw := "\x1b[91m\x1b[1mError: \x1b[0mFailed to change directory to ../../var/projects/x\n"
+	got := failErr(fmt.Errorf("exit status 1"), raw)
+	if !strings.Contains(got, "Failed to change directory") {
+		t.Fatalf("%q", got)
+	}
+	if strings.Contains(got, "exit status") {
+		t.Fatalf("should not be generic: %q", got)
 	}
 }

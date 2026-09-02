@@ -215,6 +215,13 @@ func TestSlug(t *testing.T) {
 	}
 }
 
+func TestProjectRootIsAbsolute(t *testing.T) {
+	svc := New(store.NewMemory(), filepath.Join(".", "rel-projects"))
+	if !filepath.IsAbs(svc.Root) {
+		t.Fatalf("root %s", svc.Root)
+	}
+}
+
 func TestActivateAndRunMaestroNeverPassWithoutDevice(t *testing.T) {
 	mem := store.NewMemory()
 	svc := New(mem, t.TempDir())

@@ -18,8 +18,12 @@ flowchart LR
 ## Çağrı / Invoke
 
 ```bash
-opencode run --dir <projectRoot> --auto
+opencode run --dir <absoluteProjectRoot> --auto
 ```
+
+`--dir` must be an **absolute** path. Relative `../../var/projects/...` makes OpenCode fail with `Failed to change directory` because it already started in that folder.
+
+`--dir` mutlak olmalı. Göreli yol `chdir` hatası verir.
 
 Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü.
 

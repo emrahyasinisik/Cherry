@@ -77,6 +77,9 @@ func main() {
 	if projectsRoot == "" {
 		projectsRoot = filepath.Join("..", "..", "var", "projects")
 	}
+	if abs, err := filepath.Abs(projectsRoot); err == nil {
+		projectsRoot = abs
+	}
 	fact := factory.New(memory, projectsRoot)
 	fact.LLM = llmSvc
 	oc := opencode.NewCLI()

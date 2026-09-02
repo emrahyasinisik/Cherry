@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -109,7 +110,11 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 		}
 		return res, nil
 	}
-	if err := WriteConfig(req.Dir); err != nil {
+	dir, err := absDir(req.Dir)
+	if err != nil {
+		return Result{Status: StatusFailed, Bin: bin, Err: err.Error()}, err
+	}
+	if err := WriteConfig(dir); err != nil {
 		return Result{Status: StatusFailed, Bin: bin, Err: err.Error()}, err
 	}
 	timeout := c.Timeout
@@ -118,7 +123,7 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	}
 	runCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	args := []string{"run", "--dir", req.Dir, "--auto", "--title", titleOr(req.Title, "icerde")}
+	args := []string{"run", "--dir", dir, "--auto", "--title", titleOr(req.Title, "icerde")}
 	if req.Continue {
 		args = append(args, "--continue")
 	}
@@ -126,7 +131,7 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 		args = append(args, "--model", model)
 	}
 	cmd := exec.CommandContext(runCtx, bin, args...)
-	cmd.Dir = req.Dir
+	cmd.Dir = dir
 	cmd.Stdin = strings.NewReader(req.Prompt)
 	cmd.Env = withLLMKey(os.Environ())
 	var buf bytes.Buffer
@@ -138,7 +143,7 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	res := Result{Status: StatusRan, Bin: bin, Output: safe, Version: versionOf(bin)}
 	if runErr != nil {
 		res.Status = StatusFailed
-		res.Err = runErr.Error()
+		res.Err = failErr(runErr, raw)
 		if errors.Is(runCtx.Err(), context.DeadlineExceeded) {
 			res.Err = "opencode zaman aşımı"
 		}
@@ -158,6 +163,59 @@ func versionOf(bin string) string {
 		return ""
 	}
 	return strings.TrimSpace(string(out))
+}
+
+func absDir(dir string) (string, error) {
+	dir = strings.TrimSpace(dir)
+	if dir == "" {
+		return "", fmt.Errorf("proje dizini boş")
+	}
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return "", err
+	}
+	st, err := os.Stat(abs)
+	if err != nil {
+		return "", err
+	}
+	if !st.IsDir() {
+		return "", fmt.Errorf("proje dizini klasör değil: %s", abs)
+	}
+	return abs, nil
+}
+
+var ansiEscape = regexp.MustCompile(`\x1b\[[0-9;]*m`)
+
+func failErr(runErr error, raw string) string {
+	text := strings.TrimSpace(ansiEscape.ReplaceAllString(raw, ""))
+	if text == "" && runErr != nil {
+		return runErr.Error()
+	}
+	for _, line := range strings.Split(text, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		low := strings.ToLower(line)
+		if strings.Contains(low, "error:") || strings.Contains(low, "failed to") {
+			return clipErr(line, 240)
+		}
+	}
+	if text != "" {
+		return clipErr(text, 240)
+	}
+	if runErr != nil {
+		return runErr.Error()
+	}
+	return "opencode başarısız"
+}
+
+func clipErr(s string, n int) string {
+	s = strings.TrimSpace(s)
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "…"
 }
 
 func titleOr(title, fallback string) string {

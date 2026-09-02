@@ -44,6 +44,9 @@ func New(st store.Store, root string) *Service {
 	if strings.TrimSpace(root) == "" {
 		root = filepath.Join("var", "projects")
 	}
+	if abs, err := filepath.Abs(root); err == nil {
+		root = abs
+	}
 	return &Service{Store: st, Root: root, StepDelay: 380 * time.Millisecond, AutoRun: true, reports: map[string]maestro.Report{}}
 }
 
@@ -463,7 +466,7 @@ func (s *Service) recordOpenCode(ctx context.Context, projectID string, res open
 		}
 		return s.log(ctx, projectID, "OpenCode CLI yok — iskelet kaldı, sahte yazım yok.")
 	case opencode.StatusFailed:
-		if err := s.logRole(ctx, projectID, "Ajan yazamadı: "+res.Err+". İskelet duruyor.", store.RoleAgent); err != nil {
+		if err := s.logRole(ctx, projectID, "Yazamadı: "+res.Err+". İskelet duruyor.", store.RoleAgent); err != nil {
 			return err
 		}
 		return s.log(ctx, projectID, "OpenCode hata: "+res.Err+" — iskelet duruyor. llm/opencode.log")
