@@ -107,19 +107,19 @@ export default function ProjectsPage() {
           </Button>
         </div>
         {projects.length === 0 ? (
-          <div className="cherry-enter rounded-[10px] border border-dashed border-border bg-card/40 px-6 py-16 text-center">
+          <div className="cherry-enter cherry-surface rounded-[10px] border border-dashed border-border px-6 py-16 text-center">
             <p className="text-base font-medium">Henüz proje yok</p>
             <p className="mt-1 text-muted-foreground">
               İstediğin mobil uygulamayı anlat. Kodlama ve test arka planda yürür.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-border rounded-[10px] border border-border">
+          <ul className="cherry-stagger divide-y divide-border overflow-hidden rounded-[10px] border border-border">
             {projects.map((project) => (
               <li key={project.id}>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/40"
+                  className="cherry-row flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/40"
                 >
                   <span>
                     <span className="block">{project.name}</span>

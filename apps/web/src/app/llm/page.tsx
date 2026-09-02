@@ -368,7 +368,7 @@ function SlotCard({
   return (
     <article
       className={cn(
-        "rounded-[10px] border bg-card/40 p-4",
+        "cherry-surface rounded-[10px] border p-4",
         busy ? "border-primary" : "border-border",
       )}
     >

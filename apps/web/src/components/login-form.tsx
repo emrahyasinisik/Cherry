@@ -258,7 +258,7 @@ export function LoginForm() {
             {mailbox.body}
           </pre>
         ) : null}
-        <CodeInputs value={code} onChange={setCode} disabled={pending} />
+        <CodeInputs value={code} onChange={setCode} disabled={pending} error={Boolean(error)} />
         <label className="flex items-center gap-2 text-muted-foreground">
           <input
             type="checkbox"
@@ -291,7 +291,7 @@ export function LoginForm() {
     return (
       <form onSubmit={(event) => void handleTotp(event)} className="flex flex-col gap-4">
         <p className="text-muted-foreground">Authenticator uygulamasındaki 6 hane.</p>
-        <CodeInputs value={totp} onChange={setTotp} disabled={pending} />
+        <CodeInputs value={totp} onChange={setTotp} disabled={pending} error={Boolean(error)} />
         {error ? (
           <p className="text-destructive" role="alert">
             {error}

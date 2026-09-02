@@ -248,7 +248,7 @@ function ConnectionsBody() {
               const connected = item.status === "CONNECTED";
               const name = connectionKindLabel(item.kind);
               return (
-                <li key={item.kind} className="bg-card px-4 py-3 transition-colors hover:bg-muted/40">
+                <li key={item.kind} className="cherry-row bg-card px-4 py-3 hover:bg-muted/40">
                   <div className="flex items-center gap-3">
                     <ProviderTile kind={item.kind} />
                     <div className="min-w-0 flex-1">
@@ -409,7 +409,12 @@ function ConnectionsBody() {
 function StatusDot({ connected, label }: { connected: boolean; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-normal text-muted-foreground">
-      <span className={cn("size-1.5 rounded-full", connected ? "bg-success" : "bg-muted-foreground/40")} />
+      <span
+        className={cn(
+          "cherry-status-dot size-1.5 rounded-full",
+          connected ? "bg-success" : "bg-muted-foreground/40",
+        )}
+      />
       {label}
     </span>
   );
