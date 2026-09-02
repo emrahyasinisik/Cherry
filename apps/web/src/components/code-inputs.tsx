@@ -62,9 +62,12 @@ export function CodeInputs({ value, onChange, disabled }: CodeInputsProps) {
           ref={(node) => {
             refs.current[index] = node;
           }}
+          type="text"
           inputMode="numeric"
           autoComplete={index === 0 ? "one-time-code" : "off"}
           maxLength={1}
+          name={index === 0 ? "otp" : undefined}
+          aria-label={`Kod ${index + 1}`}
           disabled={disabled}
           value={digit}
           onChange={(event) => handleChange(index, event)}

@@ -180,8 +180,7 @@ export function LoginForm() {
     }
   }
 
-  async function handleCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitCode() {
     setError(null);
     if (!challengeId || code.replace(/\D/g, "").length !== 6) {
       setError("6 haneli kodu gir.");
@@ -207,6 +206,11 @@ export function LoginForm() {
     } finally {
       setPending(false);
     }
+  }
+
+  async function handleCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitCode();
   }
 
   async function handleTotp(event: FormEvent<HTMLFormElement>) {
@@ -268,7 +272,15 @@ export function LoginForm() {
             {error}
           </p>
         ) : null}
-        <Button type="submit" size="lg" className="h-10 w-full" disabled={pending}>
+        <Button
+          type="button"
+          size="lg"
+          className="h-10 w-full"
+          disabled={pending}
+          onClick={() => {
+            void submitCode();
+          }}
+        >
           {pending ? "Doğrulanıyor…" : "Kodu doğrula"}
         </Button>
       </form>

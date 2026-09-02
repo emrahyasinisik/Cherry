@@ -227,14 +227,22 @@ export async function graphql<T>(
   }
 
   let response: Response;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 20000);
   try {
     response = await fetch(`${getApiBase()}/graphql`, {
       method: "POST",
       headers,
       body: JSON.stringify({ query, variables }),
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("API yanıt vermedi. Biraz bekle veya kodu yeniden iste.");
+    }
     throw new Error("API’ye ulaşılamadı. Go sunucusunun açık olduğundan emin ol.");
+  } finally {
+    window.clearTimeout(timer);
   }
 
   const payload = (await response.json()) as GraphQLResponse<T>;
