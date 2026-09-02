@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/08-mobile-factory.mdc](../.cursor/rules/08-mobile-factory.mdc) · [integrations.md](integrations.md)
 
-**TR:** OpenCode’u yeniden yazmıyoruz. İçerde CLI’yi **çağırır**. LLM (işçi A) beynidir; OpenCode dosyayı yazar.
+**TR:** OpenCode’u yeniden yazmıyoruz. Cherry CLI’yi **çağırır**. LLM (işçi A) beynidir; OpenCode dosyayı yazar.
 
-**EN:** We do not reimplement OpenCode. Icerde **invokes** the CLI. The LLM (worker A) is the brain; OpenCode writes files.
+**EN:** We do not reimplement OpenCode. Cherry **invokes** the CLI. The LLM (worker A) is the brain; OpenCode writes files.
 
 ```mermaid
 flowchart LR
@@ -29,26 +29,26 @@ Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca
 
 The prompt is stdin; already redacted. Working directory is the customer folder only. It requires the selected stack’s current language **and** Clean Architecture — never an HTML website as the app.
 
-**Kişi OpenCode görmez.** Yalnızca İçerde sohbetine yazar. TUI açılmaz. Program `sendProjectMessage` → `opencode run --dir --auto` (sonraki mesajda `--continue`).
+**Kişi OpenCode görmez.** Yalnızca Cherry sohbetine yazar. TUI açılmaz. Program `sendProjectMessage` → `opencode run --dir --auto` (sonraki mesajda `--continue`).
 
-**The person never sees OpenCode.** They only write in Icerde. Do not launch the TUI. The program calls `run --auto` in the background.
+**The person never sees OpenCode.** They only write in Cherry. Do not launch the TUI. The program calls `run --auto` in the background.
 
 | Env | Anlam |
 | --- | --- |
-| `ICERDE_OPENCODE_BIN` | `opencode` yolu (boşsa PATH) |
-| `ICERDE_OPENCODE_TIMEOUT_SEC` | tavan (varsayılan 480) |
-| `ICERDE_OPENCODE_REQUIRE=1` | CLI yoksa iş başarısız |
-| `ICERDE_LLM_API_KEY` | varsa `OPENAI_API_KEY` olarak OpenCode’a geçer |
+| `CHERRY_OPENCODE_BIN` | `opencode` yolu (boşsa PATH) |
+| `CHERRY_OPENCODE_TIMEOUT_SEC` | tavan (varsayılan 480) |
+| `CHERRY_OPENCODE_REQUIRE=1` | CLI yoksa iş başarısız |
+| `CHERRY_LLM_API_KEY` | varsa `OPENAI_API_KEY` olarak OpenCode’a geçer |
 
 **Kurulum / Install**
 
-Müşteri yalnızca **İçerde** kurar. OpenCode ve Maestro `vendor/bin` (Electron `resources/bin`). PATH yalnızca geliştirici yedeği.
+Müşteri yalnızca **Cherry** kurar. OpenCode ve Maestro `vendor/bin` (Electron `resources/bin`). PATH yalnızca geliştirici yedeği.
 
 ```bash
 ./scripts/vendor-sidecars.sh
 ```
 
-CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. CLI var, model anahtarı yoksa yazım düşer; yine sahte dosya yok. `ICERDE_LLM_API_KEY` → OpenCode `OPENAI_API_KEY`.
+CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. CLI var, model anahtarı yoksa yazım düşer; yine sahte dosya yok. `CHERRY_LLM_API_KEY` → OpenCode `OPENAI_API_KEY`.
 
 If the CLI is missing the scaffold stays. **No fake OpenCode write.** If the CLI is present but there is no model key, the run fails honestly.
 

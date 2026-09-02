@@ -1,4 +1,4 @@
-# Agent instructions — İçerde
+# Agent instructions — Cherry
 
 Read this file before any implementation. Respond to the user in Turkish and English.
 
@@ -15,9 +15,9 @@ Before writing code, read that section’s **rule and document**. If the documen
 
 ## Hard product facts
 
-- Icerde itself is **not** a mobile app. It is Electron on Windows and macOS.
+- Cherry itself is **not** a mobile app. It is Electron on Windows and macOS.
 - There are **two backends**. Never mix them:
-  - Platform API: Go GraphQL + MongoDB (Icerde)
+  - Platform API: Go GraphQL + MongoDB (Cherry)
   - Generated customer backend: files on disk, activated locally for tests only
 - Customer delivery is **files** (folder / zip / git). **No hosting** in v1. Zip is the chosen stack’s **language** and Clean Architecture (Expo TS, Flutter Dart, SwiftUI) — never `preview/` HTML.
 - Mobile stack of the generated app is **chosen by the user** (Expo, Flutter, SwiftUI). Backend **target** is chosen via **Bağlantılar** (local / Supabase / Cloudflare / Render). GitHub push lives on that page.
@@ -41,7 +41,7 @@ docs/              this documentation
 
 ## Do not
 
-- Do not add a mobile client for Icerde.
+- Do not add a mobile client for Cherry.
 - Do not host customer backends.
 - Do not send PII to an LLM without redaction.
 - Do not implement a section without updating its doc if behavior changes.

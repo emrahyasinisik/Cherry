@@ -176,7 +176,7 @@ type ProjectFile struct {
 	Kind string `json:"kind"`
 }
 
-// Icerde platform GraphQL — not the generated customer app API.
+// Cherry platform GraphQL — not the generated customer app API.
 type Query struct {
 }
 

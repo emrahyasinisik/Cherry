@@ -4,7 +4,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - icerde-mongo:/data/db
+      - cherry-mongo:/data/db
 
 volumes:
-  icerde-mongo:
+  cherry-mongo:

@@ -114,7 +114,7 @@ export function AppShell({
     <div className="flex h-full min-h-screen flex-col bg-background">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
         <div className="flex items-center gap-3">
-          <span className="text-[15px] font-medium tracking-tight">İçerde</span>
+          <span className="text-[15px] font-medium tracking-tight">Cherry</span>
           <span className="text-muted-foreground">/</span>
           <span className="text-muted-foreground">{title ?? headerTitle(pathname)}</span>
         </div>

@@ -29,8 +29,8 @@ func TestFakeWritesMarker(t *testing.T) {
 
 func TestCLIMissing(t *testing.T) {
 	t.Setenv("PATH", "/nonexistent")
-	t.Setenv("ICERDE_OPENCODE_BIN", "")
-	t.Setenv("ICERDE_SIDECAR_DIR", t.TempDir())
+	t.Setenv("CHERRY_OPENCODE_BIN", "")
+	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
 	cli := &CLI{Bin: "", Timeout: 0, Require: false}
 	res, err := cli.Run(context.Background(), Request{Dir: t.TempDir(), Prompt: "x"})
 	if err != nil {
@@ -43,8 +43,8 @@ func TestCLIMissing(t *testing.T) {
 
 func TestCLIRequireMissing(t *testing.T) {
 	t.Setenv("PATH", "/nonexistent")
-	t.Setenv("ICERDE_OPENCODE_BIN", "")
-	t.Setenv("ICERDE_SIDECAR_DIR", t.TempDir())
+	t.Setenv("CHERRY_OPENCODE_BIN", "")
+	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
 	cli := &CLI{Require: true}
 	_, err := cli.Run(context.Background(), Request{Dir: t.TempDir(), Prompt: "x"})
 	if err == nil {

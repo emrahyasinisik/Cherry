@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/mailer"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/mailer"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestRegisterVerifyCodeSession(t *testing.T) {
@@ -15,7 +15,7 @@ func TestRegisterVerifyCodeSession(t *testing.T) {
 	svc := New(mem, mail, "pepper", "http://127.0.0.1:43147")
 	ctx := context.Background()
 
-	result, err := svc.Register(ctx, "ada@icerde.dev", "secret12", "fp-1", "Test", "127.0.0.1")
+	result, err := svc.Register(ctx, "ada@cherry.dev", "secret12", "fp-1", "Test", "127.0.0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,11 +47,11 @@ func TestRegisterVerifyCodeSession(t *testing.T) {
 	}
 
 	user, sess, err := svc.SessionUser(ctx, verified.Token)
-	if err != nil || user.Email != "ada@icerde.dev" || sess == nil {
+	if err != nil || user.Email != "ada@cherry.dev" || sess == nil {
 		t.Fatalf("session: %v %#v", err, user)
 	}
 
-	again, err := svc.Login(ctx, "ada@icerde.dev", "secret12", "fp-1", "Test", "127.0.0.1")
+	again, err := svc.Login(ctx, "ada@cherry.dev", "secret12", "fp-1", "Test", "127.0.0.1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestRegisterRequiresMailWhenConfigured(t *testing.T) {
 	mem := store.NewMemory()
 	mail := &mailer.Service{Store: mem, WebURL: "http://127.0.0.1:43147", Require: true}
 	svc := New(mem, mail, "pepper", "http://127.0.0.1:43147")
-	_, err := svc.Register(context.Background(), "ada@icerde.dev", "secret12", "fp-1", "Test", "127.0.0.1")
+	_, err := svc.Register(context.Background(), "ada@cherry.dev", "secret12", "fp-1", "Test", "127.0.0.1")
 	if err == nil {
 		t.Fatal("expected mail failure when Require is set and no SMTP/Resend")
 	}

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestOAuthConsentThenComplete(t *testing.T) {
@@ -21,7 +21,7 @@ func TestOAuthConsentThenComplete(t *testing.T) {
 		APIOrigin: "http://127.0.0.1:43148",
 	}
 	ctx := context.Background()
-	start, err := svc.StartOAuth(ctx, "u1", "emrah@icerde.dev", "GITHUB")
+	start, err := svc.StartOAuth(ctx, "u1", "emrah@cherry.dev", "GITHUB")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +76,7 @@ func TestOAuthDenyDoesNotConnect(t *testing.T) {
 		Store:     store.NewMemory(),
 		WebOrigin: "http://127.0.0.1:43147",
 	}
-	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@icerde.dev", "VERCEL")
+	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@cherry.dev", "VERCEL")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestOAuthWrongUser(t *testing.T) {
 		WebOrigin: "http://127.0.0.1:43147",
 	}
 	ctx := context.Background()
-	start, err := svc.StartOAuth(ctx, "u1", "emrah@icerde.dev", "SUPABASE")
+	start, err := svc.StartOAuth(ctx, "u1", "emrah@cherry.dev", "SUPABASE")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestProviderOAuthStartUsesGithub(t *testing.T) {
 			},
 		},
 	}
-	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@icerde.dev", "GITHUB")
+	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@cherry.dev", "GITHUB")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +167,7 @@ func TestProviderCallbackStoresToken(t *testing.T) {
 			},
 		},
 	}
-	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@icerde.dev", "GITHUB")
+	start, err := svc.StartOAuth(context.Background(), "u1", "emrah@cherry.dev", "GITHUB")
 	if err != nil {
 		t.Fatal(err)
 	}

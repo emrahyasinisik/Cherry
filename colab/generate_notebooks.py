@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Icerde Colab notebooks A and B from one recipe."""
+"""Generate Cherry Colab notebooks A and B from one recipe."""
 
 from __future__ import annotations
 
@@ -25,14 +25,14 @@ def cells(worker: str) -> list[dict]:
     }
     return [
         md(
-            f"""# İçerde — Colab fine-tune (işçi {worker})
+            f"""# Cherry — Colab fine-tune (işçi {worker})
 
 **TR:** Bu notebook **LLM {worker}** için. Aynı tarif **LLM {other}** notebook’unda da var. İki ayrı Colab oturumu, her biri **16GB GPU (T4)**. Tek kartta iki notebook yok. Colab üretim inferansı değildir — adapter’ı indir, stüdyoda sürüm olarak kaydet.
 
 **EN:** Same QLoRA recipe as worker {other}. Two Colab sessions, **16GB GPU each**. Colab is not production inference.
 
 Dosyalar / Files:
-1. `icerde_training_pack.json` (stüdyodan veya `colab/examples/`)
+1. `cherry_training_pack.json` (stüdyodan veya `colab/examples/`)
 2. Bu `.ipynb` — Runtime → GPU (T4)"""
         ),
         md("## 0. GPU kontrol / GPU check"),
@@ -67,26 +67,26 @@ print("worker", WORKER, "base", BASE_MODEL, "gpu_budget_gb", 16)"""
         md(
             """## 3. Eğitim paketi / Training pack
 
-Soldan **icerde_training_pack.json** yükle (stüdyo LLM sayfası veya `colab/examples/`). Yoksa hücredeki seed çalışır."""
+Soldan **cherry_training_pack.json** yükle (stüdyo LLM sayfası veya `colab/examples/`). Yoksa hücredeki seed çalışır."""
         ),
         py(
             r'''from pathlib import Path
 import json
 
-PACK_PATH = Path("/content/icerde_training_pack.json")
+PACK_PATH = Path("/content/cherry_training_pack.json")
 MINI = {
-  "schema": "icerde.training_pack.v1",
+  "schema": "cherry.training_pack.v1",
   "recipe": {"baseModel": BASE_MODEL, "method": "qlora", "gpuBudgetGb": 16},
   "examples": [
     {
-      "instruction": "İçerde stüdyosu için mobil uygulama planı yaz. preview/ HTML site yazma. PII uydurma.",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. preview/ HTML site yazma. PII uydurma.",
       "input": "Proje: Kahve sipariş\nYığın: EXPO\nBrif: Mahalle kahvecisi. Giriş + ana ekran. Yerel backend.",
       "output": "Plan (Expo SDK 57):\n- frontend/ domain-data-presentation\n- backend/ yerel\n- maestro/ login.yaml + home.yaml"
     },
     {
       "instruction": "Maestro YAML yaz. Cihaz yoksa SKIPPED; PASSED uydurma.",
       "input": "Akış: login.yaml\nSonuç: SKIPPED",
-      "output": "appId: com.icerde.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n"
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n"
     },
     {
       "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
@@ -116,7 +116,7 @@ for ex in pack.get("examples", []):
     })
 print("sft_rows", len(rows))
 if len(rows) < 2:
-    raise SystemExit("Paket boş. Stüdyodan JSON indir veya examples/icerde_training_pack.json yükle.")'''
+    raise SystemExit("Paket boş. Stüdyodan JSON indir veya examples/cherry_training_pack.json yükle.")'''
         ),
         md("## 4. Dataset"),
         py(
@@ -127,7 +127,7 @@ def format_row(ex):
     if ex["input"]:
         user = user + "\n\n" + ex["input"]
     return (
-        f"<|im_start|>system\nİçerde işçi {WORKER}. Mobil frontend/backend ve Maestro YAML yaz. PII yok. HTML site yazma.<|im_end|>\n"
+        f"<|im_start|>system\nCherry işçi {WORKER}. Mobil frontend/backend ve Maestro YAML yaz. PII yok. HTML site yazma.<|im_end|>\n"
         f"<|im_start|>user\n{user}<|im_end|>\n"
         f"<|im_start|>assistant\n{ex['output']}<|im_end|>"
     )
@@ -199,21 +199,21 @@ trainer.train()'''
             f'''from google.colab import files
 import shutil
 
-adapter_dir = f"/content/icerde_adapter_worker_{worker}"
-zip_path = f"/content/icerde_adapter_worker_{worker}"
+adapter_dir = f"/content/cherry_adapter_worker_{worker}"
+zip_path = f"/content/cherry_adapter_worker_{worker}"
 model.save_pretrained(adapter_dir)
 tok.save_pretrained(adapter_dir)
 shutil.make_archive(zip_path, "zip", adapter_dir)
 print("zip", zip_path + ".zip")
-print("Stüdyo LLM sayfasında kaydet / Register in Icerde:")
-print(f'  slot={worker}  name=v-colab  checkpointRef=icerde_adapter_worker_{worker}.zip')
+print("Stüdyo LLM sayfasında kaydet / Register in Cherry:")
+print(f'  slot={worker}  name=v-colab  checkpointRef=cherry_adapter_worker_{worker}.zip')
 files.download(zip_path + ".zip")'''
         ),
         md(
             f"""## Sonra / Next
 
 1. Zip’i makineye indir.
-2. İçerde → LLM yönetici → **Colab sürümü kaydet** (işçi {worker}).
+2. Cherry → LLM yönetici → **Colab sürümü kaydet** (işçi {worker}).
 3. Pointer’ı o sürüme al. In-flight işler eski pointer’da biter.
 4. Colab’i kapat. Üretim çağrıları stüdyo işçilerinde kalır."""
         ),
@@ -236,7 +236,7 @@ def notebook(worker: str) -> dict:
 
 def main() -> None:
     for worker in ("A", "B"):
-        path = ROOT / f"icerde_worker_{worker.lower()}.ipynb"
+        path = ROOT / f"cherry_worker_{worker.lower()}.ipynb"
         path.write_text(json.dumps(notebook(worker), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print("wrote", path)
 

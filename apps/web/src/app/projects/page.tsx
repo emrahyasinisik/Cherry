@@ -107,7 +107,7 @@ export default function ProjectsPage() {
           </Button>
         </div>
         {projects.length === 0 ? (
-          <div className="icerde-enter rounded-[10px] border border-dashed border-border bg-card/40 px-6 py-16 text-center">
+          <div className="cherry-enter rounded-[10px] border border-dashed border-border bg-card/40 px-6 py-16 text-center">
             <p className="text-base font-medium">Henüz proje yok</p>
             <p className="mt-1 text-muted-foreground">
               İstediğin mobil uygulamayı anlat. Kodlama ve test arka planda yürür.

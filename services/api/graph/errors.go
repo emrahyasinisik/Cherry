@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/icerde/api/internal/connect"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/connect"
+	"github.com/cherry/api/internal/store"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestBuildPackRedactsAndSkipsSecrets(t *testing.T) {
 	root := t.TempDir()
-	mustWrite(t, filepath.Join(root, "README.md"), "Kahve uygulaması. İletişim ada@icerde.dev")
+	mustWrite(t, filepath.Join(root, "README.md"), "Kahve uygulaması. İletişim ada@cherry.dev")
 	mustWrite(t, filepath.Join(root, "llm", "plan.md"), "Ekranları böl. PII yok.")
 	mustWrite(t, filepath.Join(root, "frontend", "src", "domain", "entities", "item.ts"), "export type Item = { id: string };\n")
 	mustWrite(t, filepath.Join(root, ".env"), "SECRET=sk-live-should-never-leave")
@@ -25,7 +25,7 @@ func TestBuildPackRedactsAndSkipsSecrets(t *testing.T) {
 		Projects: []store.Project{{
 			ID:       "p1",
 			Name:     "Kahve",
-			Brief:    "Ada için ada@icerde.dev ile kahve. Kod 123456.",
+			Brief:    "Ada için ada@cherry.dev ile kahve. Kod 123456.",
 			Stack:    store.StackExpo,
 			RootPath: root,
 			Status:   store.StatusReady,
@@ -58,7 +58,7 @@ func TestBuildPackRedactsAndSkipsSecrets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(blob, "ada@icerde.dev") || strings.Contains(blob, "123456") || strings.Contains(blob, "sk-live") {
+	if strings.Contains(blob, "ada@cherry.dev") || strings.Contains(blob, "123456") || strings.Contains(blob, "sk-live") {
 		t.Fatalf("pii or secret leaked: %s", blob)
 	}
 	if strings.Contains(blob, "preview/home.html") || strings.Contains(blob, "<html>preview") {
@@ -112,7 +112,7 @@ func TestRegisterVersionPointsAtCheckpoint(t *testing.T) {
 		t.Fatal(err)
 	}
 	svc := &Service{Store: mem, Completer: MockCompleter{}}
-	version, err := svc.RegisterVersion(ctx, "A", "v1.2-colab", "T4 QLoRA", "icerde_adapter_worker_A.zip")
+	version, err := svc.RegisterVersion(ctx, "A", "v1.2-colab", "T4 QLoRA", "cherry_adapter_worker_A.zip")
 	if err != nil {
 		t.Fatal(err)
 	}

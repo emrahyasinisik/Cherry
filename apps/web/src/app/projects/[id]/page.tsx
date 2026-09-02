@@ -185,7 +185,7 @@ export default function StudioPage() {
 
   return (
     <AppShell user={user} title={project.name} status={projectStatusLabel(project.status)}>
-      <div className="icerde-enter grid min-h-full gap-px bg-border lg:grid-cols-[minmax(240px,1fr)_minmax(320px,1.4fr)_minmax(240px,1fr)]">
+      <div className="cherry-enter grid min-h-full gap-px bg-border lg:grid-cols-[minmax(240px,1fr)_minmax(320px,1.4fr)_minmax(240px,1fr)]">
         <section className="flex flex-col gap-4 bg-background p-6">
           <h1 className="text-base font-medium">{project.name}</h1>
           <p className="text-muted-foreground">{project.brief}</p>
@@ -223,7 +223,7 @@ export default function StudioPage() {
         <section className="flex min-h-[280px] flex-col bg-background p-6">
           <h2 className="mb-3 text-sm font-medium">Sohbet</h2>
           <p className="mb-3 text-muted-foreground">
-            Buraya yaz. OpenCode ayrı açılmaz; ajan İçerde içinde, arka planda çalışır.
+            Buraya yaz. OpenCode ayrı açılmaz; ajan Cherry içinde, arka planda çalışır.
           </p>
           <div
             ref={scroller}
@@ -241,7 +241,7 @@ export default function StudioPage() {
               onChange={(event) => setDraft(event.target.value)}
               placeholder={working ? "Ajan yazıyor…" : "Ne değişsin?"}
               disabled={working || sending}
-              className="icerde-focus"
+              className="cherry-focus"
             />
             <Button type="submit" disabled={working || sending || draft.trim().length === 0}>
               Gönder
@@ -429,7 +429,7 @@ async function downloadZip(id: string) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "icerde.zip";
+  anchor.download = "cherry.zip";
   anchor.click();
   URL.revokeObjectURL(url);
 }

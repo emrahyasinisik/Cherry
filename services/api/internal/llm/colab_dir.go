@@ -7,7 +7,7 @@ import (
 )
 
 func ColabDir() string {
-	if value := strings.TrimSpace(os.Getenv("ICERDE_COLAB_DIR")); value != "" {
+	if value := strings.TrimSpace(os.Getenv("CHERRY_COLAB_DIR")); value != "" {
 		if abs, err := filepath.Abs(value); err == nil {
 			return abs
 		}

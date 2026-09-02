@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func ReadFile(root, rel string) ([]byte, error) {

@@ -10,7 +10,7 @@ alwaysApply: false
 # Next.js UI
 
 - Renderer UI is Next.js + TypeScript + Tailwind + shadcn/ui. Do not add a second component library.
-- This UI runs inside Electron. There is no Icerde mobile UI.
+- This UI runs inside Electron. There is no Cherry mobile UI.
 - Talk to the platform via GraphQL only.
 - Real copy in Turkish (primary UI) with English where the user-facing product needs both.
 - Every screen: empty, loading, error.

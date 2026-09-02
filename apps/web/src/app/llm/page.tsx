@@ -41,7 +41,7 @@ export default function LlmAdminPage() {
   const [regSlot, setRegSlot] = useState<ColabSlot>("A");
   const [regName, setRegName] = useState("v-colab");
   const [regNote, setRegNote] = useState("");
-  const [regRef, setRegRef] = useState("icerde_adapter_worker_A.zip");
+  const [regRef, setRegRef] = useState("cherry_adapter_worker_A.zip");
   const rooted = useRef(false);
 
   async function load() {
@@ -100,7 +100,7 @@ export default function LlmAdminPage() {
 
   return (
     <AppShell user={user} title="LLM yönetici" status="GDPR katmanı bağlı">
-      <div className="icerde-enter mx-auto flex max-w-5xl flex-col gap-6 p-8">
+      <div className="cherry-enter mx-auto flex max-w-5xl flex-col gap-6 p-8">
         <div>
           <h1 className="text-base font-medium">LLM yönetici</h1>
           <p className="text-muted-foreground">
@@ -192,28 +192,28 @@ export default function LlmAdminPage() {
             </Button>
             <a
               className={buttonVariants({ variant: "outline" })}
-              href="/colab/icerde_worker_a.ipynb"
+              href="/colab/cherry_worker_a.ipynb"
               download
             >
               Notebook A
             </a>
             <a
               className={buttonVariants({ variant: "outline" })}
-              href="/colab/icerde_worker_b.ipynb"
+              href="/colab/cherry_worker_b.ipynb"
               download
             >
               Notebook B
             </a>
             <a
               className={buttonVariants({ variant: "outline" })}
-              href="/colab/examples/icerde_training_pack.json"
+              href="/colab/examples/cherry_training_pack.json"
               download
             >
               Seed paket
             </a>
           </div>
           <p className="font-mono text-[11px] text-muted-foreground">
-            colab/icerde_worker_a.ipynb · colab/icerde_worker_b.ipynb
+            colab/cherry_worker_a.ipynb · colab/cherry_worker_b.ipynb
           </p>
           <h3 className="mt-2 text-sm font-medium">Colab sürümü kaydet</h3>
           <p className="text-muted-foreground">
@@ -228,7 +228,7 @@ export default function LlmAdminPage() {
                 variant={regSlot === slot ? "default" : "outline"}
                 onClick={() => {
                   setRegSlot(slot);
-                  setRegRef(`icerde_adapter_worker_${slot}.zip`);
+                  setRegRef(`cherry_adapter_worker_${slot}.zip`);
                 }}
               >
                 İşçi {slot}
@@ -240,20 +240,20 @@ export default function LlmAdminPage() {
               value={regName}
               onChange={(event) => setRegName(event.target.value)}
               placeholder="v-colab"
-              className="icerde-focus font-mono text-[12px]"
+              className="cherry-focus font-mono text-[12px]"
             />
             <Input
               value={regRef}
               onChange={(event) => setRegRef(event.target.value)}
-              placeholder="icerde_adapter_worker_A.zip"
-              className="icerde-focus font-mono text-[12px]"
+              placeholder="cherry_adapter_worker_A.zip"
+              className="cherry-focus font-mono text-[12px]"
             />
           </div>
           <Input
             value={regNote}
             onChange={(event) => setRegNote(event.target.value)}
             placeholder="T4 QLoRA notu (isteğe bağlı)"
-            className="icerde-focus text-[12px]"
+            className="cherry-focus text-[12px]"
           />
           <Button
             type="button"
@@ -290,7 +290,7 @@ export default function LlmAdminPage() {
             <Input
               value={mcpRoot}
               onChange={(event) => setMcpRoot(event.target.value)}
-              className="icerde-focus font-mono text-[12px]"
+              className="cherry-focus font-mono text-[12px]"
             />
             <Button
               type="button"

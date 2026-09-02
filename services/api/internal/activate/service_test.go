@@ -24,7 +24,7 @@ import (
   "os"
 )
 func main() {
-  addr := os.Getenv("ICERDE_CUSTOMER_ADDR")
+  addr := os.Getenv("CHERRY_CUSTOMER_ADDR")
   if addr == "" { addr = "127.0.0.1:18080" }
   http.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
     _ = json.NewEncoder(w).Encode(map[string]any{"ok": true})

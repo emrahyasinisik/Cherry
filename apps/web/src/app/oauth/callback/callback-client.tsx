@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { IcerdeMark } from "@/components/provider-mark";
+import { CherryMark } from "@/components/provider-mark";
 import { getToken, graphql, type Connection } from "@/lib/api";
 
 export function CallbackClient() {
@@ -58,7 +58,7 @@ export function CallbackClient() {
 
   return (
     <div className="flex min-h-full flex-col items-center justify-center gap-3">
-      <IcerdeMark className="size-8" />
+      <CherryMark className="size-8" />
       <p className="text-muted-foreground">OAuth 2.0 kodu değiş tokuş…</p>
     </div>
   );

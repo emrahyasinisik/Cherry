@@ -13,7 +13,7 @@ sequenceDiagram
   participant U as User
   participant App as Electron
   participant API as GoGraphQL
-  participant Mail as Icerde_mailer
+  participant Mail as Cherry_mailer
   participant DB as MongoDB
   U->>App: email_plus_password
   App->>API: login

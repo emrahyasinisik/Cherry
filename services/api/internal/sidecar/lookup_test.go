@@ -12,7 +12,7 @@ func TestLookPrefersEnv(t *testing.T) {
 	if err := os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("ICERDE_OPENCODE_BIN", bin)
+	t.Setenv("CHERRY_OPENCODE_BIN", bin)
 	hit, err := Look("opencode")
 	if err != nil {
 		t.Fatal(err)
@@ -28,9 +28,9 @@ func TestLookBundledDir(t *testing.T) {
 	if err := os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("ICERDE_OPENCODE_BIN", "")
-	t.Setenv("ICERDE_MAESTRO_BIN", "")
-	t.Setenv("ICERDE_SIDECAR_DIR", dir)
+	t.Setenv("CHERRY_OPENCODE_BIN", "")
+	t.Setenv("CHERRY_MAESTRO_BIN", "")
+	t.Setenv("CHERRY_SIDECAR_DIR", dir)
 	t.Setenv("PATH", "/nonexistent")
 	hit, err := Look("maestro")
 	if err != nil {
@@ -42,8 +42,8 @@ func TestLookBundledDir(t *testing.T) {
 }
 
 func TestLookMissing(t *testing.T) {
-	t.Setenv("ICERDE_OPENCODE_BIN", "")
-	t.Setenv("ICERDE_SIDECAR_DIR", t.TempDir())
+	t.Setenv("CHERRY_OPENCODE_BIN", "")
+	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
 	t.Setenv("PATH", "/nonexistent")
 	if _, err := Look("opencode"); err == nil {
 		t.Fatal("expected missing")

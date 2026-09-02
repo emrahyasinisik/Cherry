@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestCompleteRedactsAndAudits(t *testing.T) {
@@ -22,12 +22,12 @@ func TestCompleteRedactsAndAudits(t *testing.T) {
 		ProjectID:  "p1",
 		Purpose:    "codegen",
 		LegalBasis: "contract",
-		Prompt:     "Ada için ada@icerde.dev ile kahve uygulaması yaz. Kod 123456.",
+		Prompt:     "Ada için ada@cherry.dev ile kahve uygulaması yaz. Kod 123456.",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(out.Text, "ada@icerde.dev") || strings.Contains(out.Text, "123456") {
+	if strings.Contains(out.Text, "ada@cherry.dev") || strings.Contains(out.Text, "123456") {
 		t.Fatalf("pii leaked: %s", out.Text)
 	}
 	if out.InputN == 0 {
@@ -40,7 +40,7 @@ func TestCompleteRedactsAndAudits(t *testing.T) {
 	if err != nil || len(events) != 1 {
 		t.Fatalf("audit %v %#v", err, events)
 	}
-	if strings.Contains(events[0].PromptPreview, "ada@icerde.dev") {
+	if strings.Contains(events[0].PromptPreview, "ada@cherry.dev") {
 		t.Fatalf("audit leaked %s", events[0].PromptPreview)
 	}
 }

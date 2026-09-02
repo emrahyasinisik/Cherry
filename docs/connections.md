@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/20-connections.mdc](../.cursor/rules/20-connections.mdc)
 
-**TR:** Kişi, ürettiği uygulamanın backend’inin **nerede** duracağını seçer. İçerde barındırmaz. Hesaplar **Bağlantılar** menüsünden, **OAuth 2.0** izin ekranı ile bağlanır.
+**TR:** Kişi, ürettiği uygulamanın backend’inin **nerede** duracağını seçer. Cherry barındırmaz. Hesaplar **Bağlantılar** menüsünden, **OAuth 2.0** izin ekranı ile bağlanır.
 
-**EN:** The person chooses **where** the generated app’s backend lives. Icerde does not host it. Accounts under **Connections** are bound with **OAuth 2.0** consent.
+**EN:** The person chooses **where** the generated app’s backend lives. Cherry does not host it. Accounts under **Connections** are bound with **OAuth 2.0** consent.
 
 ## Sistemin adı / What this is called
 
@@ -12,12 +12,12 @@ Kullanıcının tarif ettiği akış:
 
 1. Uygulamada **Bağlan** (Connect with GitHub / Supabase / …)
 2. Tarayıcı **sağlayıcının sitesine** (veya onun izin ekranına) gider
-3. “**İçerde hesabına erişmek istiyor**” — yetkilendir / iptal
+3. “**Cherry hesabına erişmek istiyor**” — yetkilendir / iptal
 4. Geri dönüş (callback) ile bağlantı kurulur
 
 Bunun adı **OAuth 2.0**, özel olarak **Authorization Code** akışı. Ekran **consent / izin / onay ekranı**.
 
-GitHub OAuth uygulaması (`ICERDE_GITHUB_CLIENT_ID`) varsa gerçek `github.com/login/oauth/authorize` açılır. Yoksa İçerde **yerel izin ekranı** gösterir — aynı onay; sessiz “bağlandı” yok. İptal = bağlı değil.
+GitHub OAuth uygulaması (`CHERRY_GITHUB_CLIENT_ID`) varsa gerçek `github.com/login/oauth/authorize` açılır. Yoksa Cherry **yerel izin ekranı** gösterir — aynı onay; sessiz “bağlandı” yok. İptal = bağlı değil.
 
 Token yapıştırma gelişmiş yedek yoldur (Cloudflare API token, PAT, …).
 
@@ -25,7 +25,7 @@ Token yapıştırma gelişmiş yedek yoldur (Cloudflare API token, PAT, …).
 
 ```mermaid
 flowchart TB
-  subgraph icerde [Icerde_platform]
+  subgraph cherry [Cherry_platform]
     GQL[Go_GraphQL]
     Mongo[(MongoDB)]
   end
@@ -49,9 +49,9 @@ flowchart TB
   BE --> RE
 ```
 
-- İçerde API’si (Go GraphQL + Mongo) müşteri backend’i **değildir**.
+- Cherry API’si (Go GraphQL + Mongo) müşteri backend’i **değildir**.
 - Müşteri backend’i dosyadır; hedef **yerel Go iskeleti**, **Supabase**, **Cloudflare** veya benzeri olabilir — kişi seçer.
-- İçerde bu servislerde uygulama **barındırmaz**. Token ve proje kişinin hesabındadır.
+- Cherry bu servislerde uygulama **barındırmaz**. Token ve proje kişinin hesabındadır.
 - OpenCode, bağlı hedefe göre `backend/` (ve gerekirse frontend env) yazar.
 
 ## Menü / Menu
@@ -60,7 +60,7 @@ Sidebar: **Bağlantılar**. Kartlarda sağlayıcı logosu. Birincil düğme OAut
 
 ```mermaid
 sequenceDiagram
-  participant UI as Icerde
+  participant UI as Cherry
   participant API as GraphQL
   participant Consent as Izin_ekrani
   UI->>API: startConnectionOAuth
@@ -87,10 +87,10 @@ Bağlı değilse hedef seçilemez; ajan uydurma URL yazmaz.
 | Bağlantı | Ne |
 | --- | --- |
 | **GitHub** | Geliştirilen proje kişinin reposuna **çekilir / push**. Teslim zip’e ek, yerine geçmez. |
-| **Vercel** | Kişi hesabına frontend (veya seçilen parça) deploy — İçerde host değil. |
-| **Render** | Kişi hesabına backend/servis deploy — İçerde host değil. |
+| **Vercel** | Kişi hesabına frontend (veya seçilen parça) deploy — Cherry host değil. |
+| **Render** | Kişi hesabına backend/servis deploy — Cherry host değil. |
 
-GitHub push: gerçek `git push`. Yerel OAuth grant’i (client id yokken) GitHub’a push **etmez** — hata görünür. `ICERDE_GITHUB_CLIENT_ID` + secret veya PAT gerekir.
+GitHub push: gerçek `git push`. Yerel OAuth grant’i (client id yokken) GitHub’a push **etmez** — hata görünür. `CHERRY_GITHUB_CLIENT_ID` + secret veya PAT gerekir.
 
 ## Sırlar / Secrets
 
@@ -100,8 +100,8 @@ GitHub push: gerçek `git push`. Yerel OAuth grant’i (client id yokken) GitHub
 
 ## Yapılmayacak / Do not
 
-- İçerde’nin kendi GraphQL’ine Supabase/Cloudflare karıştırma.
-- Müşteri uygulamasını İçerde bulutunda host etme.
+- Cherry’nin kendi GraphQL’ine Supabase/Cloudflare karıştırma.
+- Müşteri uygulamasını Cherry bulutunda host etme.
 - AgentMail, SMS, Figma’yı bu menüye alma.
 - İzin vermeden “bağlı” gösterme.
 - Dilim 7–8’i (işçi B, Colab) bu iş için erteleme — sıra [build-order.md](build-order.md).

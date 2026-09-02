@@ -14,4 +14,4 @@ alwaysApply: false
 - Org data (projects, jobs, audit) must not leak across org boundaries.
 - Membership roles: owner, admin, member. Only owner/admin manage LLM routing for that org if org-scoped models exist.
 - User deletion from an org ≠ platform user deletion. Document both in [docs/organizations.md](docs/organizations.md).
-- Generated project files inherit the org/personal owner of the Icerde project record.
+- Generated project files inherit the org/personal owner of the Cherry project record.

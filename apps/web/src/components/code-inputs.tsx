@@ -73,7 +73,7 @@ export function CodeInputs({ value, onChange, disabled }: CodeInputsProps) {
           onChange={(event) => handleChange(index, event)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          className="icerde-focus h-12 w-10 rounded-md border border-input bg-transparent text-center font-mono text-lg outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="cherry-focus h-12 w-10 rounded-md border border-input bg-transparent text-center font-mono text-lg outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
         />
       ))}
     </div>

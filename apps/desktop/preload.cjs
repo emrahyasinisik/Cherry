@@ -11,7 +11,7 @@ function deviceLabel() {
   return `${os.hostname()} (${process.platform})`;
 }
 
-contextBridge.exposeInMainWorld("icerdeDesktop", {
+contextBridge.exposeInMainWorld("cherryDesktop", {
   platform: process.platform,
   deviceFingerprint,
   deviceLabel,

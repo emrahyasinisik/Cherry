@@ -1,5 +1,5 @@
 {
-  "schema": "icerde.training_pack.v1",
+  "schema": "cherry.training_pack.v1",
   "exportedAt": "2026-09-02T00:00:00Z",
   "recipe": {
     "baseModel": "Qwen/Qwen2.5-1.5B-Instruct",
@@ -13,7 +13,7 @@
       "id": "seed-expo-brief",
       "kind": "brief",
       "source": "seed",
-      "instruction": "İçerde stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
       "input": "Proje: Kahve sipariş\nYığın: EXPO\nBrif:\nMahalle kahvecisi için sipariş listesi. Giriş ve ana ekran. Yerel backend.",
       "output": "Plan (Expo SDK 57, TypeScript):\n- frontend/: domain / data / presentation.\n- backend/: yerel HTTP, barındırma yok.\n- maestro/: login.yaml + home.yaml.\n- preview/ zip’e girmez.",
       "meta": { "stack": "EXPO", "kind": "brief" }
@@ -51,7 +51,7 @@
       "source": "seed",
       "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
       "input": "Akış: login.yaml\nSonuç: SKIPPED\nNot: Emülatör yok. PASSED sayılmaz.",
-      "output": "appId: com.icerde.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n",
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n",
       "meta": { "flow": "login.yaml", "result": "SKIPPED" }
     },
     {
@@ -60,7 +60,7 @@
       "source": "seed",
       "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
       "input": "Akış: home.yaml\nSonuç: SKIPPED\nNot: Cihaz yoksa SKIPPED.",
-      "output": "appId: com.icerde.demo\n---\n- launchApp\n- assertVisible: \"Siparişler\"\n",
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Siparişler\"\n",
       "meta": { "flow": "home.yaml", "result": "SKIPPED" }
     },
     {
@@ -76,7 +76,7 @@
       "id": "seed-workers",
       "kind": "brief",
       "source": "seed",
-      "instruction": "İçerde stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
       "input": "Proje: Kapasite notu\nYığın: EXPO\nBrif:\nA ve B aynı işi yapar. Boş işçi alır; ikisi meşgulse kuyruk. Kod/test ayrımı yok.",
       "output": "Plan:\n- Tek tarif, iki kapasite işçisi.\n- Versiyon pointer’ı sonraki cevabı değiştirir.\n- Colab üretim inferansı değil; checkpoint stüdyoya döner.",
       "meta": { "stack": "EXPO", "kind": "capacity" }

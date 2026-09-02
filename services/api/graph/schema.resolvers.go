@@ -10,7 +10,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 // Register is the resolver for the register field.

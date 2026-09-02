@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/11-llmops.mdc](../.cursor/rules/11-llmops.mdc) · [llmops.md](llmops.md)
 
-**TR:** Colab’de eğitim **senin Google hesabında** olur. İçerde Colab barındırmaz ve Colab MCP değildir. Bu repodaki dosyaları Colab’e yüklersin; adapter zip’ini indirir, stüdyoda yeni `llmVersion` kaydedersin.
+**TR:** Colab’de eğitim **senin Google hesabında** olur. Cherry Colab barındırmaz ve Colab MCP değildir. Bu repodaki dosyaları Colab’e yüklersin; adapter zip’ini indirir, stüdyoda yeni `llmVersion` kaydedersin.
 
-**EN:** Training runs on **your** Colab runtime. Icerde does not host Colab. Upload these files, download the adapter zip, register a new immutable version in the studio.
+**EN:** Training runs on **your** Colab runtime. Cherry does not host Colab. Upload these files, download the adapter zip, register a new immutable version in the studio.
 
 ## Dosyalar / Files
 
@@ -12,10 +12,10 @@ Repo kökü `colab/`:
 
 | Dosya | İş |
 | --- | --- |
-| `colab/icerde_worker_a.ipynb` | İşçi A, 16GB T4, QLoRA |
-| `colab/icerde_worker_b.ipynb` | İşçi B, **aynı tarif** |
-| `colab/examples/icerde_training_pack.json` | Seed paket (canlı iz yokken) |
-| `colab/examples/icerde_sft.jsonl` | Aynı seed, satır satır |
+| `colab/cherry_worker_a.ipynb` | İşçi A, 16GB T4, QLoRA |
+| `colab/cherry_worker_b.ipynb` | İşçi B, **aynı tarif** |
+| `colab/examples/cherry_training_pack.json` | Seed paket (canlı iz yokken) |
+| `colab/examples/cherry_sft.jsonl` | Aynı seed, satır satır |
 | `colab/training_pack.schema.json` | JSON şema |
 
 Stüdyo **LLM** sayfasından da indirilir: canlı paket (JSON + JSONL), notebook’lar, seed.
@@ -35,10 +35,10 @@ flowchart LR
   VerB --> Pointer
 ```
 
-1. İçerde’de bir proje üret (brif + kod + Maestro). Yoksa seed paketi kullan.
-2. LLM yönetici → **Eğitim paketini indir** (`icerde-training-pack.json` + `.jsonl`).
+1. Cherry’de bir proje üret (brif + kod + Maestro). Yoksa seed paketi kullan.
+2. LLM yönetici → **Eğitim paketini indir** (`cherry-training-pack.json` + `.jsonl`).
 3. [colab.research.google.com](https://colab.research.google.com) — **iki oturum**. Her birinde Runtime → GPU → **T4**.
-4. Oturum A’ya `icerde_worker_a.ipynb` + JSON yükle. Oturum B’ye `icerde_worker_b.ipynb` + **aynı** JSON.
+4. Oturum A’ya `cherry_worker_a.ipynb` + JSON yükle. Oturum B’ye `cherry_worker_b.ipynb` + **aynı** JSON.
 5. Hücreleri sırayla çalıştır. Adapter zip iner.
 6. LLM yönetici → **Colab sürümü kaydet** (`slot` A veya B, `checkpointRef` = zip adı). Pointer’ı **sen** çevirirsin. In-flight iş eski pointer’da biter.
 
@@ -53,7 +53,7 @@ flowchart LR
 
 ## Paket içeriği / Pack contents
 
-`schema`: `icerde.training_pack.v1`
+`schema`: `cherry.training_pack.v1`
 
 Her örnek: `instruction`, `input`, `output`. Canlı iz inceyse stüdyo **seed** örnek ekler (işaret `source: seed`).
 

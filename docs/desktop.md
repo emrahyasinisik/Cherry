@@ -23,9 +23,9 @@ flowchart TB
   Sidecar --> Maestro[maestro]
 ```
 
-Go API çocuk müşteri sürecini başlatır (`activate`). Electron CLI’leri paketler ve `ICERDE_SIDECAR_DIR` yazar.
+Go API çocuk müşteri sürecini başlatır (`activate`). Electron CLI’leri paketler ve `CHERRY_SIDECAR_DIR` yazar.
 
-The Go API starts the generated backend. Electron vendors the CLIs and sets `ICERDE_SIDECAR_DIR`.
+The Go API starts the generated backend. Electron vendors the CLIs and sets `CHERRY_SIDECAR_DIR`.
 
 ## Güvenlik sınırı / Trust boundary
 
@@ -42,5 +42,5 @@ flowchart LR
 - Generated project path stays in userData or a chosen workspace folder.
 - **Müşteri OpenCode / Maestro kurmaz.** Kurucu `vendor/bin` veya `process.resourcesPath/bin` doldurur.
 - **The customer does not install OpenCode or Maestro.** The installer fills `vendor/bin` or `resources/bin`.
-- PATH / `ICERDE_OPENCODE_BIN` / `ICERDE_MAESTRO_BIN` is a **developer fallback** only.
+- PATH / `CHERRY_OPENCODE_BIN` / `CHERRY_MAESTRO_BIN` is a **developer fallback** only.
 - Missing sidecar: keep scaffold / SKIPPED Maestro. No fake write, no fake pass.

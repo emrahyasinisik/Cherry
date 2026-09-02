@@ -6,10 +6,10 @@
 
 | Dosya / File | Ne / What |
 | --- | --- |
-| [icerde_worker_a.ipynb](icerde_worker_a.ipynb) | İşçi A |
-| [icerde_worker_b.ipynb](icerde_worker_b.ipynb) | İşçi B |
-| [examples/icerde_training_pack.json](examples/icerde_training_pack.json) | Seed paket |
-| [examples/icerde_sft.jsonl](examples/icerde_sft.jsonl) | Seed JSONL |
+| [cherry_worker_a.ipynb](cherry_worker_a.ipynb) | İşçi A |
+| [cherry_worker_b.ipynb](cherry_worker_b.ipynb) | İşçi B |
+| [examples/cherry_training_pack.json](examples/cherry_training_pack.json) | Seed paket |
+| [examples/cherry_sft.jsonl](examples/cherry_sft.jsonl) | Seed JSONL |
 | [training_pack.schema.json](training_pack.schema.json) | Şema |
 
 Nasıl: [docs/colab.md](../docs/colab.md)

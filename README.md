@@ -1,8 +1,8 @@
-# İçerde
+# Cherry
 
-**TR:** İçerde bir mobil uygulama değildir. Windows ve Mac’te çalışan bir masaüstü stüdyosudur. Arka plandaki ajan mobil uygulamanın frontend ve backend kodunu yazar, yerelde ayağa kaldırır, **Maestro MCP** ile UI test eder. Müşteriye **klasör / zip / git** verilir. Barındırma yoktur.
+**TR:** Cherry bir mobil uygulama değildir. Windows ve Mac’te çalışan bir masaüstü stüdyosudur. Arka plandaki ajan mobil uygulamanın frontend ve backend kodunu yazar, yerelde ayağa kaldırır, **Maestro MCP** ile UI test eder. Müşteriye **klasör / zip / git** verilir. Barındırma yoktur.
 
-**EN:** Icerde is not a mobile app. It is a Win/Mac desktop studio. A background agent writes a mobile app’s frontend and backend, boots it locally, and UI-tests it with **Maestro MCP**. The customer receives **folder / zip / git**. No hosting.
+**EN:** Cherry is not a mobile app. It is a Win/Mac desktop studio. A background agent writes a mobile app’s frontend and backend, boots it locally, and UI-tests it with **Maestro MCP**. The customer receives **folder / zip / git**. No hosting.
 
 Ajanlar için: [AGENTS.md](AGENTS.md)
 

@@ -44,9 +44,9 @@ func Look(name string) (Hit, error) {
 func envKeyFor(name string) string {
 	switch strings.ToLower(name) {
 	case "opencode":
-		return "ICERDE_OPENCODE_BIN"
+		return "CHERRY_OPENCODE_BIN"
 	case "maestro":
-		return "ICERDE_MAESTRO_BIN"
+		return "CHERRY_MAESTRO_BIN"
 	default:
 		return ""
 	}
@@ -61,7 +61,7 @@ func names(name string) []string {
 
 func bundledDirs() []string {
 	var out []string
-	if dir := strings.TrimSpace(os.Getenv("ICERDE_SIDECAR_DIR")); dir != "" {
+	if dir := strings.TrimSpace(os.Getenv("CHERRY_SIDECAR_DIR")); dir != "" {
 		out = append(out, dir)
 		return unique(out)
 	}

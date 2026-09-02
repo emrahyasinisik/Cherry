@@ -88,7 +88,7 @@ flowchart LR
 | Aynı tarif (LoRA/QLoRA), aynı veri paketi | A ve B yük paylaşır; farklı iş uzmanı değiller |
 | 16GB / oturum | Colab T4 bütçesi; tam ağırlık büyük model yok |
 | İki oturum = iki GPU hakkı | Paralel fine-tune; tek kartı bölme |
-| Colab üretim inferansı değil | Stüdyo işçileri İçerde’de çalışır |
+| Colab üretim inferansı değil | Stüdyo işçileri Cherry’de çalışır |
 
 Dilim 8: dosyalar `colab/`, stüdyodan paket indirme, checkpoint → `registerLlmVersion`. Colab üretim inferansı değil.
 

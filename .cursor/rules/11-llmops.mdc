@@ -15,6 +15,6 @@ alwaysApply: false
 - MCP read-file is how models read generated source. Admin can change the allowed root.
 - Fine-tune via Colab export/import. Colab is not 24/7 production inference.
 - Two notebooks, one per worker (A and B), may run **in parallel as two Colab sessions**. Each session is budgeted at **16GB GPU** (T4-class). Do not assume one 16GB card hosts both notebooks. Same recipe so A and B stay interchangeable for load.
-- Notebooks must fit 16GB: LoRA/QLoRA, not full-weight large models. Files live in `colab/` (`icerde_worker_a.ipynb`, `icerde_worker_b.ipynb`) plus a training pack (`icerde.training_pack.v1`). Studio LLM admin exports a GDPR-redacted pack and can register the returned adapter as an immutable version.
+- Notebooks must fit 16GB: LoRA/QLoRA, not full-weight large models. Files live in `colab/` (`cherry_worker_a.ipynb`, `cherry_worker_b.ipynb`) plus a training pack (`cherry.training_pack.v1`). Studio LLM admin exports a GDPR-redacted pack and can register the returned adapter as an immutable version.
 - Admin UI must show occupancy (idle/busy/queued), not fake role labels. A switch with no effect on later answers is a bug.
 - Read [docs/llmops.md](docs/llmops.md) and [docs/colab.md](docs/colab.md).

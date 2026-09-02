@@ -90,13 +90,20 @@ export function ProviderTile({
   );
 }
 
-export function IcerdeMark({ className }: { className?: string }) {
+export function CherryMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={cn("size-8", className)} role="img" aria-label="İçerde">
-      <title>İçerde</title>
+    <svg viewBox="0 0 24 24" className={cn("size-8", className)} role="img" aria-label="Cherry">
+      <title>Cherry</title>
       <rect width="24" height="24" rx="6" fill="#c4a574" />
-      <rect x="7" y="6" width="10" height="12" rx="2" fill="none" stroke="#0e1114" strokeWidth="1.6" />
-      <rect x="10.2" y="11" width="3.6" height="7" rx="0.8" fill="#0e1114" />
+      <circle cx="9.4" cy="14.2" r="4.1" fill="#0e1114" />
+      <circle cx="14.8" cy="14.6" r="3.7" fill="#0e1114" />
+      <path
+        d="M12 10.2C12 7.4 14.6 5.2 17.2 4.4"
+        fill="none"
+        stroke="#0e1114"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

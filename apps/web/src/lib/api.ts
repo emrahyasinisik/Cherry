@@ -222,7 +222,7 @@ type GraphQLResponse<T> = {
   errors?: { message: string }[];
 };
 
-const TOKEN_KEY = "icerde.token";
+const TOKEN_KEY = "cherry.token";
 
 export function getApiBase(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {

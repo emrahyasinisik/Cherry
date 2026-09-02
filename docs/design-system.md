@@ -2,15 +2,15 @@
 
 **Kural:** [.cursor/rules/15-design.mdc](../.cursor/rules/15-design.mdc) · hareket: [motion.md](motion.md) · ekranlar: [screens.md](screens.md)
 
-**TR:** İçerde bir tüketici sohbet uygulaması değil; masaüstü atölye aracıdır. Görsel dil sakin, sıkı, metalik bir atölye: mürekkep zemin, kâğıt yazı, tek pirinç vurgu. Mor yapay zekâ gradyanı, cam blob, maskot yok.
+**TR:** Cherry bir tüketici sohbet uygulaması değil; masaüstü atölye aracıdır. Görsel dil sakin, sıkı, metalik bir atölye: mürekkep zemin, kâğıt yazı, tek pirinç vurgu. Mor yapay zekâ gradyanı, cam blob, maskot yok.
 
-**EN:** Icerde is a desktop atelier, not a consumer chat toy. Calm, tight, workshop metal: ink ground, paper type, one brass accent. No purple AI gradients, glass blobs, or mascots.
+**EN:** Cherry is a desktop atelier, not a consumer chat toy. Calm, tight, workshop metal: ink ground, paper type, one brass accent. No purple AI gradients, glass blobs, or mascots.
 
 Referans / references:
 
-- Giriş: [design/icerde-login.png](design/icerde-login.png)
-- Stüdyo: [design/icerde-studio.png](design/icerde-studio.png)
-- LLM yönetici: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
+- Giriş: [design/cherry-login.png](design/cherry-login.png)
+- Stüdyo: [design/cherry-studio.png](design/cherry-studio.png)
+- LLM yönetici: [design/cherry-llm-admin.png](design/cherry-llm-admin.png)
 
 Uygulama bu referanslara **yakın** durur; birebir piksel kopyası şart değil, karakter şart.
 

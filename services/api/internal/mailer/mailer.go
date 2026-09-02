@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 const (
@@ -206,7 +206,7 @@ func (s *Service) fromAddress() string {
 	if strings.TrimSpace(s.ResendFrom) != "" {
 		return s.ResendFrom
 	}
-	return "İçerde <icerde@localhost>"
+	return "Cherry <cherry@localhost>"
 }
 
 func smtpBytes(from string, msg Message) []byte {
@@ -223,7 +223,7 @@ func smtpBytes(from string, msg Message) []byte {
 		b.WriteString(msg.PlainBody)
 		return []byte(b.String())
 	}
-	const boundary = "icerde-alt-7a3f"
+	const boundary = "cherry-alt-7a3f"
 	b.WriteString("Content-Type: multipart/alternative; boundary=" + boundary + "\r\n\r\n")
 	b.WriteString("--" + boundary + "\r\n")
 	b.WriteString("Content-Type: text/plain; charset=UTF-8\r\n\r\n")
@@ -245,10 +245,10 @@ func headerSafe(value string) string {
 }
 
 func CodeEmail(code, link, webURL string) (subject, plain, html string) {
-	subject = "İçerde doğrulama kodu"
-	plain = "İçerde\n\n6 haneli kodun: " + code + "\n10 dakika geçerli, en fazla 5 deneme.\n\nLink: " + webURL + "/?link=" + link + "\n\nSMS kullanılmaz.\n"
+	subject = "Cherry doğrulama kodu"
+	plain = "Cherry\n\n6 haneli kodun: " + code + "\n10 dakika geçerli, en fazla 5 deneme.\n\nLink: " + webURL + "/?link=" + link + "\n\nSMS kullanılmaz.\n"
 	html = `<div style="font-family:IBM Plex Sans,Segoe UI,sans-serif;background:#0E1114;color:#E8E4DC;padding:32px">
-<p style="font-size:20px;margin:0 0 12px">İçerde</p>
+<p style="font-size:20px;margin:0 0 12px">Cherry</p>
 <p style="color:#8B939C;margin:0 0 20px">6 haneli doğrulama kodun:</p>
 <p style="font-family:IBM Plex Mono,monospace;font-size:28px;letter-spacing:8px;color:#C4A574;margin:0 0 20px">` + code + `</p>
 <p style="color:#8B939C;font-size:13px">10 dakika geçerli, en fazla 5 deneme.</p>

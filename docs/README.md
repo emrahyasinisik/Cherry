@@ -1,4 +1,4 @@
-# İçerde belgeler / Documents
+# Cherry belgeler / Documents
 
 Her bölümün **kuralı** (`.cursor/rules`) ve **çizimli belgesi** (`docs/`) vardır.
 
@@ -6,13 +6,13 @@ Each section has a **rule** and a **document with diagrams**.
 
 ```mermaid
 flowchart TB
-  subgraph studio [Icerde_masaüstü]
+  subgraph studio [Cherry_masaüstü]
     UI[Next.js]
     Electron[Electron_Win_Mac]
     Agent[Arka_plan_ajan]
     MCP[MCP_host]
   end
-  subgraph platform [Icerde_platform]
+  subgraph platform [Cherry_platform]
     GQL[Go_GraphQL]
     DB[(MongoDB)]
     GDPR[KVKK_GDPR]

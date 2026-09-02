@@ -2,11 +2,11 @@ export function getDeviceFingerprint(): string {
   if (typeof window === "undefined") {
     return "ssr";
   }
-  const desktop = window.icerdeDesktop;
+  const desktop = window.cherryDesktop;
   if (desktop) {
     return desktop.deviceFingerprint();
   }
-  const key = "icerde.device";
+  const key = "cherry.device";
   const existing = localStorage.getItem(key);
   if (existing) {
     return existing;
@@ -20,7 +20,7 @@ export function getDeviceLabel(): string {
   if (typeof window === "undefined") {
     return "web";
   }
-  const desktop = window.icerdeDesktop;
+  const desktop = window.cherryDesktop;
   if (desktop) {
     return desktop.deviceLabel();
   }

@@ -1,4 +1,4 @@
-module github.com/icerde/api
+module github.com/cherry/api
 
 go 1.24.0
 

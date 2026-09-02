@@ -17,15 +17,21 @@ User notes below are not the current slice.
 
 ### 2. Bağlantılar menüsü / Connections menu
 
-**TR:** Sidebar **Bağlantılar**. OAuth 2.0 izin ekranı + logolar. İçerde host değil.
+**TR:** Sidebar **Bağlantılar**. OAuth 2.0 izin ekranı + logolar. Cherry host değil.
 
-**EN:** Connections: OAuth 2.0 consent + marks. Icerde does not host.
+**EN:** Connections: OAuth 2.0 consent + marks. Cherry does not host.
 
 ### 3. Colab belgeleri / Colab files
 
 **TR:** `colab/` notebook + seed paket + LLM sayfasından indirme. İki T4 oturumu. **Kodda.**
 
 **EN:** `colab/` notebooks + seed pack + LLM admin download. Two T4 sessions. **In code.**
+
+### 4. Marka / Brand
+
+**TR:** Stüdyo adı **Cherry**. İçerde adı kalktı.
+
+**EN:** The studio brand is **Cherry**. The Icerde name is gone.
 
 ## Bitti / Done
 
@@ -36,9 +42,9 @@ User notes below are not the current slice.
 | 5 OpenCode | `opencode run --dir` GDPR’li prompt ile. CLI yoksa iskelet, sahte yazım yok. |
 | 6 Yerel aktif + Maestro | Çocuk `go run` 47000–47999. Sidecar `vendor/bin`. Cihaz yok → SKIPPED, PASSED yok. |
 | 7 LLM B + kuyruk | A ve B aynı iş. Boş olan alır; ikisi meşgulse kuyruk. Versiyon pointer’ı sonraki cevabı değiştirir; in-flight eski pointer’da biter. |
-| 8 Colab fine-tune | `colab/icerde_worker_{a,b}.ipynb`, seed paket, `trainingPack` + `registerLlmVersion`. Colab MCP/üretim değil. |
+| 8 Colab fine-tune | `colab/cherry_worker_{a,b}.ipynb`, seed paket, `trainingPack` + `registerLlmVersion`. Colab MCP/üretim değil. |
 
-LLM anahtarı yoksa `mock` kanal; `ICERDE_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`.
+LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`.
 
 ## Kalan / Remaining
 

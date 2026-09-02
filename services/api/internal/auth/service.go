@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icerde/api/internal/crypto"
-	"github.com/icerde/api/internal/mailer"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/crypto"
+	"github.com/cherry/api/internal/mailer"
+	"github.com/cherry/api/internal/store"
 	"github.com/pquerna/otp/totp"
 )
 
@@ -40,7 +40,7 @@ type Service struct {
 
 func New(st store.Store, mail *mailer.Service, pepper, webURL string) *Service {
 	if pepper == "" {
-		pepper = "icerde-dev-pepper-change-me"
+		pepper = "cherry-dev-pepper-change-me"
 	}
 	return &Service{
 		Store:  st,
@@ -199,7 +199,7 @@ func (s *Service) EnableTotp(ctx context.Context, userID string) (secret, otpaut
 		return "", "", err
 	}
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "Icerde",
+		Issuer:      "Cherry",
 		AccountName: user.Email,
 	})
 	if err != nil {

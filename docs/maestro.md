@@ -8,9 +8,9 @@
 
 ## Kurulum / Install
 
-Müşteri Maestro kurmaz. İçerde `vendor/bin` (veya `resources/bin`) paketler. Geliştirici PATH / `ICERDE_MAESTRO_BIN` yedek.
+Müşteri Maestro kurmaz. Cherry `vendor/bin` (veya `resources/bin`) paketler. Geliştirici PATH / `CHERRY_MAESTRO_BIN` yedek.
 
-The customer does not install Maestro. Icerde vendors it. PATH is a developer fallback.
+The customer does not install Maestro. Cherry vendors it. PATH is a developer fallback.
 
 ```bash
 ./scripts/vendor-sidecars.sh
@@ -47,11 +47,11 @@ flowchart LR
   Test --> Local[customer_API_47xxx]
 ```
 
-Maestro **Icerde GraphQL’e değil**, yerelde aktif müşteri API’sine konuşur.
+Maestro **Cherry GraphQL’e değil**, yerelde aktif müşteri API’sine konuşur.
 
 ## Kurallar / Rules
 
 - YAML under `maestro/` ships with zip/git.
 - No emulator / no CLI: status `SKIPPED`, never `PASSED`.
 - Bound repair attempts (suggested max 3 per flow) then fail the job.
-- Maestro talks to the **locally activated** customer API, not Icerde GraphQL.
+- Maestro talks to the **locally activated** customer API, not Cherry GraphQL.

@@ -11,12 +11,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icerde/api/internal/activate"
-	"github.com/icerde/api/internal/gdpr"
-	"github.com/icerde/api/internal/llm"
-	"github.com/icerde/api/internal/maestro"
-	"github.com/icerde/api/internal/opencode"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/activate"
+	"github.com/cherry/api/internal/gdpr"
+	"github.com/cherry/api/internal/llm"
+	"github.com/cherry/api/internal/maestro"
+	"github.com/cherry/api/internal/opencode"
+	"github.com/cherry/api/internal/store"
 )
 
 type MaestroRunner interface {
@@ -133,7 +133,7 @@ func (s *Service) ZipPath(ctx context.Context, userID, id string) (string, error
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(project.RootPath, "icerde.zip")
+	path := filepath.Join(project.RootPath, "cherry.zip")
 	if _, err := os.Stat(path); err != nil {
 		return "", store.ErrNotFound
 	}
@@ -203,7 +203,7 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 		return err
 	}
 	s.pause()
-	zipPath := filepath.Join(project.RootPath, "icerde.zip")
+	zipPath := filepath.Join(project.RootPath, "cherry.zip")
 	if err := zipProject(project.RootPath, zipPath); err != nil {
 		return err
 	}
@@ -379,7 +379,7 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		beLabel = "Yerel API"
 	}
 	prompt := strings.Join([]string{
-		"İçerde müşteri uygulamasını bu dizinde yaz. Kök dışına çıkma.",
+		"Cherry müşteri uygulamasını bu dizinde yaz. Kök dışına çıkma.",
 		"Yığın: " + label,
 		rule,
 		"Backend hedefi: " + beLabel + ". Token’ı koda gömme.",
@@ -389,14 +389,14 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		"Mevcut domain/data/presentation katmanlarını koru ve genişlet. Tek dosyaya yığma.",
 		"preview/ HTML makettir; uygulamayı HTML ile yazma. Teslim zip HTML site olmasın.",
 		"Barındırma yok. Teslim dosya. Maestro YAML yaz; emülatör yoksa test çalıştırma.",
-		"İçerde platform GraphQL’ine dokunma.",
+		"Cherry platform GraphQL’ine dokunma.",
 		"Plan:",
 		plan,
 	}, "\n")
 	res, err := s.OpenCode.Run(ctx, opencode.Request{
 		Dir:      project.RootPath,
 		Prompt:   prompt,
-		Title:    "icerde-" + project.ID,
+		Title:    "cherry-" + project.ID,
 		Continue: false,
 	})
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
@@ -455,7 +455,7 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 		return store.Project{}, err
 	}
 	prompt := strings.Join([]string{
-		"İçerde sohbeti. OpenCode TUI açma. Yalnızca bu dizin.",
+		"Cherry sohbeti. OpenCode TUI açma. Yalnızca bu dizin.",
 		"Kullanıcı: " + safe,
 		rule,
 		"Gerekirse frontend/, backend/, maestro/ güncelle. Clean Architecture katmanlarını bozma. HTML site yazma.",
@@ -463,7 +463,7 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 	res, err := s.OpenCode.Run(ctx, opencode.Request{
 		Dir:      project.RootPath,
 		Prompt:   prompt,
-		Title:    "icerde-" + project.ID,
+		Title:    "cherry-" + project.ID,
 		Continue: true,
 	})
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {

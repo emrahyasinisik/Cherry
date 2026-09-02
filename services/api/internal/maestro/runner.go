@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icerde/api/internal/sidecar"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/sidecar"
+	"github.com/cherry/api/internal/store"
 )
 
 type Device struct {

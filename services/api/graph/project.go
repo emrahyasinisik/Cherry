@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 
-	"github.com/icerde/api/internal/activate"
+	"github.com/cherry/api/internal/activate"
 )
 
 func (r *Resolver) projectPayload(ctx context.Context, userID, id string, full bool) (*Project, error) {

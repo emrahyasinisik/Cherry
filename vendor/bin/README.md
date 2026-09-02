@@ -6,13 +6,13 @@
 
 ## Look order / Arama sırası
 
-1. `ICERDE_OPENCODE_BIN` / `ICERDE_MAESTRO_BIN`
-2. `ICERDE_SIDECAR_DIR` only (when set — Electron `resources/bin`)
+1. `CHERRY_OPENCODE_BIN` / `CHERRY_MAESTRO_BIN`
+2. `CHERRY_SIDECAR_DIR` only (when set — Electron `resources/bin`)
 3. else `vendor/bin` walked from the API working directory, plus next-to-exe `resources/bin`
 4. `PATH` (developer fallback)
 
 Kaynak etiketleri: `env` | `bundled` | `path` | `missing`.
 
-Yazmak için CLI yetmez; `ICERDE_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) gerekir. Anahtar yoksa CLI çalışır ama model çağrısı düşer — sahte yazım yok.
+Yazmak için CLI yetmez; `CHERRY_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) gerekir. Anahtar yoksa CLI çalışır ama model çağrısı düşer — sahte yazım yok.
 
-The CLI is not enough to write: `ICERDE_LLM_API_KEY` is forwarded as `OPENAI_API_KEY`. No key → no fake write.
+The CLI is not enough to write: `CHERRY_LLM_API_KEY` is forwarded as `OPENAI_API_KEY`. No key → no fake write.

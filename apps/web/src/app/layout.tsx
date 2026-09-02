@@ -20,7 +20,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "İçerde",
+  title: "Cherry",
   description: "Masaüstü stüdyo — mobil uygulama üretir ve dener",
 };
 

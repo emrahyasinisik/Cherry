@@ -1,7 +1,7 @@
 {
-  "name": "icerde",
+  "name": "cherry",
   "private": true,
-  "description": "İçerde desktop studio — scaffold",
+  "description": "Cherry desktop studio — scaffold",
   "scripts": {
     "dev:web": "npm --prefix apps/web run dev",
     "dev:api": "go -C services/api run ./cmd/api",

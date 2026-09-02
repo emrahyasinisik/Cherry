@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 var ErrConnect = errors.New("bağlantı")
@@ -83,7 +83,7 @@ func (s *Service) Connect(ctx context.Context, userID, kindRaw, account, token s
 		Account:    account,
 		Token:      token,
 		TokenHint:  hint(token),
-		Note:       "Anahtar bu makinede duruyor. İçerde barındırmaz. Token GraphQL’e dönmez.",
+		Note:       "Anahtar bu makinede duruyor. Cherry barındırmaz. Token GraphQL’e dönmez.",
 		AuthMethod: store.AuthToken,
 		Scopes:     catalogScopes(kind),
 		UpdatedAt:  now,
@@ -145,7 +145,7 @@ func (s *Service) PushGitHub(ctx context.Context, userID, projectRoot, repo stri
 	if strings.HasPrefix(conn.Token, grantPrefix) {
 		return PushResult{
 			OK:   false,
-			Note: "Yerel OAuth izni GitHub’a push etmez. GitHub OAuth uygulaması (ICERDE_GITHUB_CLIENT_ID) veya PAT gerekir.",
+			Note: "Yerel OAuth izni GitHub’a push etmez. GitHub OAuth uygulaması (CHERRY_GITHUB_CLIENT_ID) veya PAT gerekir.",
 		}, nil
 	}
 	if s.Git == nil {
@@ -180,15 +180,15 @@ func parseKind(raw string) (store.ConnectionKind, error) {
 func catalogNote(kind store.ConnectionKind) string {
 	switch kind {
 	case store.KindSupabase:
-		return "OAuth 2.0. Kişinin Supabase projesi. Müşteri backend hedefi olabilir. İçerde host değil."
+		return "OAuth 2.0. Kişinin Supabase projesi. Müşteri backend hedefi olabilir. Cherry host değil."
 	case store.KindCloudflare:
 		return "OAuth 2.0. Workers / D1 / R2. Kişinin hesabı."
 	case store.KindGithub:
 		return "OAuth 2.0. Geliştirilen projeyi kişinin reposuna push."
 	case store.KindVercel:
-		return "OAuth 2.0. Kişinin Vercel hesabına frontend deploy. İçerde host değil."
+		return "OAuth 2.0. Kişinin Vercel hesabına frontend deploy. Cherry host değil."
 	case store.KindRender:
-		return "OAuth 2.0. Kişinin Render hesabına servis. İçerde host değil."
+		return "OAuth 2.0. Kişinin Render hesabına servis. Cherry host değil."
 	default:
 		return ""
 	}

@@ -3,7 +3,7 @@ package factory
 import (
 	"fmt"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func frontendFiles(stack store.ProjectStack, name, slug, brief string) ([]fileSpec, error) {

@@ -48,7 +48,7 @@ export default function MaestroIndexPage() {
 
   return (
     <AppShell user={user} title="Maestro">
-      <div className="icerde-enter mx-auto flex max-w-lg flex-col gap-4 p-8">
+      <div className="cherry-enter mx-auto flex max-w-lg flex-col gap-4 p-8">
         <h1 className="text-base font-medium">Maestro</h1>
         <p className="text-muted-foreground">
           Önce bir uygulama tarif et. Test aşamasına gelince bu ekran kendiliğinden açılır; sen de

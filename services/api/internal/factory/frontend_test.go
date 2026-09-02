@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestFrontendCleanArchTrees(t *testing.T) {

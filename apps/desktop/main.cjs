@@ -3,13 +3,13 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 
-const WEB_URL = process.env.ICERDE_WEB_URL || "http://127.0.0.1:43147";
+const WEB_URL = process.env.CHERRY_WEB_URL || "http://127.0.0.1:43147";
 
 let maestroMcp = null;
 
 function sidecarDir() {
-  if (process.env.ICERDE_SIDECAR_DIR) {
-    return process.env.ICERDE_SIDECAR_DIR;
+  if (process.env.CHERRY_SIDECAR_DIR) {
+    return process.env.CHERRY_SIDECAR_DIR;
   }
   const packed = process.resourcesPath ? path.join(process.resourcesPath, "bin") : "";
   const repoVendor = path.resolve(__dirname, "..", "..", "vendor", "bin");
@@ -32,7 +32,7 @@ function binPath(name) {
 }
 
 function startMaestroMcp() {
-  const fromEnv = (process.env.ICERDE_MAESTRO_BIN || "").trim();
+  const fromEnv = (process.env.CHERRY_MAESTRO_BIN || "").trim();
   const bin = fromEnv || binPath("maestro");
   if (!bin) {
     console.log("maestro sidecar missing — MCP host idle (SKIPPED without a device)");
@@ -40,7 +40,7 @@ function startMaestroMcp() {
   }
   maestroMcp = spawn(bin, ["mcp"], {
     stdio: ["pipe", "pipe", "pipe"],
-    env: { ...process.env, ICERDE_SIDECAR_DIR: sidecarDir() },
+    env: { ...process.env, CHERRY_SIDECAR_DIR: sidecarDir() },
     windowsHide: true,
   });
   maestroMcp.on("error", (err) => {
@@ -68,7 +68,7 @@ function createWindow() {
     width: 1280,
     height: 800,
     backgroundColor: "#0E1114",
-    title: "İçerde",
+    title: "Cherry",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       nodeIntegration: false,
@@ -80,7 +80,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  process.env.ICERDE_SIDECAR_DIR = sidecarDir();
+  process.env.CHERRY_SIDECAR_DIR = sidecarDir();
   startMaestroMcp();
   createWindow();
   app.on("activate", () => {

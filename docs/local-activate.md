@@ -12,12 +12,12 @@
 sequenceDiagram
   participant U as User
   participant UI as Nextjs
-  participant API as Icerde_GraphQL
+  participant API as Cherry_GraphQL
   participant Child as backend_main_go
   participant Maestro as Maestro_CLI
   U->>UI: Yerelde baslat
   UI->>API: activateProject
-  API->>Child: go_run_ICERDE_CUSTOMER_ADDR
+  API->>Child: go_run_CHERRY_CUSTOMER_ADDR
   Child-->>API: health_127_0_0_1_47xxx
   API-->>UI: RUNNING_url_pid
   U->>UI: Maestro_kos
@@ -48,7 +48,7 @@ stateDiagram-v2
 
 ## Portlar / Ports
 
-- Icerde UI `43147`, API `43148`.
+- Cherry UI `43147`, API `43148`.
 - Generated app: **47000–47999**, recorded on `Project.activate`.
-- Child env: `ICERDE_CUSTOMER_ADDR=127.0.0.1:<port>`.
+- Child env: `CHERRY_CUSTOMER_ADDR=127.0.0.1:<port>`.
 - Pipeline TESTING starts the child, runs Maestro, then **stops** so jobs do not leak. The person can start it again from the studio column.

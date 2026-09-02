@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/activate"
-	"github.com/icerde/api/internal/llm"
-	"github.com/icerde/api/internal/maestro"
-	"github.com/icerde/api/internal/opencode"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/activate"
+	"github.com/cherry/api/internal/llm"
+	"github.com/cherry/api/internal/maestro"
+	"github.com/cherry/api/internal/opencode"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
@@ -58,7 +58,7 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 		"llm/opencode.ran",
 		"opencode.json",
 		"AGENTS.md",
-		"icerde.zip",
+		"cherry.zip",
 	} {
 		if _, err := os.Stat(filepath.Join(got.RootPath, rel)); err != nil {
 			t.Fatalf("%s: %v", rel, err)
@@ -101,13 +101,13 @@ func TestSendMessageContinuesHeadlessOpenCode(t *testing.T) {
 	if fake.Continue {
 		t.Fatal("first write must not continue")
 	}
-	if _, err := svc.SendMessage(ctx, "u1", project.ID, "Girişe ada@icerde.dev QR ekle"); err != nil {
+	if _, err := svc.SendMessage(ctx, "u1", project.ID, "Girişe ada@cherry.dev QR ekle"); err != nil {
 		t.Fatal(err)
 	}
 	if !fake.Continue {
 		t.Fatal("chat follow-up must continue headless OpenCode")
 	}
-	if strings.Contains(fake.Prompt, "ada@icerde.dev") {
+	if strings.Contains(fake.Prompt, "ada@cherry.dev") {
 		t.Fatalf("chat leaked email: %s", fake.Prompt)
 	}
 	logs, err := svc.Logs(ctx, "u1", project.ID)
@@ -177,14 +177,14 @@ func TestOpenCodePromptRedactsEmail(t *testing.T) {
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
 	fake := &opencode.Fake{}
 	svc.OpenCode = fake
-	project, err := svc.Create(ctx, "u1", "Kahve", "ada@icerde.dev için sipariş kuyruğu uygulaması.", "EXPO", "")
+	project, err := svc.Create(ctx, "u1", "Kahve", "ada@cherry.dev için sipariş kuyruğu uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := svc.RunSync(ctx, project.ID); err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(fake.Prompt, "ada@icerde.dev") {
+	if strings.Contains(fake.Prompt, "ada@cherry.dev") {
 		t.Fatalf("prompt leaked email: %s", fake.Prompt)
 	}
 	if !strings.Contains(fake.Prompt, "[REDACTED_EMAIL]") {
@@ -354,7 +354,7 @@ func TestHandoffZipIsStackSourceNotHTML(t *testing.T) {
 			if _, err := os.Stat(filepath.Join(got.RootPath, "preview", "home.html")); err != nil {
 				t.Fatalf("studio mock missing: %v", err)
 			}
-			names := zipEntryNames(t, filepath.Join(got.RootPath, "icerde.zip"))
+			names := zipEntryNames(t, filepath.Join(got.RootPath, "cherry.zip"))
 			joined := strings.Join(names, "\n")
 			if !strings.Contains(joined, tc.want) {
 				t.Fatalf("zip missing %s:\n%s", tc.want, joined)

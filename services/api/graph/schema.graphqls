@@ -1,4 +1,4 @@
-"""Icerde platform GraphQL — not the generated customer app API."""
+"""Cherry platform GraphQL — not the generated customer app API."""
 type Query {
   health: Health!
   me: User

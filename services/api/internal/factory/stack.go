@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func parseBackendTarget(raw string) (store.BackendTarget, error) {

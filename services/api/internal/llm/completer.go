@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 type MockCompleter struct{}
@@ -52,7 +52,7 @@ func (c HTTPCompleter) Complete(ctx context.Context, version store.LlmVersion, p
 	body, err := json.Marshal(map[string]any{
 		"model": model,
 		"messages": []map[string]string{
-			{"role": "system", "content": "İçerde kod ajanısın. Kısa Türkçe plan yaz. PII uydurma. Versiyon: " + version.Name},
+			{"role": "system", "content": "Cherry kod ajanısın. Kısa Türkçe plan yaz. PII uydurma. Versiyon: " + version.Name},
 			{"role": "user", "content": prompt},
 		},
 	})

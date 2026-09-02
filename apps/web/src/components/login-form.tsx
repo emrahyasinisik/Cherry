@@ -314,8 +314,8 @@ export function LoginForm() {
           autoComplete="username"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="icerde-focus h-9"
-          placeholder="sen@icerde.dev"
+          className="cherry-focus h-9"
+          placeholder="sen@cherry.dev"
           aria-invalid={Boolean(error)}
         />
       </div>
@@ -327,7 +327,7 @@ export function LoginForm() {
           autoComplete={mode === "register" ? "new-password" : "current-password"}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="icerde-focus h-9"
+          className="cherry-focus h-9"
           aria-invalid={Boolean(error)}
         />
       </div>

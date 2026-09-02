@@ -15,7 +15,7 @@ Kod **her zaman** in-app `tempMailboxes` satırına yazılır. Gerçek çıkış
 
 İkisi de yoksa kanal `inbox`: geliştirmede kutu + log. GraphQL `emailSent: false`. Sahte “gönderildi” yok.
 
-Production’da `ICERDE_MAIL_REQUIRE=1` — çıkış yoksa kayıt/giriş kod adımı hata verir.
+Production’da `CHERRY_MAIL_REQUIRE=1` — çıkış yoksa kayıt/giriş kod adımı hata verir.
 
 ```bash
 # Gmail app password (not the account password)
@@ -23,11 +23,11 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=you@gmail.com
 SMTP_PASSWORD=xxxx xxxx xxxx xxxx
-SMTP_FROM=İçerde <you@gmail.com>
+SMTP_FROM=Cherry <you@gmail.com>
 
 # or Resend
 RESEND_API_KEY=re_...
-RESEND_FROM=İçerde <hello@yourdomain.com>
+RESEND_FROM=Cherry <hello@yourdomain.com>
 ```
 
 `register` / `login` yanıtı: `emailSent`, `emailChannel` (`inbox` | `smtp` | `resend`). UI, gönderildiyse kodu kartta göstermez.
@@ -39,7 +39,7 @@ sequenceDiagram
   participant U as User
   participant App as Electron
   participant API as GoGraphQL
-  participant Mailer as Icerde_mailer
+  participant Mailer as Cherry_mailer
   participant Box as tempMailboxes
   participant Out as SMTP_or_Resend
   participant DB as verificationCodes
@@ -66,7 +66,7 @@ sequenceDiagram
 | Parça | Nerede | Not |
 | --- | --- | --- |
 | Mailer | `services/api/internal/mailer` | SMTP env veya Resend HTTP. Kütüphane taşıma; ürün mantığı bizde. |
-| Şablon | düz metin + HTML | İçerde wordmark, kod 6 hane mono, TTL metni. |
+| Şablon | düz metin + HTML | Cherry wordmark, kod 6 hane mono, TTL metni. |
 | `verificationCodes` | store / Mongo | `codeHash`, `purpose`, `expiresAt`, `attempts`, `userId`, `deviceId` |
 | `tempMailboxes` | store / Mongo | In-app kutu. Gövde PII; silmede drop. |
 | UI | Next.js | 6 kutu + “e-postadaki link”; güvenlik ekranında kutu listesi |

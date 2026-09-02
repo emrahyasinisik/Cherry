@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 type fileSpec struct {
@@ -58,32 +58,32 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 		{
 			rel:  "README.md",
 			kind: "readme",
-			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\nMimari: Clean Architecture (domain / data / presentation).\nBackend hedefi: " + beLabel + ".\n\nİçerde bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git — seçilen dil, HTML değil.\n",
+			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\nMimari: Clean Architecture (domain / data / presentation).\nBackend hedefi: " + beLabel + ".\n\nCherry bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git — seçilen dil, HTML değil.\n",
 		},
 		{
 			rel:  "backend/README.md",
 			kind: "backend",
-			body: "# Müşteri API\n\nBu, İçerde GraphQL’i değil üretilen uygulamanın backend’idir.\nHedef: " + beLabel + ".\nYerel aktif localhost’ta ayağa kaldırır (47000–47999).\n",
+			body: "# Müşteri API\n\nBu, Cherry GraphQL’i değil üretilen uygulamanın backend’idir.\nHedef: " + beLabel + ".\nYerel aktif localhost’ta ayağa kaldırır (47000–47999).\n",
 		},
 		{
 			rel:  "backend/TARGET.md",
 			kind: "backend",
-			body: "# Backend hedefi\n\n" + beLabel + " (`" + string(be) + "`).\n\nToken zip’e yazılmaz. Kişinin Bağlantılar hesabı. İçerde host değil.\n",
+			body: "# Backend hedefi\n\n" + beLabel + " (`" + string(be) + "`).\n\nToken zip’e yazılmaz. Kişinin Bağlantılar hesabı. Cherry host değil.\n",
 		},
 		{
 			rel:  "backend/main.go",
 			kind: "backend",
-			body: "package main\n\nimport (\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\taddr := os.Getenv(\"ICERDE_CUSTOMER_ADDR\")\n\tif addr == \"\" {\n\t\taddr = \"127.0.0.1:18080\"\n\t}\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, _ *http.Request) {\n\t\t_ = json.NewEncoder(w).Encode(map[string]any{\"ok\": true, \"app\": \"" + slug + "\"})\n\t})\n\tlog.Println(\"generated customer api on\", addr)\n\tlog.Fatal(http.ListenAndServe(addr, nil))\n}\n",
+			body: "package main\n\nimport (\n\t\"encoding/json\"\n\t\"log\"\n\t\"net/http\"\n\t\"os\"\n)\n\nfunc main() {\n\taddr := os.Getenv(\"CHERRY_CUSTOMER_ADDR\")\n\tif addr == \"\" {\n\t\taddr = \"127.0.0.1:18080\"\n\t}\n\thttp.HandleFunc(\"/health\", func(w http.ResponseWriter, _ *http.Request) {\n\t\t_ = json.NewEncoder(w).Encode(map[string]any{\"ok\": true, \"app\": \"" + slug + "\"})\n\t})\n\tlog.Println(\"generated customer api on\", addr)\n\tlog.Fatal(http.ListenAndServe(addr, nil))\n}\n",
 		},
 		{
 			rel:  "maestro/login.yaml",
 			kind: "maestro",
-			body: "appId: dev.icerde." + slug + "\n---\n- launchApp\n- assertVisible: \"Giriş\"\n- tapOn: \"Devam\"\n",
+			body: "appId: dev.cherry." + slug + "\n---\n- launchApp\n- assertVisible: \"Giriş\"\n- tapOn: \"Devam\"\n",
 		},
 		{
 			rel:  "maestro/home.yaml",
 			kind: "maestro",
-			body: "appId: dev.icerde." + slug + "\n---\n- launchApp\n- assertVisible: \"" + name + "\"\n",
+			body: "appId: dev.cherry." + slug + "\n---\n- launchApp\n- assertVisible: \"" + name + "\"\n",
 		},
 		{
 			rel:  "preview/login.html",
@@ -232,7 +232,7 @@ func skipDeliveryDir(base string) bool {
 func skipDeliveryRel(rel string) bool {
 	rel = filepath.ToSlash(rel)
 	switch rel {
-	case "icerde.zip", "opencode.json", "AGENTS.md":
+	case "cherry.zip", "opencode.json", "AGENTS.md":
 		return true
 	}
 	first, _, _ := strings.Cut(rel, "/")

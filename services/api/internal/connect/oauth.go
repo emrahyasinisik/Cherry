@@ -14,13 +14,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 const (
 	oauthModeConsent  = "CONSENT"
 	oauthModeProvider = "PROVIDER"
-	grantPrefix       = "icerde_grant_"
+	grantPrefix       = "cherry_grant_"
 	pendingTTL        = 10 * time.Minute
 )
 
@@ -102,7 +102,7 @@ func (s *Service) StartOAuth(_ context.Context, userID, account string, kindRaw 
 		}, nil
 	}
 	values := url.Values{
-		"client_id":     {"icerde"},
+		"client_id":     {"cherry"},
 		"response_type": {"code"},
 		"state":         {state},
 		"kind":          {string(kind)},
@@ -174,7 +174,7 @@ func (s *Service) HandleDecision(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, web+"/oauth/authorize?"+url.Values{
 			"kind":          {string(pending.Kind)},
 			"state":         {state},
-			"client_id":     {"icerde"},
+			"client_id":     {"cherry"},
 			"response_type": {"code"},
 			"error":         {"account"},
 		}.Encode(), http.StatusFound)
@@ -389,33 +389,33 @@ func (s *Service) fetchAccount(client OAuthClient, token string) (string, error)
 
 func LoadClientsFromEnv() map[store.ConnectionKind]OAuthClient {
 	out := map[store.ConnectionKind]OAuthClient{}
-	if id := strings.TrimSpace(os.Getenv("ICERDE_GITHUB_CLIENT_ID")); id != "" {
+	if id := strings.TrimSpace(os.Getenv("CHERRY_GITHUB_CLIENT_ID")); id != "" {
 		out[store.KindGithub] = OAuthClient{
 			ClientID:     id,
-			ClientSecret: strings.TrimSpace(os.Getenv("ICERDE_GITHUB_CLIENT_SECRET")),
+			ClientSecret: strings.TrimSpace(os.Getenv("CHERRY_GITHUB_CLIENT_SECRET")),
 			AuthURL:      "https://github.com/login/oauth/authorize",
 			TokenURL:     "https://github.com/login/oauth/access_token",
 			UserURL:      "https://api.github.com/user",
 			Scopes:       catalogScopes(store.KindGithub),
 		}
 	}
-	if id := strings.TrimSpace(os.Getenv("ICERDE_VERCEL_CLIENT_ID")); id != "" {
+	if id := strings.TrimSpace(os.Getenv("CHERRY_VERCEL_CLIENT_ID")); id != "" {
 		out[store.KindVercel] = OAuthClient{
 			ClientID:     id,
-			ClientSecret: strings.TrimSpace(os.Getenv("ICERDE_VERCEL_CLIENT_SECRET")),
-			AuthURL:      getenv("ICERDE_VERCEL_AUTH_URL", "https://vercel.com/oauth/authorize"),
-			TokenURL:     getenv("ICERDE_VERCEL_TOKEN_URL", "https://api.vercel.com/v2/oauth/access_token"),
+			ClientSecret: strings.TrimSpace(os.Getenv("CHERRY_VERCEL_CLIENT_SECRET")),
+			AuthURL:      getenv("CHERRY_VERCEL_AUTH_URL", "https://vercel.com/oauth/authorize"),
+			TokenURL:     getenv("CHERRY_VERCEL_TOKEN_URL", "https://api.vercel.com/v2/oauth/access_token"),
 			UserURL:      "https://api.vercel.com/v2/user",
 			Scopes:       catalogScopes(store.KindVercel),
 		}
 	}
-	if id := strings.TrimSpace(os.Getenv("ICERDE_SUPABASE_CLIENT_ID")); id != "" {
+	if id := strings.TrimSpace(os.Getenv("CHERRY_SUPABASE_CLIENT_ID")); id != "" {
 		out[store.KindSupabase] = OAuthClient{
 			ClientID:     id,
-			ClientSecret: strings.TrimSpace(os.Getenv("ICERDE_SUPABASE_CLIENT_SECRET")),
-			AuthURL:      getenv("ICERDE_SUPABASE_AUTH_URL", "https://api.supabase.com/v1/oauth/authorize"),
-			TokenURL:     getenv("ICERDE_SUPABASE_TOKEN_URL", "https://api.supabase.com/v1/oauth/token"),
-			UserURL:      getenv("ICERDE_SUPABASE_USER_URL", "https://api.supabase.com/v1/organizations"),
+			ClientSecret: strings.TrimSpace(os.Getenv("CHERRY_SUPABASE_CLIENT_SECRET")),
+			AuthURL:      getenv("CHERRY_SUPABASE_AUTH_URL", "https://api.supabase.com/v1/oauth/authorize"),
+			TokenURL:     getenv("CHERRY_SUPABASE_TOKEN_URL", "https://api.supabase.com/v1/oauth/token"),
+			UserURL:      getenv("CHERRY_SUPABASE_USER_URL", "https://api.supabase.com/v1/organizations"),
 			Scopes:       catalogScopes(store.KindSupabase),
 		}
 	}
@@ -446,10 +446,10 @@ func randomHex(n int) (string, error) {
 
 func oauthNote(kind store.ConnectionKind, localGrant bool) string {
 	if localGrant {
-		return "OAuth 2.0 izin ekranı onaylandı. İçerde host değil. Yerel grant; sağlayıcı client id yoksa gerçek API çağrısı için token gerekir."
+		return "OAuth 2.0 izin ekranı onaylandı. Cherry host değil. Yerel grant; sağlayıcı client id yoksa gerçek API çağrısı için token gerekir."
 	}
 	_ = kind
-	return "OAuth 2.0 ile bağlandı. İçerde host değil. Token GraphQL’e dönmez."
+	return "OAuth 2.0 ile bağlandı. Cherry host değil. Token GraphQL’e dönmez."
 }
 
 func catalogScopes(kind store.ConnectionKind) []string {

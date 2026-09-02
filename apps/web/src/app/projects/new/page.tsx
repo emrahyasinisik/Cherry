@@ -110,7 +110,7 @@ export default function NewProjectPage() {
     <AppShell user={user} title="Yeni proje">
       <form
         onSubmit={(event) => void handleSubmit(event)}
-        className="icerde-enter mx-auto flex max-w-xl flex-col gap-5 p-8"
+        className="cherry-enter mx-auto flex max-w-xl flex-col gap-5 p-8"
       >
         <div>
           <h1 className="text-base font-medium">Ne üretilsin?</h1>
@@ -126,7 +126,7 @@ export default function NewProjectPage() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Mahalle kahvesi"
-            className="icerde-focus h-9"
+            className="cherry-focus h-9"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -162,7 +162,7 @@ export default function NewProjectPage() {
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium">Backend hedefi</legend>
           <p className="text-muted-foreground">
-            İçerde host değil. Cloud için önce Bağlantılar’dan hesap bağla.
+            Cherry host değil. Cloud için önce Bağlantılar’dan hesap bağla.
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
             {(["LOCAL", "SUPABASE", "CLOUDFLARE", "RENDER"] as const).map((item) => {

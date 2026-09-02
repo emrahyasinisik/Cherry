@@ -209,11 +209,11 @@ function ConnectionsBody() {
 
   return (
     <AppShell user={user} title="Bağlantılar">
-      <div className="icerde-enter mx-auto flex max-w-[720px] flex-col gap-8 p-8">
+      <div className="cherry-enter mx-auto flex max-w-[720px] flex-col gap-8 p-8">
         <div>
           <h1 className="text-base font-medium">Bağlantılar</h1>
           <p className="text-muted-foreground">
-            Kendi hesapların. Bağla deyince OAuth 2.0 izin ekranı açılır — İçerde barındırmaz.
+            Kendi hesapların. Bağla deyince OAuth 2.0 izin ekranı açılır — Cherry barındırmaz.
           </p>
         </div>
 
@@ -242,7 +242,7 @@ function ConnectionsBody() {
               {connectedCount === 0 ? "Hiç bağlı yok" : `${connectedCount} bağlı`}
             </p>
           </div>
-          <ul className="icerde-stagger divide-y divide-border overflow-hidden rounded-[10px] border border-border">
+          <ul className="cherry-stagger divide-y divide-border overflow-hidden rounded-[10px] border border-border">
             {list.map((item) => {
               const form = draft(item.kind);
               const connected = item.status === "CONNECTED";

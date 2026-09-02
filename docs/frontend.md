@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/04-frontend.mdc](../.cursor/rules/04-frontend.mdc) · [13-typescript.mdc](../.cursor/rules/13-typescript.mdc)
 
-**TR:** Renderer, Electron içinde Next.js’tir. İçerde’nin mobil arayüzü yoktur.
+**TR:** Renderer, Electron içinde Next.js’tir. Cherry’nin mobil arayüzü yoktur.
 
-**EN:** The renderer is Next.js inside Electron. Icerde has no mobile UI.
+**EN:** The renderer is Next.js inside Electron. Cherry has no mobile UI.
 
 ## Ekran haritası / Screen map
 

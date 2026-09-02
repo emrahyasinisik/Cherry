@@ -23,7 +23,7 @@ func (CLIGit) Push(dir, repo, token string) error {
 	if err := runGit(dir, "add", "-A"); err != nil {
 		return err
 	}
-	_ = runGit(dir, "-c", "user.email=icerde@local", "-c", "user.name=Icerde", "commit", "-m", "İçerde teslim")
+	_ = runGit(dir, "-c", "user.email=cherry@local", "-c", "user.name=Cherry", "commit", "-m", "Cherry teslim")
 	if err := runGit(dir, "push", url, "HEAD:main"); err != nil {
 		if err2 := runGit(dir, "push", url, "HEAD:master"); err2 != nil {
 			return fmt.Errorf("git push başarısız: %v", err)

@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/08-mobile-factory.mdc](../.cursor/rules/08-mobile-factory.mdc)
 
-**TR:** İçerde mobil uygulama **yazar**. Kendisi mobil değildir. Yığını kullanıcı seçer.
+**TR:** Cherry mobil uygulama **yazar**. Kendisi mobil değildir. Yığını kullanıcı seçer.
 
-**EN:** Icerde **writes** mobile apps. It is not a mobile app. The user picks the stack.
+**EN:** Cherry **writes** mobile apps. It is not a mobile app. The user picks the stack.
 
 ## Boru hattı / Pipeline
 
@@ -45,7 +45,7 @@ OpenCode mevcut katmanları genişletir; tek `App.js` / `main.dart` / `ContentVi
 
 `preview/*.html` stüdyo / Maestro maketidir; zip’e **girmez**. Stüdyo dosya listesi `frontend/` öne çıkar.
 
-**Backend hedefi:** Kişi Bağlantılar’dan seçer (yerel, Supabase, Cloudflare, …). Ayrıntı: [connections.md](connections.md). İçerde barındırmaz.
+**Backend hedefi:** Kişi Bağlantılar’dan seçer (yerel, Supabase, Cloudflare, …). Ayrıntı: [connections.md](connections.md). Cherry barındırmaz.
 
 ## Yığın / Stack
 
@@ -68,9 +68,9 @@ The user writes a brief. **OpenCode** writes `frontend/`, `backend/`, `maestro/`
 
 ```mermaid
 flowchart TB
-  IcerdeAPI[Icerde_Go_GraphQL]
+  CherryAPI[Cherry_Go_GraphQL]
   CustAPI[Generated_customer_API]
-  IcerdeAPI --> Jobs[job_metadata]
+  CherryAPI --> Jobs[job_metadata]
   CustAPI --> Disk[files_on_disk]
 ```
 

@@ -2,16 +2,16 @@
 
 **Kural:** [.cursor/rules/01-architecture.mdc](../.cursor/rules/01-architecture.mdc)
 
-**TR:** İçerde, kullanıcının bilgisayarında duran bir stüdyo + kendi GraphQL platformudur. Üretilen mobil uygulama ayrı bir çıktıdır.
+**TR:** Cherry, kullanıcının bilgisayarında duran bir stüdyo + kendi GraphQL platformudur. Üretilen mobil uygulama ayrı bir çıktıdır.
 
-**EN:** Icerde is a studio on the user’s computer plus its own GraphQL platform. The generated mobile app is a separate artifact.
+**EN:** Cherry is a studio on the user’s computer plus its own GraphQL platform. The generated mobile app is a separate artifact.
 
 ## Sistem bağlamı / System context
 
 ```mermaid
 flowchart LR
-  User[Kullanici] --> Desktop[Icerde_Electron]
-  Desktop --> API[Icerde_Go_GraphQL]
+  User[Kullanici] --> Desktop[Cherry_Electron]
+  Desktop --> API[Cherry_Go_GraphQL]
   API --> Mongo[(MongoDB)]
   Desktop --> Disk[Proje_klasoru]
   Desktop --> Emu[Emulator]
@@ -48,7 +48,7 @@ flowchart TB
 - Tek GraphQL sözleşmesi: platform. Üretilen müşteri API’si bu şemada yaşamaz.
 - UI asla LLM’e doğrudan gitmez.
 - LLM A ve B aynı iş türlerini yapar; ikinci yuva eşzamanlı yoğunluk içindir.
-- v1’de İçerde müşteri backend’i için public URL vermez. Kişi ileride kendi Supabase/Cloudflare/Vercel/Render hesabını Bağlantılar’dan bağlar; o URL onundur.
+- v1’de Cherry müşteri backend’i için public URL vermez. Kişi ileride kendi Supabase/Cloudflare/Vercel/Render hesabını Bağlantılar’dan bağlar; o URL onundur.
 
 | Parça | Sorumluluk |
 | --- | --- |

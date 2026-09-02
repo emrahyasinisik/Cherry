@@ -2,9 +2,9 @@
 
 | Ekran | Dosya |
 | --- | --- |
-| Giriş | [icerde-login.png](icerde-login.png) |
-| Stüdyo | [icerde-studio.png](icerde-studio.png) |
-| LLM yönetici | [icerde-llm-admin.png](icerde-llm-admin.png) |
+| Giriş | [cherry-login.png](cherry-login.png) |
+| Stüdyo | [cherry-studio.png](cherry-studio.png) |
+| LLM yönetici | [cherry-llm-admin.png](cherry-llm-admin.png) |
 
 Token kaynağı: [tokens.css](tokens.css)
 

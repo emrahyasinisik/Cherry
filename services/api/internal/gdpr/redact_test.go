@@ -7,12 +7,12 @@ import (
 )
 
 func TestRedactEmailAndSecrets(t *testing.T) {
-	in := "Mail ada@icerde.dev ve anahtar sk-testABCDEFGH. Kod 052533. Bearer abcdef0123456789."
+	in := "Mail ada@cherry.dev ve anahtar sk-testABCDEFGH. Kod 052533. Bearer abcdef0123456789."
 	out, counts := Redact(in)
 	if counts.Total() < 3 {
 		t.Fatalf("counts %#v out=%s", counts, out)
 	}
-	if stringsContains(out, "ada@icerde.dev") || stringsContains(out, "sk-test") || stringsContains(out, "052533") {
+	if stringsContains(out, "ada@cherry.dev") || stringsContains(out, "sk-test") || stringsContains(out, "052533") {
 		t.Fatalf("leaked: %s", out)
 	}
 }

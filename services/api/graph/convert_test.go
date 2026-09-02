@@ -3,9 +3,9 @@ package graph
 import (
 	"testing"
 
-	"github.com/icerde/api/internal/activate"
-	"github.com/icerde/api/internal/mailer"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/activate"
+	"github.com/cherry/api/internal/mailer"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestMapWorkspaceKindExhaustive(t *testing.T) {

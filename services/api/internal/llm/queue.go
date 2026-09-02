@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 type Occupancy struct {

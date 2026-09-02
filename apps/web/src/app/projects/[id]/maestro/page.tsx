@@ -131,7 +131,7 @@ export default function MaestroPage() {
                 </p>
               ) : (
                 <p className="mt-1 text-muted-foreground">
-                  Yerel API kapalı. Stüdyodan başlat; Maestro Icerde GraphQL’e değil localhost’a konuşur.
+                  Yerel API kapalı. Stüdyodan başlat; Maestro Cherry GraphQL’e değil localhost’a konuşur.
                 </p>
               )}
             </div>

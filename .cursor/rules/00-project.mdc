@@ -1,15 +1,15 @@
 ---
-description: İçerde proje sabitleri — mobil istemci yok, iki backend karışmaz, barındırma yok
+description: Cherry proje sabitleri — mobil istemci yok, iki backend karışmaz, barındırma yok
 alwaysApply: true
 ---
 
-# İçerde — proje kuralları / project rules
+# Cherry — proje kuralları / project rules
 
 - Respond to the user in Turkish and English.
-- Icerde is **not** a mobile app. Ship Electron for Windows and macOS only.
+- Cherry is **not** a mobile app. Ship Electron for Windows and macOS only.
 - Never mix the **platform API** (Go GraphQL + MongoDB) with the **generated customer backend** (files on disk).
 - Customer delivery is files (folder, zip, or git). Do **not** host customer backends in v1. Handoff is the chosen stack’s language and Clean Architecture (`frontend/` Expo TS, Flutter Dart, or SwiftUI), not studio `preview/` HTML.
-- The generated mobile stack is chosen by the user (Expo, Flutter, SwiftUI). Later: backend **target** is also chosen (local, Supabase, Cloudflare, similar) under sidebar **Bağlantılar**; GitHub/Vercel/Render are the person’s accounts. See docs/connections.md. Do not mix those into the Icerde platform API.
+- The generated mobile stack is chosen by the user (Expo, Flutter, SwiftUI). Later: backend **target** is also chosen (local, Supabase, Cloudflare, similar) under sidebar **Bağlantılar**; GitHub/Vercel/Render are the person’s accounts. See docs/connections.md. Do not mix those into the Cherry platform API.
 - Security is X-inspired: password, 6-digit new-device code, TOTP, trusted devices, session revoke. No SMS. No phone number as identity. One active session per account.
 - Every LLM call must pass the KVKK/GDPR layer (redact → model → scan → audit).
 - Two LLMs: A and B are capacity workers of the same kind. They exist so concurrent users (e.g. 10 at once) can share load — not to split codegen vs test. The router picks a free worker; busy workers queue. A version pointer still changes subsequent answers on that worker.

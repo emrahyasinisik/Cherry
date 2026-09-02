@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestCatalogShowsAllDisconnected(t *testing.T) {

@@ -1,4 +1,4 @@
-const LAST_PROJECT_KEY = "icerde.lastProject";
+const LAST_PROJECT_KEY = "cherry.lastProject";
 
 export function setLastProjectId(id: string | null): void {
   if (typeof window === "undefined") {

@@ -35,7 +35,7 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 3. **Proje diski** — brif, yığın seçimi, `frontend/` `backend/` `maestro/` klasörü, zip. Ajan henüz sahte/stub dosya yazabilir.
 4. **LLM A + GDPR** — tek model, redact → tamamla → denetim. MCP read-file kökü proje klasörü. Admin’de tek aktif versiyon.
 5. **OpenCode** — stub yazıcı yerine gerçek kod motoru.
-6. **Yerel aktif + Maestro** — backend localhost, `maestro mcp`, skip-if-no-device. OpenCode (ve Maestro) **İçerde kurucusuna** gömülür; müşteri ayrı CLI kurmaz.
+6. **Yerel aktif + Maestro** — backend localhost, `maestro mcp`, skip-if-no-device. OpenCode (ve Maestro) **Cherry kurucusuna** gömülür; müşteri ayrı CLI kurmaz.
 7. **LLM B + kuyruk** — ikinci kapasite işçisi; boş olan alır, ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Versiyon pointer’ı sonraki cevapları değiştirir.
 8. **Colab fine-tune** — izler birikince. İki notebook (A/B), paralel iki oturum, her biri 16GB GPU. Aynı tarif; tek kartta iki iş yok.
 

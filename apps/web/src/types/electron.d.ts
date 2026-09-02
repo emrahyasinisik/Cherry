@@ -2,7 +2,7 @@ export {};
 
 declare global {
   interface Window {
-    icerdeDesktop?: {
+    cherryDesktop?: {
       platform: string;
       deviceFingerprint: () => string;
       deviceLabel: () => string;

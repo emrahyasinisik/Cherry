@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/icerde/api/internal/llm"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/llm"
+	"github.com/cherry/api/internal/store"
 )
 
 func (r *Resolver) llmAdminPayload(ctx context.Context, userID string) (*LlmAdmin, error) {
@@ -146,7 +146,7 @@ func trainingPackPayload(pack llm.Pack) (*TrainingPack, error) {
 	}
 	return &TrainingPack{
 		Schema:       pack.Schema,
-		Filename:     "icerde-training-pack.json",
+		Filename:     "cherry-training-pack.json",
 		JSON:         body,
 		Jsonl:        jsonl,
 		LiveExamples: pack.Stats.LiveExamples,

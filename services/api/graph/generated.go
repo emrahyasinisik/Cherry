@@ -1641,7 +1641,7 @@ func (ec *executionContext) field_Mutation_confirmTotp_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_connectProvider_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind)
 	if err != nil {
 		return nil, err
 	}
@@ -1672,12 +1672,12 @@ func (ec *executionContext) field_Mutation_createProject_args(ctx context.Contex
 		return nil, err
 	}
 	args["brief"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "stack", ec.unmarshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "stack", ec.unmarshalNProjectStack2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStack)
 	if err != nil {
 		return nil, err
 	}
 	args["stack"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "backendTarget", ec.unmarshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "backendTarget", ec.unmarshalOBackendTarget2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget)
 	if err != nil {
 		return nil, err
 	}
@@ -1721,7 +1721,7 @@ func (ec *executionContext) field_Mutation_disableTotp_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_disconnectProvider_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind)
 	if err != nil {
 		return nil, err
 	}
@@ -1897,7 +1897,7 @@ func (ec *executionContext) field_Mutation_setMcpRoot_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_startConnectionOAuth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind)
 	if err != nil {
 		return nil, err
 	}
@@ -2080,7 +2080,7 @@ func (ec *executionContext) _Connection_kind(ctx context.Context, field graphql.
 			return obj.Kind, nil
 		},
 		nil,
-		ec.marshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind,
+		ec.marshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind,
 		true,
 		true,
 	)
@@ -2109,7 +2109,7 @@ func (ec *executionContext) _Connection_status(ctx context.Context, field graphq
 			return obj.Status, nil
 		},
 		nil,
-		ec.marshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus,
+		ec.marshalNConnectionStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionStatus,
 		true,
 		true,
 	)
@@ -2225,7 +2225,7 @@ func (ec *executionContext) _Connection_authMethod(ctx context.Context, field gr
 			return obj.AuthMethod, nil
 		},
 		nil,
-		ec.marshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth,
+		ec.marshalNConnectionAuth2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionAuth,
 		true,
 		true,
 	)
@@ -2834,7 +2834,7 @@ func (ec *executionContext) _JobLog_role(ctx context.Context, field graphql.Coll
 			return obj.Role, nil
 		},
 		nil,
-		ec.marshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole,
+		ec.marshalNChatRole2githubᚗcomᚋcherryᚋapiᚋgraphᚐChatRole,
 		true,
 		true,
 	)
@@ -2979,7 +2979,7 @@ func (ec *executionContext) _LlmAdmin_slotA(ctx context.Context, field graphql.C
 			return obj.SlotA, nil
 		},
 		nil,
-		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard,
+		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmSlotCard,
 		true,
 		true,
 	)
@@ -3022,7 +3022,7 @@ func (ec *executionContext) _LlmAdmin_slotB(ctx context.Context, field graphql.C
 			return obj.SlotB, nil
 		},
 		nil,
-		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard,
+		ec.marshalNLlmSlotCard2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmSlotCard,
 		true,
 		true,
 	)
@@ -3065,7 +3065,7 @@ func (ec *executionContext) _LlmAdmin_completions(ctx context.Context, field gra
 			return obj.Completions, nil
 		},
 		nil,
-		ec.marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletionᚄ,
+		ec.marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmCompletionᚄ,
 		true,
 		true,
 	)
@@ -3462,7 +3462,7 @@ func (ec *executionContext) _LlmSlotCard_occupancy(ctx context.Context, field gr
 			return obj.Occupancy, nil
 		},
 		nil,
-		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmOccupancy,
 		true,
 		true,
 	)
@@ -3520,7 +3520,7 @@ func (ec *executionContext) _LlmSlotCard_versions(ctx context.Context, field gra
 			return obj.Versions, nil
 		},
 		nil,
-		ec.marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersionᚄ,
+		ec.marshalNLlmVersion2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmVersionᚄ,
 		true,
 		true,
 	)
@@ -3704,7 +3704,7 @@ func (ec *executionContext) _LlmStatus_occupancyA(ctx context.Context, field gra
 			return obj.OccupancyA, nil
 		},
 		nil,
-		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmOccupancy,
 		true,
 		true,
 	)
@@ -3733,7 +3733,7 @@ func (ec *executionContext) _LlmStatus_occupancyB(ctx context.Context, field gra
 			return obj.OccupancyB, nil
 		},
 		nil,
-		ec.marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy,
+		ec.marshalNLlmOccupancy2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmOccupancy,
 		true,
 		true,
 	)
@@ -3936,7 +3936,7 @@ func (ec *executionContext) _LocalActivate_status(ctx context.Context, field gra
 			return obj.Status, nil
 		},
 		nil,
-		ec.marshalNActivateStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐActivateStatus,
+		ec.marshalNActivateStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐActivateStatus,
 		true,
 		true,
 	)
@@ -4081,7 +4081,7 @@ func (ec *executionContext) _LoginResult_next(ctx context.Context, field graphql
 			return obj.Next, nil
 		},
 		nil,
-		ec.marshalNLoginNext2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginNext,
+		ec.marshalNLoginNext2githubᚗcomᚋcherryᚋapiᚋgraphᚐLoginNext,
 		true,
 		true,
 	)
@@ -4168,7 +4168,7 @@ func (ec *executionContext) _LoginResult_user(ctx context.Context, field graphql
 			return obj.User, nil
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐUser,
 		true,
 		false,
 	)
@@ -4352,7 +4352,7 @@ func (ec *executionContext) _MaestroFlow_result(ctx context.Context, field graph
 			return obj.Result, nil
 		},
 		nil,
-		ec.marshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult,
+		ec.marshalNMaestroResult2githubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroResult,
 		true,
 		true,
 	)
@@ -4468,7 +4468,7 @@ func (ec *executionContext) _MaestroStudio_screens(ctx context.Context, field gr
 			return obj.Screens, nil
 		},
 		nil,
-		ec.marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreenᚄ,
+		ec.marshalNDesignScreen2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDesignScreenᚄ,
 		true,
 		true,
 	)
@@ -4505,7 +4505,7 @@ func (ec *executionContext) _MaestroStudio_flows(ctx context.Context, field grap
 			return obj.Flows, nil
 		},
 		nil,
-		ec.marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlowᚄ,
+		ec.marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroFlowᚄ,
 		true,
 		true,
 	)
@@ -4633,7 +4633,7 @@ func (ec *executionContext) _MailMessage_purpose(ctx context.Context, field grap
 			return obj.Purpose, nil
 		},
 		nil,
-		ec.marshalNVerifyPurpose2githubᚗcomᚋicerdeᚋapiᚋgraphᚐVerifyPurpose,
+		ec.marshalNVerifyPurpose2githubᚗcomᚋcherryᚋapiᚋgraphᚐVerifyPurpose,
 		true,
 		true,
 	)
@@ -4692,7 +4692,7 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 			return ec.resolvers.Mutation().Register(ctx, fc.Args["email"].(string), fc.Args["password"].(string), fc.Args["deviceFingerprint"].(string), fc.Args["deviceLabel"].(string))
 		},
 		nil,
-		ec.marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult,
+		ec.marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult,
 		true,
 		true,
 	)
@@ -4747,7 +4747,7 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 			return ec.resolvers.Mutation().Login(ctx, fc.Args["email"].(string), fc.Args["password"].(string), fc.Args["deviceFingerprint"].(string), fc.Args["deviceLabel"].(string))
 		},
 		nil,
-		ec.marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult,
+		ec.marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult,
 		true,
 		true,
 	)
@@ -4802,7 +4802,7 @@ func (ec *executionContext) _Mutation_verifyCode(ctx context.Context, field grap
 			return ec.resolvers.Mutation().VerifyCode(ctx, fc.Args["challengeId"].(string), fc.Args["code"].(string), fc.Args["trustDevice"].(bool))
 		},
 		nil,
-		ec.marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult,
+		ec.marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult,
 		true,
 		true,
 	)
@@ -4857,7 +4857,7 @@ func (ec *executionContext) _Mutation_verifyLink(ctx context.Context, field grap
 			return ec.resolvers.Mutation().VerifyLink(ctx, fc.Args["token"].(string), fc.Args["deviceFingerprint"].(string), fc.Args["deviceLabel"].(string))
 		},
 		nil,
-		ec.marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult,
+		ec.marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult,
 		true,
 		true,
 	)
@@ -4912,7 +4912,7 @@ func (ec *executionContext) _Mutation_verifyTotp(ctx context.Context, field grap
 			return ec.resolvers.Mutation().VerifyTotp(ctx, fc.Args["challengeId"].(string), fc.Args["code"].(string))
 		},
 		nil,
-		ec.marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult,
+		ec.marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult,
 		true,
 		true,
 	)
@@ -4966,7 +4966,7 @@ func (ec *executionContext) _Mutation_enableTotp(ctx context.Context, field grap
 			return ec.resolvers.Mutation().EnableTotp(ctx)
 		},
 		nil,
-		ec.marshalNTotpSetup2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐTotpSetup,
+		ec.marshalNTotpSetup2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐTotpSetup,
 		true,
 		true,
 	)
@@ -5195,7 +5195,7 @@ func (ec *executionContext) _Mutation_createProject(ctx context.Context, field g
 			return ec.resolvers.Mutation().CreateProject(ctx, fc.Args["name"].(string), fc.Args["brief"].(string), fc.Args["stack"].(ProjectStack), fc.Args["backendTarget"].(*BackendTarget))
 		},
 		nil,
-		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		true,
 	)
@@ -5262,7 +5262,7 @@ func (ec *executionContext) _Mutation_sendProjectMessage(ctx context.Context, fi
 			return ec.resolvers.Mutation().SendProjectMessage(ctx, fc.Args["projectId"].(string), fc.Args["body"].(string))
 		},
 		nil,
-		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		true,
 	)
@@ -5329,7 +5329,7 @@ func (ec *executionContext) _Mutation_activateProject(ctx context.Context, field
 			return ec.resolvers.Mutation().ActivateProject(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		true,
 	)
@@ -5396,7 +5396,7 @@ func (ec *executionContext) _Mutation_deactivateProject(ctx context.Context, fie
 			return ec.resolvers.Mutation().DeactivateProject(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		true,
 	)
@@ -5463,7 +5463,7 @@ func (ec *executionContext) _Mutation_runMaestro(ctx context.Context, field grap
 			return ec.resolvers.Mutation().RunMaestro(ctx, fc.Args["projectId"].(string))
 		},
 		nil,
-		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		true,
 	)
@@ -5530,7 +5530,7 @@ func (ec *executionContext) _Mutation_connectProvider(ctx context.Context, field
 			return ec.resolvers.Mutation().ConnectProvider(ctx, fc.Args["kind"].(ConnectionKind), fc.Args["account"].(string), fc.Args["token"].(string))
 		},
 		nil,
-		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnection,
 		true,
 		true,
 	)
@@ -5587,7 +5587,7 @@ func (ec *executionContext) _Mutation_startConnectionOAuth(ctx context.Context, 
 			return ec.resolvers.Mutation().StartConnectionOAuth(ctx, fc.Args["kind"].(ConnectionKind))
 		},
 		nil,
-		ec.marshalNOAuthStart2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart,
+		ec.marshalNOAuthStart2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthStart,
 		true,
 		true,
 	)
@@ -5636,7 +5636,7 @@ func (ec *executionContext) _Mutation_completeConnectionOAuth(ctx context.Contex
 			return ec.resolvers.Mutation().CompleteConnectionOAuth(ctx, fc.Args["code"].(string), fc.Args["state"].(string))
 		},
 		nil,
-		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnection,
 		true,
 		true,
 	)
@@ -5693,7 +5693,7 @@ func (ec *executionContext) _Mutation_disconnectProvider(ctx context.Context, fi
 			return ec.resolvers.Mutation().DisconnectProvider(ctx, fc.Args["kind"].(ConnectionKind))
 		},
 		nil,
-		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnection,
 		true,
 		true,
 	)
@@ -5750,7 +5750,7 @@ func (ec *executionContext) _Mutation_pushProjectGithub(ctx context.Context, fie
 			return ec.resolvers.Mutation().PushProjectGithub(ctx, fc.Args["projectId"].(string), fc.Args["repo"].(string))
 		},
 		nil,
-		ec.marshalNGitPushResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult,
+		ec.marshalNGitPushResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐGitPushResult,
 		true,
 		true,
 	)
@@ -5797,7 +5797,7 @@ func (ec *executionContext) _Mutation_setActiveVersion(ctx context.Context, fiel
 			return ec.resolvers.Mutation().SetActiveVersion(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin,
 		true,
 		true,
 	)
@@ -5854,7 +5854,7 @@ func (ec *executionContext) _Mutation_setMcpRoot(ctx context.Context, field grap
 			return ec.resolvers.Mutation().SetMcpRoot(ctx, fc.Args["path"].(string))
 		},
 		nil,
-		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin,
 		true,
 		true,
 	)
@@ -5911,7 +5911,7 @@ func (ec *executionContext) _Mutation_registerLlmVersion(ctx context.Context, fi
 			return ec.resolvers.Mutation().RegisterLlmVersion(ctx, fc.Args["slot"].(string), fc.Args["name"].(string), fc.Args["note"].(string), fc.Args["checkpointRef"].(string))
 		},
 		nil,
-		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin,
 		true,
 		true,
 	)
@@ -6066,7 +6066,7 @@ func (ec *executionContext) _OAuthStart_mode(ctx context.Context, field graphql.
 			return obj.Mode, nil
 		},
 		nil,
-		ec.marshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode,
+		ec.marshalNOAuthMode2githubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthMode,
 		true,
 		true,
 	)
@@ -6182,7 +6182,7 @@ func (ec *executionContext) _Project_stack(ctx context.Context, field graphql.Co
 			return obj.Stack, nil
 		},
 		nil,
-		ec.marshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack,
+		ec.marshalNProjectStack2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStack,
 		true,
 		true,
 	)
@@ -6211,7 +6211,7 @@ func (ec *executionContext) _Project_status(ctx context.Context, field graphql.C
 			return obj.Status, nil
 		},
 		nil,
-		ec.marshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus,
+		ec.marshalNProjectStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStatus,
 		true,
 		true,
 	)
@@ -6269,7 +6269,7 @@ func (ec *executionContext) _Project_backendTarget(ctx context.Context, field gr
 			return obj.BackendTarget, nil
 		},
 		nil,
-		ec.marshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget,
+		ec.marshalNBackendTarget2githubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget,
 		true,
 		true,
 	)
@@ -6327,7 +6327,7 @@ func (ec *executionContext) _Project_logs(ctx context.Context, field graphql.Col
 			return obj.Logs, nil
 		},
 		nil,
-		ec.marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLogᚄ,
+		ec.marshalNJobLog2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐJobLogᚄ,
 		true,
 		true,
 	)
@@ -6364,7 +6364,7 @@ func (ec *executionContext) _Project_files(ctx context.Context, field graphql.Co
 			return obj.Files, nil
 		},
 		nil,
-		ec.marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFileᚄ,
+		ec.marshalNProjectFile2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectFileᚄ,
 		true,
 		true,
 	)
@@ -6399,7 +6399,7 @@ func (ec *executionContext) _Project_maestro(ctx context.Context, field graphql.
 			return obj.Maestro, nil
 		},
 		nil,
-		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio,
+		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroStudio,
 		true,
 		true,
 	)
@@ -6438,7 +6438,7 @@ func (ec *executionContext) _Project_activate(ctx context.Context, field graphql
 			return obj.Activate, nil
 		},
 		nil,
-		ec.marshalNLocalActivate2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLocalActivate,
+		ec.marshalNLocalActivate2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLocalActivate,
 		true,
 		true,
 	)
@@ -6537,7 +6537,7 @@ func (ec *executionContext) _Query_health(ctx context.Context, field graphql.Col
 			return ec.resolvers.Query().Health(ctx)
 		},
 		nil,
-		ec.marshalNHealth2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐHealth,
+		ec.marshalNHealth2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐHealth,
 		true,
 		true,
 	)
@@ -6580,7 +6580,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐUser,
 		true,
 		false,
 	)
@@ -6619,7 +6619,7 @@ func (ec *executionContext) _Query_projects(ctx context.Context, field graphql.C
 			return ec.resolvers.Query().Projects(ctx)
 		},
 		nil,
-		ec.marshalNProject2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectᚄ,
+		ec.marshalNProject2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectᚄ,
 		true,
 		true,
 	)
@@ -6675,7 +6675,7 @@ func (ec *executionContext) _Query_project(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().Project(ctx, fc.Args["id"].(string))
 		},
 		nil,
-		ec.marshalOProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		ec.marshalOProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject,
 		true,
 		false,
 	)
@@ -6742,7 +6742,7 @@ func (ec *executionContext) _Query_maestroStudio(ctx context.Context, field grap
 			return ec.resolvers.Query().MaestroStudio(ctx, fc.Args["projectId"].(string))
 		},
 		nil,
-		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio,
+		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroStudio,
 		true,
 		true,
 	)
@@ -6792,7 +6792,7 @@ func (ec *executionContext) _Query_devices(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().Devices(ctx)
 		},
 		nil,
-		ec.marshalNDevice2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDeviceᚄ,
+		ec.marshalNDevice2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDeviceᚄ,
 		true,
 		true,
 	)
@@ -6833,7 +6833,7 @@ func (ec *executionContext) _Query_sessions(ctx context.Context, field graphql.C
 			return ec.resolvers.Query().Sessions(ctx)
 		},
 		nil,
-		ec.marshalNSession2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐSessionᚄ,
+		ec.marshalNSession2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐSessionᚄ,
 		true,
 		true,
 	)
@@ -6872,7 +6872,7 @@ func (ec *executionContext) _Query_mailbox(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().Mailbox(ctx)
 		},
 		nil,
-		ec.marshalNMailMessage2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessageᚄ,
+		ec.marshalNMailMessage2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessageᚄ,
 		true,
 		true,
 	)
@@ -6914,7 +6914,7 @@ func (ec *executionContext) _Query_challengeMailbox(ctx context.Context, field g
 			return ec.resolvers.Query().ChallengeMailbox(ctx, fc.Args["challengeId"].(string))
 		},
 		nil,
-		ec.marshalOMailMessage2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessage,
+		ec.marshalOMailMessage2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessage,
 		true,
 		false,
 	)
@@ -6966,7 +6966,7 @@ func (ec *executionContext) _Query_llmAdmin(ctx context.Context, field graphql.C
 			return ec.resolvers.Query().LlmAdmin(ctx)
 		},
 		nil,
-		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin,
+		ec.marshalNLlmAdmin2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin,
 		true,
 		true,
 	)
@@ -7011,7 +7011,7 @@ func (ec *executionContext) _Query_llmStatus(ctx context.Context, field graphql.
 			return ec.resolvers.Query().LlmStatus(ctx)
 		},
 		nil,
-		ec.marshalNLlmStatus2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus,
+		ec.marshalNLlmStatus2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmStatus,
 		true,
 		true,
 	)
@@ -7101,7 +7101,7 @@ func (ec *executionContext) _Query_exportMe(ctx context.Context, field graphql.C
 			return ec.resolvers.Query().ExportMe(ctx)
 		},
 		nil,
-		ec.marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle,
+		ec.marshalNExportBundle2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐExportBundle,
 		true,
 		true,
 	)
@@ -7134,7 +7134,7 @@ func (ec *executionContext) _Query_trainingPack(ctx context.Context, field graph
 			return ec.resolvers.Query().TrainingPack(ctx)
 		},
 		nil,
-		ec.marshalNTrainingPack2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐTrainingPack,
+		ec.marshalNTrainingPack2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐTrainingPack,
 		true,
 		true,
 	)
@@ -7179,7 +7179,7 @@ func (ec *executionContext) _Query_connections(ctx context.Context, field graphq
 			return ec.resolvers.Query().Connections(ctx)
 		},
 		nil,
-		ec.marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionᚄ,
+		ec.marshalNConnection2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionᚄ,
 		true,
 		true,
 	)
@@ -7767,7 +7767,7 @@ func (ec *executionContext) _User_workspaceKind(ctx context.Context, field graph
 			return obj.WorkspaceKind, nil
 		},
 		nil,
-		ec.marshalNWorkspaceKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐWorkspaceKind,
+		ec.marshalNWorkspaceKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐWorkspaceKind,
 		true,
 		true,
 	)
@@ -11592,23 +11592,23 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNActivateStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐActivateStatus(ctx context.Context, v any) (ActivateStatus, error) {
+func (ec *executionContext) unmarshalNActivateStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐActivateStatus(ctx context.Context, v any) (ActivateStatus, error) {
 	var res ActivateStatus
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNActivateStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐActivateStatus(ctx context.Context, sel ast.SelectionSet, v ActivateStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNActivateStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐActivateStatus(ctx context.Context, sel ast.SelectionSet, v ActivateStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (BackendTarget, error) {
+func (ec *executionContext) unmarshalNBackendTarget2githubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (BackendTarget, error) {
 	var res BackendTarget
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v BackendTarget) graphql.Marshaler {
+func (ec *executionContext) marshalNBackendTarget2githubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v BackendTarget) graphql.Marshaler {
 	return v
 }
 
@@ -11628,21 +11628,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole(ctx context.Context, v any) (ChatRole, error) {
+func (ec *executionContext) unmarshalNChatRole2githubᚗcomᚋcherryᚋapiᚋgraphᚐChatRole(ctx context.Context, v any) (ChatRole, error) {
 	var res ChatRole
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole(ctx context.Context, sel ast.SelectionSet, v ChatRole) graphql.Marshaler {
+func (ec *executionContext) marshalNChatRole2githubᚗcomᚋcherryᚋapiᚋgraphᚐChatRole(ctx context.Context, sel ast.SelectionSet, v ChatRole) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNConnection2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v Connection) graphql.Marshaler {
+func (ec *executionContext) marshalNConnection2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v Connection) graphql.Marshaler {
 	return ec._Connection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Connection) graphql.Marshaler {
+func (ec *executionContext) marshalNConnection2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Connection) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -11666,7 +11666,7 @@ func (ec *executionContext) marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx, sel, v[i])
+			ret[i] = ec.marshalNConnection2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnection(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11686,7 +11686,7 @@ func (ec *executionContext) marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapi
 	return ret
 }
 
-func (ec *executionContext) marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v *Connection) graphql.Marshaler {
+func (ec *executionContext) marshalNConnection2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v *Connection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11696,37 +11696,37 @@ func (ec *executionContext) marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ec._Connection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, v any) (ConnectionAuth, error) {
+func (ec *executionContext) unmarshalNConnectionAuth2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, v any) (ConnectionAuth, error) {
 	var res ConnectionAuth
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, sel ast.SelectionSet, v ConnectionAuth) graphql.Marshaler {
+func (ec *executionContext) marshalNConnectionAuth2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, sel ast.SelectionSet, v ConnectionAuth) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind(ctx context.Context, v any) (ConnectionKind, error) {
+func (ec *executionContext) unmarshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind(ctx context.Context, v any) (ConnectionKind, error) {
 	var res ConnectionKind
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind(ctx context.Context, sel ast.SelectionSet, v ConnectionKind) graphql.Marshaler {
+func (ec *executionContext) marshalNConnectionKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionKind(ctx context.Context, sel ast.SelectionSet, v ConnectionKind) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, v any) (ConnectionStatus, error) {
+func (ec *executionContext) unmarshalNConnectionStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, v any) (ConnectionStatus, error) {
 	var res ConnectionStatus
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, sel ast.SelectionSet, v ConnectionStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNConnectionStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, sel ast.SelectionSet, v ConnectionStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreenᚄ(ctx context.Context, sel ast.SelectionSet, v []*DesignScreen) graphql.Marshaler {
+func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDesignScreenᚄ(ctx context.Context, sel ast.SelectionSet, v []*DesignScreen) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -11750,7 +11750,7 @@ func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋa
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDesignScreen2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreen(ctx, sel, v[i])
+			ret[i] = ec.marshalNDesignScreen2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDesignScreen(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11770,7 +11770,7 @@ func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋa
 	return ret
 }
 
-func (ec *executionContext) marshalNDesignScreen2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreen(ctx context.Context, sel ast.SelectionSet, v *DesignScreen) graphql.Marshaler {
+func (ec *executionContext) marshalNDesignScreen2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDesignScreen(ctx context.Context, sel ast.SelectionSet, v *DesignScreen) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11780,7 +11780,7 @@ func (ec *executionContext) marshalNDesignScreen2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._DesignScreen(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDevice2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDeviceᚄ(ctx context.Context, sel ast.SelectionSet, v []*Device) graphql.Marshaler {
+func (ec *executionContext) marshalNDevice2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDeviceᚄ(ctx context.Context, sel ast.SelectionSet, v []*Device) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -11804,7 +11804,7 @@ func (ec *executionContext) marshalNDevice2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDevice2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDevice(ctx, sel, v[i])
+			ret[i] = ec.marshalNDevice2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDevice(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11824,7 +11824,7 @@ func (ec *executionContext) marshalNDevice2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋg
 	return ret
 }
 
-func (ec *executionContext) marshalNDevice2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDevice(ctx context.Context, sel ast.SelectionSet, v *Device) graphql.Marshaler {
+func (ec *executionContext) marshalNDevice2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐDevice(ctx context.Context, sel ast.SelectionSet, v *Device) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11834,11 +11834,11 @@ func (ec *executionContext) marshalNDevice2ᚖgithubᚗcomᚋicerdeᚋapiᚋgrap
 	return ec._Device(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNExportBundle2githubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v ExportBundle) graphql.Marshaler {
+func (ec *executionContext) marshalNExportBundle2githubᚗcomᚋcherryᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v ExportBundle) graphql.Marshaler {
 	return ec._ExportBundle(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v *ExportBundle) graphql.Marshaler {
+func (ec *executionContext) marshalNExportBundle2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐExportBundle(ctx context.Context, sel ast.SelectionSet, v *ExportBundle) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11848,11 +11848,11 @@ func (ec *executionContext) marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._ExportBundle(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGitPushResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v GitPushResult) graphql.Marshaler {
+func (ec *executionContext) marshalNGitPushResult2githubᚗcomᚋcherryᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v GitPushResult) graphql.Marshaler {
 	return ec._GitPushResult(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGitPushResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v *GitPushResult) graphql.Marshaler {
+func (ec *executionContext) marshalNGitPushResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v *GitPushResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11862,11 +11862,11 @@ func (ec *executionContext) marshalNGitPushResult2ᚖgithubᚗcomᚋicerdeᚋapi
 	return ec._GitPushResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNHealth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v Health) graphql.Marshaler {
+func (ec *executionContext) marshalNHealth2githubᚗcomᚋcherryᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v Health) graphql.Marshaler {
 	return ec._Health(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNHealth2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v *Health) graphql.Marshaler {
+func (ec *executionContext) marshalNHealth2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v *Health) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11908,7 +11908,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*JobLog) graphql.Marshaler {
+func (ec *executionContext) marshalNJobLog2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐJobLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*JobLog) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -11932,7 +11932,7 @@ func (ec *executionContext) marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLog(ctx, sel, v[i])
+			ret[i] = ec.marshalNJobLog2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐJobLog(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11952,7 +11952,7 @@ func (ec *executionContext) marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋg
 	return ret
 }
 
-func (ec *executionContext) marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLog(ctx context.Context, sel ast.SelectionSet, v *JobLog) graphql.Marshaler {
+func (ec *executionContext) marshalNJobLog2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐJobLog(ctx context.Context, sel ast.SelectionSet, v *JobLog) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11962,11 +11962,11 @@ func (ec *executionContext) marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgrap
 	return ec._JobLog(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLlmAdmin2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v LlmAdmin) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmAdmin2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v LlmAdmin) graphql.Marshaler {
 	return ec._LlmAdmin(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v *LlmAdmin) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmAdmin2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmAdmin(ctx context.Context, sel ast.SelectionSet, v *LlmAdmin) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11976,7 +11976,7 @@ func (ec *executionContext) marshalNLlmAdmin2ᚖgithubᚗcomᚋicerdeᚋapiᚋgr
 	return ec._LlmAdmin(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmCompletion) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmCompletionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmCompletion) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12000,7 +12000,7 @@ func (ec *executionContext) marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletion(ctx, sel, v[i])
+			ret[i] = ec.marshalNLlmCompletion2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmCompletion(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12020,7 +12020,7 @@ func (ec *executionContext) marshalNLlmCompletion2ᚕᚖgithubᚗcomᚋicerdeᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmCompletion(ctx context.Context, sel ast.SelectionSet, v *LlmCompletion) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmCompletion2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmCompletion(ctx context.Context, sel ast.SelectionSet, v *LlmCompletion) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12030,17 +12030,17 @@ func (ec *executionContext) marshalNLlmCompletion2ᚖgithubᚗcomᚋicerdeᚋapi
 	return ec._LlmCompletion(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, v any) (LlmOccupancy, error) {
+func (ec *executionContext) unmarshalNLlmOccupancy2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, v any) (LlmOccupancy, error) {
 	var res LlmOccupancy
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNLlmOccupancy2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, sel ast.SelectionSet, v LlmOccupancy) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmOccupancy2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmOccupancy(ctx context.Context, sel ast.SelectionSet, v LlmOccupancy) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmSlotCard(ctx context.Context, sel ast.SelectionSet, v *LlmSlotCard) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmSlotCard2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmSlotCard(ctx context.Context, sel ast.SelectionSet, v *LlmSlotCard) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12050,11 +12050,11 @@ func (ec *executionContext) marshalNLlmSlotCard2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._LlmSlotCard(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLlmStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v LlmStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v LlmStatus) graphql.Marshaler {
 	return ec._LlmStatus(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLlmStatus2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v *LlmStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmStatus2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmStatus(ctx context.Context, sel ast.SelectionSet, v *LlmStatus) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12064,7 +12064,7 @@ func (ec *executionContext) marshalNLlmStatus2ᚖgithubᚗcomᚋicerdeᚋapiᚋg
 	return ec._LlmStatus(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmVersion) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmVersion2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmVersionᚄ(ctx context.Context, sel ast.SelectionSet, v []*LlmVersion) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12088,7 +12088,7 @@ func (ec *executionContext) marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNLlmVersion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersion(ctx, sel, v[i])
+			ret[i] = ec.marshalNLlmVersion2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmVersion(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12108,7 +12108,7 @@ func (ec *executionContext) marshalNLlmVersion2ᚕᚖgithubᚗcomᚋicerdeᚋapi
 	return ret
 }
 
-func (ec *executionContext) marshalNLlmVersion2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLlmVersion(ctx context.Context, sel ast.SelectionSet, v *LlmVersion) graphql.Marshaler {
+func (ec *executionContext) marshalNLlmVersion2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLlmVersion(ctx context.Context, sel ast.SelectionSet, v *LlmVersion) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12118,7 +12118,7 @@ func (ec *executionContext) marshalNLlmVersion2ᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ec._LlmVersion(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNLocalActivate2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLocalActivate(ctx context.Context, sel ast.SelectionSet, v *LocalActivate) graphql.Marshaler {
+func (ec *executionContext) marshalNLocalActivate2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLocalActivate(ctx context.Context, sel ast.SelectionSet, v *LocalActivate) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12128,21 +12128,21 @@ func (ec *executionContext) marshalNLocalActivate2ᚖgithubᚗcomᚋicerdeᚋapi
 	return ec._LocalActivate(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNLoginNext2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginNext(ctx context.Context, v any) (LoginNext, error) {
+func (ec *executionContext) unmarshalNLoginNext2githubᚗcomᚋcherryᚋapiᚋgraphᚐLoginNext(ctx context.Context, v any) (LoginNext, error) {
 	var res LoginNext
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNLoginNext2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginNext(ctx context.Context, sel ast.SelectionSet, v LoginNext) graphql.Marshaler {
+func (ec *executionContext) marshalNLoginNext2githubᚗcomᚋcherryᚋapiᚋgraphᚐLoginNext(ctx context.Context, sel ast.SelectionSet, v LoginNext) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNLoginResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult(ctx context.Context, sel ast.SelectionSet, v LoginResult) graphql.Marshaler {
+func (ec *executionContext) marshalNLoginResult2githubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult(ctx context.Context, sel ast.SelectionSet, v LoginResult) graphql.Marshaler {
 	return ec._LoginResult(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginResult(ctx context.Context, sel ast.SelectionSet, v *LoginResult) graphql.Marshaler {
+func (ec *executionContext) marshalNLoginResult2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐLoginResult(ctx context.Context, sel ast.SelectionSet, v *LoginResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12152,7 +12152,7 @@ func (ec *executionContext) marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._LoginResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlowᚄ(ctx context.Context, sel ast.SelectionSet, v []*MaestroFlow) graphql.Marshaler {
+func (ec *executionContext) marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroFlowᚄ(ctx context.Context, sel ast.SelectionSet, v []*MaestroFlow) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12176,7 +12176,7 @@ func (ec *executionContext) marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMaestroFlow2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlow(ctx, sel, v[i])
+			ret[i] = ec.marshalNMaestroFlow2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroFlow(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12196,7 +12196,7 @@ func (ec *executionContext) marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋap
 	return ret
 }
 
-func (ec *executionContext) marshalNMaestroFlow2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlow(ctx context.Context, sel ast.SelectionSet, v *MaestroFlow) graphql.Marshaler {
+func (ec *executionContext) marshalNMaestroFlow2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroFlow(ctx context.Context, sel ast.SelectionSet, v *MaestroFlow) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12206,21 +12206,21 @@ func (ec *executionContext) marshalNMaestroFlow2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._MaestroFlow(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult(ctx context.Context, v any) (MaestroResult, error) {
+func (ec *executionContext) unmarshalNMaestroResult2githubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroResult(ctx context.Context, v any) (MaestroResult, error) {
 	var res MaestroResult
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult(ctx context.Context, sel ast.SelectionSet, v MaestroResult) graphql.Marshaler {
+func (ec *executionContext) marshalNMaestroResult2githubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroResult(ctx context.Context, sel ast.SelectionSet, v MaestroResult) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNMaestroStudio2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v MaestroStudio) graphql.Marshaler {
+func (ec *executionContext) marshalNMaestroStudio2githubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v MaestroStudio) graphql.Marshaler {
 	return ec._MaestroStudio(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v *MaestroStudio) graphql.Marshaler {
+func (ec *executionContext) marshalNMaestroStudio2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v *MaestroStudio) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12230,7 +12230,7 @@ func (ec *executionContext) marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapi
 	return ec._MaestroStudio(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMailMessage2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*MailMessage) graphql.Marshaler {
+func (ec *executionContext) marshalNMailMessage2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*MailMessage) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12254,7 +12254,7 @@ func (ec *executionContext) marshalNMailMessage2ᚕᚖgithubᚗcomᚋicerdeᚋap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMailMessage2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessage(ctx, sel, v[i])
+			ret[i] = ec.marshalNMailMessage2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12274,7 +12274,7 @@ func (ec *executionContext) marshalNMailMessage2ᚕᚖgithubᚗcomᚋicerdeᚋap
 	return ret
 }
 
-func (ec *executionContext) marshalNMailMessage2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessage(ctx context.Context, sel ast.SelectionSet, v *MailMessage) graphql.Marshaler {
+func (ec *executionContext) marshalNMailMessage2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessage(ctx context.Context, sel ast.SelectionSet, v *MailMessage) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12284,21 +12284,21 @@ func (ec *executionContext) marshalNMailMessage2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._MailMessage(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode(ctx context.Context, v any) (OAuthMode, error) {
+func (ec *executionContext) unmarshalNOAuthMode2githubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthMode(ctx context.Context, v any) (OAuthMode, error) {
 	var res OAuthMode
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode(ctx context.Context, sel ast.SelectionSet, v OAuthMode) graphql.Marshaler {
+func (ec *executionContext) marshalNOAuthMode2githubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthMode(ctx context.Context, sel ast.SelectionSet, v OAuthMode) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNOAuthStart2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v OAuthStart) graphql.Marshaler {
+func (ec *executionContext) marshalNOAuthStart2githubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v OAuthStart) graphql.Marshaler {
 	return ec._OAuthStart(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNOAuthStart2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v *OAuthStart) graphql.Marshaler {
+func (ec *executionContext) marshalNOAuthStart2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v *OAuthStart) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12308,11 +12308,11 @@ func (ec *executionContext) marshalNOAuthStart2ᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ec._OAuthStart(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProject2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v Project) graphql.Marshaler {
+func (ec *executionContext) marshalNProject2githubᚗcomᚋcherryᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v Project) graphql.Marshaler {
 	return ec._Project(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectᚄ(ctx context.Context, sel ast.SelectionSet, v []*Project) graphql.Marshaler {
+func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectᚄ(ctx context.Context, sel ast.SelectionSet, v []*Project) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12336,7 +12336,7 @@ func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx, sel, v[i])
+			ret[i] = ec.marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12356,7 +12356,7 @@ func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v *Project) graphql.Marshaler {
+func (ec *executionContext) marshalNProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v *Project) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12366,7 +12366,7 @@ func (ec *executionContext) marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgra
 	return ec._Project(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*ProjectFile) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectFile2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*ProjectFile) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12390,7 +12390,7 @@ func (ec *executionContext) marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋap
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNProjectFile2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNProjectFile2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12410,7 +12410,7 @@ func (ec *executionContext) marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋap
 	return ret
 }
 
-func (ec *executionContext) marshalNProjectFile2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFile(ctx context.Context, sel ast.SelectionSet, v *ProjectFile) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectFile2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProjectFile(ctx context.Context, sel ast.SelectionSet, v *ProjectFile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12420,27 +12420,27 @@ func (ec *executionContext) marshalNProjectFile2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._ProjectFile(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack(ctx context.Context, v any) (ProjectStack, error) {
+func (ec *executionContext) unmarshalNProjectStack2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStack(ctx context.Context, v any) (ProjectStack, error) {
 	var res ProjectStack
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack(ctx context.Context, sel ast.SelectionSet, v ProjectStack) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectStack2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStack(ctx context.Context, sel ast.SelectionSet, v ProjectStack) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus(ctx context.Context, v any) (ProjectStatus, error) {
+func (ec *executionContext) unmarshalNProjectStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStatus(ctx context.Context, v any) (ProjectStatus, error) {
 	var res ProjectStatus
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus(ctx context.Context, sel ast.SelectionSet, v ProjectStatus) graphql.Marshaler {
+func (ec *executionContext) marshalNProjectStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐProjectStatus(ctx context.Context, sel ast.SelectionSet, v ProjectStatus) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNSession2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐSessionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Session) graphql.Marshaler {
+func (ec *executionContext) marshalNSession2ᚕᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐSessionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Session) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12464,7 +12464,7 @@ func (ec *executionContext) marshalNSession2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSession2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐSession(ctx, sel, v[i])
+			ret[i] = ec.marshalNSession2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐSession(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12484,7 +12484,7 @@ func (ec *executionContext) marshalNSession2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNSession2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐSession(ctx context.Context, sel ast.SelectionSet, v *Session) graphql.Marshaler {
+func (ec *executionContext) marshalNSession2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐSession(ctx context.Context, sel ast.SelectionSet, v *Session) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12540,11 +12540,11 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNTotpSetup2githubᚗcomᚋicerdeᚋapiᚋgraphᚐTotpSetup(ctx context.Context, sel ast.SelectionSet, v TotpSetup) graphql.Marshaler {
+func (ec *executionContext) marshalNTotpSetup2githubᚗcomᚋcherryᚋapiᚋgraphᚐTotpSetup(ctx context.Context, sel ast.SelectionSet, v TotpSetup) graphql.Marshaler {
 	return ec._TotpSetup(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTotpSetup2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐTotpSetup(ctx context.Context, sel ast.SelectionSet, v *TotpSetup) graphql.Marshaler {
+func (ec *executionContext) marshalNTotpSetup2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐTotpSetup(ctx context.Context, sel ast.SelectionSet, v *TotpSetup) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12554,11 +12554,11 @@ func (ec *executionContext) marshalNTotpSetup2ᚖgithubᚗcomᚋicerdeᚋapiᚋg
 	return ec._TotpSetup(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTrainingPack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐTrainingPack(ctx context.Context, sel ast.SelectionSet, v TrainingPack) graphql.Marshaler {
+func (ec *executionContext) marshalNTrainingPack2githubᚗcomᚋcherryᚋapiᚋgraphᚐTrainingPack(ctx context.Context, sel ast.SelectionSet, v TrainingPack) graphql.Marshaler {
 	return ec._TrainingPack(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTrainingPack2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐTrainingPack(ctx context.Context, sel ast.SelectionSet, v *TrainingPack) graphql.Marshaler {
+func (ec *executionContext) marshalNTrainingPack2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐTrainingPack(ctx context.Context, sel ast.SelectionSet, v *TrainingPack) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12568,23 +12568,23 @@ func (ec *executionContext) marshalNTrainingPack2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._TrainingPack(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNVerifyPurpose2githubᚗcomᚋicerdeᚋapiᚋgraphᚐVerifyPurpose(ctx context.Context, v any) (VerifyPurpose, error) {
+func (ec *executionContext) unmarshalNVerifyPurpose2githubᚗcomᚋcherryᚋapiᚋgraphᚐVerifyPurpose(ctx context.Context, v any) (VerifyPurpose, error) {
 	var res VerifyPurpose
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNVerifyPurpose2githubᚗcomᚋicerdeᚋapiᚋgraphᚐVerifyPurpose(ctx context.Context, sel ast.SelectionSet, v VerifyPurpose) graphql.Marshaler {
+func (ec *executionContext) marshalNVerifyPurpose2githubᚗcomᚋcherryᚋapiᚋgraphᚐVerifyPurpose(ctx context.Context, sel ast.SelectionSet, v VerifyPurpose) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNWorkspaceKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐWorkspaceKind(ctx context.Context, v any) (WorkspaceKind, error) {
+func (ec *executionContext) unmarshalNWorkspaceKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐWorkspaceKind(ctx context.Context, v any) (WorkspaceKind, error) {
 	var res WorkspaceKind
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNWorkspaceKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐWorkspaceKind(ctx context.Context, sel ast.SelectionSet, v WorkspaceKind) graphql.Marshaler {
+func (ec *executionContext) marshalNWorkspaceKind2githubᚗcomᚋcherryᚋapiᚋgraphᚐWorkspaceKind(ctx context.Context, sel ast.SelectionSet, v WorkspaceKind) graphql.Marshaler {
 	return v
 }
 
@@ -12841,7 +12841,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (*BackendTarget, error) {
+func (ec *executionContext) unmarshalOBackendTarget2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (*BackendTarget, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -12850,7 +12850,7 @@ func (ec *executionContext) unmarshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋa
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v *BackendTarget) graphql.Marshaler {
+func (ec *executionContext) marshalOBackendTarget2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v *BackendTarget) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -12923,14 +12923,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOMailMessage2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessage(ctx context.Context, sel ast.SelectionSet, v *MailMessage) graphql.Marshaler {
+func (ec *executionContext) marshalOMailMessage2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐMailMessage(ctx context.Context, sel ast.SelectionSet, v *MailMessage) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._MailMessage(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v *Project) graphql.Marshaler {
+func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v *Project) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -12955,7 +12955,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐUser(ctx context.Context, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

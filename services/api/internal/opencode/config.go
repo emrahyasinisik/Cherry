@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/icerde/api/internal/sidecar"
+	"github.com/cherry/api/internal/sidecar"
 )
 
 const configBare = `{
@@ -35,7 +35,7 @@ func WriteConfig(dir string) error {
 
 func WriteAgents(dir, name, stack, brief, sourceRule string) error {
 	body := "# " + name + "\n\n" +
-		"Bu klasör İçerde müşteri uygulamasıdır. OpenCode yalnızca bu kökte yazar.\n\n" +
+		"Bu klasör Cherry müşteri uygulamasıdır. OpenCode yalnızca bu kökte yazar.\n\n" +
 		"- Yığın: " + stack + "\n" +
 		"- Brif: " + brief + "\n" +
 		"- " + sourceRule + "\n" +
@@ -45,7 +45,7 @@ func WriteAgents(dir, name, stack, brief, sourceRule string) error {
 		"- `preview/*.html` stüdyo maketidir. Uygulamayı HTML ile değiştirme; zip’e HTML site koyma.\n" +
 		"- Barındırma yok. Teslim klasör / zip / git — seçilen dilin kaynağı.\n" +
 		"- Maestro YAML yaz; cihaz yoksa test çalıştırma, SKIPPED bırak.\n" +
-		"- İçerde GraphQL’ine dokunma; müşteri backend’i ayrıdır.\n"
+		"- Cherry GraphQL’ine dokunma; müşteri backend’i ayrıdır.\n"
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}

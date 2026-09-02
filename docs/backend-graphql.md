@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/02-backend-graphql.mdc](../.cursor/rules/02-backend-graphql.mdc) · [14-go.mdc](../.cursor/rules/14-go.mdc)
 
-**TR:** Bu, İçerde’nin kendi backend’idir. Müşteriye verilen mobil uygulamanın API’si değildir.
+**TR:** Bu, Cherry’nin kendi backend’idir. Müşteriye verilen mobil uygulamanın API’si değildir.
 
-**EN:** This is Icerde’s own backend. It is not the API of the generated mobile app.
+**EN:** This is Cherry’s own backend. It is not the API of the generated mobile app.
 
 ## İstek yolu / Request path
 

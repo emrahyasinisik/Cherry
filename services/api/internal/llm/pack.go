@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icerde/api/internal/gdpr"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/gdpr"
+	"github.com/cherry/api/internal/store"
 )
 
-const PackSchema = "icerde.training_pack.v1"
+const PackSchema = "cherry.training_pack.v1"
 
 const (
 	packBaseModel = "Qwen/Qwen2.5-1.5B-Instruct"
@@ -171,7 +171,7 @@ func examplesFromProject(project store.Project, logs []store.JobLog) []PackExamp
 			ID:          "brief-" + project.ID,
 			Kind:        "brief",
 			Source:      "live",
-			Instruction: "İçerde stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+			Instruction: "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
 			Input:       "Proje: " + project.Name + "\nYığın: " + string(project.Stack) + "\nBrif:\n" + clip(brief, 1200),
 			Output:      clip(plan, 1800),
 			Meta:        map[string]string{"projectId": project.ID, "stack": string(project.Stack), "kind": "brief"},
@@ -213,7 +213,7 @@ func examplesFromProject(project store.Project, logs []store.JobLog) []PackExamp
 			ID:          "chat-" + project.ID + "-" + strconv.Itoa(i),
 			Kind:        "completion",
 			Source:      "live",
-			Instruction: "İçerde ajanı: brife ve sohbet mesajına göre dosya planı veya yama öner. PII yok.",
+			Instruction: "Cherry ajanı: brife ve sohbet mesajına göre dosya planı veya yama öner. PII yok.",
 			Input:       clip(pair.user, 1000),
 			Output:      clip(pair.agent, 1400),
 			Meta:        map[string]string{"projectId": project.ID, "kind": "chat"},
@@ -366,7 +366,7 @@ func skipPackRel(rel string) bool {
 	rel = filepath.ToSlash(rel)
 	base := filepath.Base(rel)
 	switch base {
-	case "icerde.zip", "opencode.json", "AGENTS.md", ".env":
+	case "cherry.zip", "opencode.json", "AGENTS.md", ".env":
 		return true
 	}
 	if strings.HasPrefix(base, ".env") {

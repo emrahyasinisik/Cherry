@@ -102,7 +102,7 @@ export function oauthPermissions(kind: ConnectionKind): string[] {
 }
 
 export function oauthHeadline(kind: ConnectionKind): string {
-  return `İçerde, ${connectionKindLabel(kind)} hesabına erişmek istiyor`;
+  return `Cherry, ${connectionKindLabel(kind)} hesabına erişmek istiyor`;
 }
 
 export function providerPurpose(kind: ConnectionKind): string {

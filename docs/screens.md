@@ -27,13 +27,13 @@ flowchart TB
 
 ## 1. Giriş / Login
 
-Referans: [design/icerde-login.png](design/icerde-login.png)
+Referans: [design/cherry-login.png](design/cherry-login.png)
 
 ```mermaid
 flowchart TB
   Canvas[full_ink_canvas]
   Canvas --> Card[center_card_360]
-  Card --> Mark[Icerde]
+  Card --> Mark[Cherry]
   Card --> Sub[Masaustu_stüdyo]
   Card --> Email[email]
   Card --> Pass[sifre]
@@ -59,12 +59,12 @@ Empty: “Henüz proje yok” + “Yeni proje”. Lorem yok.
 
 ## 4. Stüdyo / Studio
 
-Referans: [design/icerde-studio.png](design/icerde-studio.png)
+Referans: [design/cherry-studio.png](design/cherry-studio.png)
 
 ```mermaid
 flowchart LR
   Brief[brif_ve_yigin]
-  Chat[icerde_sohbet_OpenCode_gizli]
+  Chat[cherry_sohbet_OpenCode_gizli]
   Side[yerel_aktif_plus_Maestro]
 ```
 
@@ -72,7 +72,7 @@ flowchart LR
 
 ## 5. LLM yönetici
 
-Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
+Referans: [design/cherry-llm-admin.png](design/cherry-llm-admin.png)
 
 İki kart A/B: aynı iş, ikinci kart yoğunluk işçisi. Versiyon select, MCP kök, kuyruk/meşgul durumu. Versiyon değişince chip metni anında yeni pointer.
 
@@ -84,7 +84,7 @@ Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yal
 
 ## 7. Bağlantılar / Connections
 
-Plugin menüsü. Kartlarda sağlayıcı logosu. Birincil yol **OAuth 2.0 izin ekranı** (“İçerde hesabına erişmek istiyor”). Token yapıştırma gelişmiş yedek. İçerde host olmaz. Boş / iptal bağlı değildir.
+Plugin menüsü. Kartlarda sağlayıcı logosu. Birincil yol **OAuth 2.0 izin ekranı** (“Cherry hesabına erişmek istiyor”). Token yapıştırma gelişmiş yedek. Cherry host olmaz. Boş / iptal bağlı değildir.
 
 ```mermaid
 flowchart TB

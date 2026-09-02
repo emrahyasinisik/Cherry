@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/icerde/api/internal/activate"
-	"github.com/icerde/api/internal/auth"
-	"github.com/icerde/api/internal/factory"
-	"github.com/icerde/api/internal/mailer"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/activate"
+	"github.com/cherry/api/internal/auth"
+	"github.com/cherry/api/internal/factory"
+	"github.com/cherry/api/internal/mailer"
+	"github.com/cherry/api/internal/store"
 )
 
 func mapUser(user store.User) (*User, error) {

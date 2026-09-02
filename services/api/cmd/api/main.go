@@ -16,25 +16,25 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/icerde/api/graph"
-	"github.com/icerde/api/internal/activate"
-	"github.com/icerde/api/internal/auth"
-	"github.com/icerde/api/internal/connect"
-	"github.com/icerde/api/internal/factory"
-	"github.com/icerde/api/internal/llm"
-	"github.com/icerde/api/internal/maestro"
-	"github.com/icerde/api/internal/mailer"
-	"github.com/icerde/api/internal/opencode"
-	"github.com/icerde/api/internal/sidecar"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/graph"
+	"github.com/cherry/api/internal/activate"
+	"github.com/cherry/api/internal/auth"
+	"github.com/cherry/api/internal/connect"
+	"github.com/cherry/api/internal/factory"
+	"github.com/cherry/api/internal/llm"
+	"github.com/cherry/api/internal/maestro"
+	"github.com/cherry/api/internal/mailer"
+	"github.com/cherry/api/internal/opencode"
+	"github.com/cherry/api/internal/sidecar"
+	"github.com/cherry/api/internal/store"
 	"github.com/rs/cors"
 )
 
 func main() {
-	addr := getenv("ICERDE_API_ADDR", "127.0.0.1:43148")
-	webOrigin := getenv("ICERDE_WEB_ORIGIN", "http://127.0.0.1:43147")
+	addr := getenv("CHERRY_API_ADDR", "127.0.0.1:43148")
+	webOrigin := getenv("CHERRY_WEB_ORIGIN", "http://127.0.0.1:43147")
 	mongoURI := os.Getenv("MONGO_URI")
-	pepper := getenv("ICERDE_CODE_PEPPER", "icerde-dev-pepper-change-me")
+	pepper := getenv("CHERRY_CODE_PEPPER", "cherry-dev-pepper-change-me")
 
 	memory := store.NewMemory()
 	var mongoOK bool
@@ -56,13 +56,13 @@ func main() {
 		WebURL:     webOrigin,
 		ResendKey:  os.Getenv("RESEND_API_KEY"),
 		ResendFrom: os.Getenv("RESEND_FROM"),
-		Require:    envTruthy("ICERDE_MAIL_REQUIRE"),
+		Require:    envTruthy("CHERRY_MAIL_REQUIRE"),
 		SMTP: mailer.Config{
 			Host:     os.Getenv("SMTP_HOST"),
 			Port:     getenv("SMTP_PORT", "587"),
 			User:     os.Getenv("SMTP_USER"),
 			Password: os.Getenv("SMTP_PASSWORD"),
-			From:     getenv("SMTP_FROM", "İçerde <icerde@localhost>"),
+			From:     getenv("SMTP_FROM", "Cherry <cherry@localhost>"),
 		},
 	}
 	log.Printf("mailer channel=%s require=%v", mail.Channel(), mail.Require)
@@ -72,9 +72,9 @@ func main() {
 	}
 	llmSvc := &llm.Service{
 		Store:     memory,
-		Completer: llm.NewCompleter(os.Getenv("ICERDE_LLM_API_KEY"), os.Getenv("ICERDE_LLM_BASE_URL"), os.Getenv("ICERDE_LLM_MODEL")),
+		Completer: llm.NewCompleter(os.Getenv("CHERRY_LLM_API_KEY"), os.Getenv("CHERRY_LLM_BASE_URL"), os.Getenv("CHERRY_LLM_MODEL")),
 	}
-	projectsRoot := getenv("ICERDE_PROJECTS_ROOT", "")
+	projectsRoot := getenv("CHERRY_PROJECTS_ROOT", "")
 	if projectsRoot == "" {
 		projectsRoot = filepath.Join("..", "..", "var", "projects")
 	}
@@ -159,7 +159,7 @@ func main() {
 			return
 		}
 		w.Header().Set("Content-Type", "application/zip")
-		w.Header().Set("Content-Disposition", `attachment; filename="icerde.zip"`)
+		w.Header().Set("Content-Disposition", `attachment; filename="cherry.zip"`)
 		http.ServeFile(w, r, path)
 	})
 	colabRoot := llm.ColabDir()
@@ -213,7 +213,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("icerde api listening on http://%s/graphql", addr)
+		log.Printf("cherry api listening on http://%s/graphql", addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

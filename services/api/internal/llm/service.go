@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icerde/api/internal/gdpr"
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/gdpr"
+	"github.com/cherry/api/internal/store"
 )
 
 type Completer interface {

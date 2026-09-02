@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://icerde.local/colab/training_pack.schema.json",
-  "title": "Icerde training pack",
+  "$id": "https://cherry.local/colab/training_pack.schema.json",
+  "title": "Cherry training pack",
   "type": "object",
   "required": ["schema", "recipe", "examples"],
   "properties": {
-    "schema": { "const": "icerde.training_pack.v1" },
+    "schema": { "const": "cherry.training_pack.v1" },
     "exportedAt": { "type": "string" },
     "recipe": {
       "type": "object",

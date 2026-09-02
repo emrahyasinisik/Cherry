@@ -4,7 +4,7 @@ import { Check, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { IcerdeMark, ProviderMark } from "@/components/provider-mark";
+import { CherryMark, ProviderMark } from "@/components/provider-mark";
 import { connectionKindLabel, getToken, graphql, type User } from "@/lib/api";
 import {
   consentTheme,
@@ -103,7 +103,7 @@ export function AuthorizeClient() {
       </header>
 
       <div className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="icerde-enter w-full max-w-[440px]">
+        <div className="cherry-enter w-full max-w-[440px]">
           <div
             className="rounded-[10px] border p-6"
             style={{ background: theme.card, borderColor: theme.border }}
@@ -113,7 +113,7 @@ export function AuthorizeClient() {
                 className="flex size-12 items-center justify-center rounded-[8px] border"
                 style={{ borderColor: theme.border, background: theme.bg }}
               >
-                <IcerdeMark className="size-7" />
+                <CherryMark className="size-7" />
               </span>
               <span className="h-px w-8" style={{ background: theme.border }} aria-hidden />
               <span
@@ -125,7 +125,7 @@ export function AuthorizeClient() {
 
             <h1 className="text-center text-base leading-6 font-medium">{oauthHeadline(kind)}</h1>
             <p className="mt-2 text-center text-[13px] leading-5" style={{ color: theme.muted }}>
-              {user.email} olarak devam ediyorsun. Onay, {name} izinlerini İçerde’ye verir. İçerde uygulamanı
+              {user.email} olarak devam ediyorsun. Onay, {name} izinlerini Cherry’ye verir. Cherry uygulamanı
               barındırmaz.
             </p>
 
@@ -180,7 +180,7 @@ export function AuthorizeClient() {
                   go("allow");
                 }}
               >
-                İçerde’yi yetkilendir
+                Cherry’yi yetkilendir
               </button>
             </div>
           </div>

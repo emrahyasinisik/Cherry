@@ -103,7 +103,7 @@ func (s *Service) Start(ctx context.Context, id, projectRoot string) (Snapshot, 
 	runCtx, cancel := context.WithCancel(context.Background())
 	cmd := exec.CommandContext(runCtx, "go", "run", "main.go")
 	cmd.Dir = backend
-	cmd.Env = append(os.Environ(), "ICERDE_CUSTOMER_ADDR="+addr)
+	cmd.Env = append(os.Environ(), "CHERRY_CUSTOMER_ADDR="+addr)
 	cmd.Stdout = io.Discard
 	cmd.Stderr = io.Discard
 	if runtime.GOOS != "windows" {

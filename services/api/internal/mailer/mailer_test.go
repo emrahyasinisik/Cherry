@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icerde/api/internal/store"
+	"github.com/cherry/api/internal/store"
 )
 
 func TestChannelSelection(t *testing.T) {
@@ -31,7 +31,7 @@ func TestSendInboxOnly(t *testing.T) {
 	mem := store.NewMemory()
 	svc := &Service{Store: mem, WebURL: "http://127.0.0.1:43147"}
 	delivery, err := svc.Send(context.Background(), Message{
-		To:          "ada@icerde.dev",
+		To:          "ada@cherry.dev",
 		Subject:     "kod",
 		PlainBody:   "kodun: 123456",
 		UserID:      "u1",
@@ -53,7 +53,7 @@ func TestSendInboxOnly(t *testing.T) {
 func TestSendRequireWithoutTransport(t *testing.T) {
 	mem := store.NewMemory()
 	svc := &Service{Store: mem, Require: true}
-	_, err := svc.Send(context.Background(), Message{To: "ada@icerde.dev", Subject: "x", PlainBody: "y"})
+	_, err := svc.Send(context.Background(), Message{To: "ada@cherry.dev", Subject: "x", PlainBody: "y"})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -75,13 +75,13 @@ func TestSendResend(t *testing.T) {
 	svc := &Service{
 		Store:      mem,
 		ResendKey:  "re_secret",
-		ResendFrom: "İçerde <mail@icerde.dev>",
+		ResendFrom: "Cherry <mail@cherry.dev>",
 		ResendURL:  server.URL,
 		HTTPClient: server.Client(),
 	}
 	delivery, err := svc.Send(context.Background(), Message{
-		To:        "ada@icerde.dev",
-		Subject:   "İçerde doğrulama kodu",
+		To:        "ada@cherry.dev",
+		Subject:   "Cherry doğrulama kodu",
 		PlainBody: "123456",
 		HTMLBody:  "<p>123456</p>",
 		UserID:    "u1",
@@ -96,7 +96,7 @@ func TestSendResend(t *testing.T) {
 	if gotAuth != "Bearer re_secret" {
 		t.Fatalf("auth %q", gotAuth)
 	}
-	if payload["from"] != "İçerde <mail@icerde.dev>" {
+	if payload["from"] != "Cherry <mail@cherry.dev>" {
 		t.Fatalf("from %#v", payload["from"])
 	}
 }
@@ -109,8 +109,8 @@ func TestCodeEmailAndSMTPBytes(t *testing.T) {
 	if !strings.Contains(html, "424242") || subject == "" {
 		t.Fatalf("html/subject")
 	}
-	raw := string(smtpBytes("İçerde <a@b.c>", Message{
-		To:        "ada@icerde.dev",
+	raw := string(smtpBytes("Cherry <a@b.c>", Message{
+		To:        "ada@cherry.dev",
 		Subject:   "kod",
 		PlainBody: plain,
 		HTMLBody:  html,

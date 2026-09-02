@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icerde/api/internal/gdpr"
-	"github.com/icerde/api/internal/sidecar"
+	"github.com/cherry/api/internal/gdpr"
+	"github.com/cherry/api/internal/sidecar"
 )
 
 type Status string
@@ -66,15 +66,15 @@ type CLI struct {
 
 func NewCLI() *CLI {
 	timeout := 8 * time.Minute
-	if raw := strings.TrimSpace(os.Getenv("ICERDE_OPENCODE_TIMEOUT_SEC")); raw != "" {
+	if raw := strings.TrimSpace(os.Getenv("CHERRY_OPENCODE_TIMEOUT_SEC")); raw != "" {
 		if n, err := time.ParseDuration(raw + "s"); err == nil && n > 0 {
 			timeout = n
 		}
 	}
 	return &CLI{
-		Bin:     strings.TrimSpace(os.Getenv("ICERDE_OPENCODE_BIN")),
+		Bin:     strings.TrimSpace(os.Getenv("CHERRY_OPENCODE_BIN")),
 		Timeout: timeout,
-		Require: envTruthy("ICERDE_OPENCODE_REQUIRE"),
+		Require: envTruthy("CHERRY_OPENCODE_REQUIRE"),
 	}
 }
 
@@ -123,11 +123,11 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	}
 	runCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-	args := []string{"run", "--dir", dir, "--auto", "--title", titleOr(req.Title, "icerde")}
+	args := []string{"run", "--dir", dir, "--auto", "--title", titleOr(req.Title, "cherry")}
 	if req.Continue {
 		args = append(args, "--continue")
 	}
-	if model := strings.TrimSpace(firstNonEmpty(req.Model, os.Getenv("ICERDE_OPENCODE_MODEL"), os.Getenv("ICERDE_LLM_MODEL"))); model != "" {
+	if model := strings.TrimSpace(firstNonEmpty(req.Model, os.Getenv("CHERRY_OPENCODE_MODEL"), os.Getenv("CHERRY_LLM_MODEL"))); model != "" {
 		args = append(args, "--model", model)
 	}
 	cmd := exec.CommandContext(runCtx, bin, args...)
@@ -239,7 +239,7 @@ func firstNonEmpty(values ...string) string {
 }
 
 func withLLMKey(env []string) []string {
-	key := strings.TrimSpace(os.Getenv("ICERDE_LLM_API_KEY"))
+	key := strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
 	if key == "" {
 		return env
 	}

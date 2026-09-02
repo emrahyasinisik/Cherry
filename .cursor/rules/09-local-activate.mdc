@@ -8,9 +8,9 @@ alwaysApply: false
 
 # Local activate
 
-- “Active” means: Icerde starts the **generated** backend on localhost (`go run backend/main.go` on 47000–47999) so Maestro and the emulator can reach it.
-- Not a public URL. Not Icerde cloud.
+- “Active” means: Cherry starts the **generated** backend on localhost (`go run backend/main.go` on 47000–47999) so Maestro and the emulator can reach it.
+- Not a public URL. Not Cherry cloud.
 - Track pid, port, logs, and stop on project close or user stop.
 - Do not start the generated API inside the platform Go process.
-- Collision: bind uncommon ports; never steal 3000/5173/8080 from the Icerde desktop UI if those are in use — pick an isolated range for generated apps.
+- Collision: bind uncommon ports; never steal 3000/5173/8080 from the Cherry desktop UI if those are in use — pick an isolated range for generated apps.
 - Read [docs/local-activate.md](docs/local-activate.md).
