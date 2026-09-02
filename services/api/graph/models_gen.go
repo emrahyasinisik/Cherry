@@ -37,8 +37,9 @@ type Health struct {
 }
 
 type JobLog struct {
-	At      string `json:"at"`
-	Message string `json:"message"`
+	At      string   `json:"at"`
+	Message string   `json:"message"`
+	Role    ChatRole `json:"role"`
 }
 
 type LlmAdmin struct {
@@ -156,6 +157,63 @@ type User struct {
 	Email         string        `json:"email"`
 	WorkspaceKind WorkspaceKind `json:"workspaceKind"`
 	TotpEnabled   bool          `json:"totpEnabled"`
+}
+
+type ChatRole string
+
+const (
+	ChatRoleUser   ChatRole = "USER"
+	ChatRoleAgent  ChatRole = "AGENT"
+	ChatRoleSystem ChatRole = "SYSTEM"
+)
+
+var AllChatRole = []ChatRole{
+	ChatRoleUser,
+	ChatRoleAgent,
+	ChatRoleSystem,
+}
+
+func (e ChatRole) IsValid() bool {
+	switch e {
+	case ChatRoleUser, ChatRoleAgent, ChatRoleSystem:
+		return true
+	}
+	return false
+}
+
+func (e ChatRole) String() string {
+	return string(e)
+}
+
+func (e *ChatRole) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ChatRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ChatRole", str)
+	}
+	return nil
+}
+
+func (e ChatRole) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ChatRole) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ChatRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type LoginNext string

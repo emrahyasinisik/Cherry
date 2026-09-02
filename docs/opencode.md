@@ -23,7 +23,7 @@ opencode run --dir <projectRoot> --auto
 
 Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü.
 
-**Kişi OpenCode görmez.** Yalnızca İçerde’ye yazar. TUI (`opencode` sohbet penceresi) açılmaz. Program `run --auto` ile arka planda çağırır.
+**Kişi OpenCode görmez.** Yalnızca İçerde sohbetine yazar. TUI açılmaz. Program `sendProjectMessage` → `opencode run --dir --auto` (sonraki mesajda `--continue`).
 
 **The person never sees OpenCode.** They only write in Icerde. Do not launch the TUI. The program calls `run --auto` in the background.
 

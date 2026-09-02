@@ -74,4 +74,12 @@ func TestMapProjectEnumsExhaustive(t *testing.T) {
 	if _, err := mapMaestroResult(store.MaestroResult("X")); err == nil {
 		t.Fatal("expected maestro error")
 	}
+	for _, role := range []store.ChatRole{store.RoleUser, store.RoleAgent, store.RoleSystem, ""} {
+		if _, err := mapChatRole(role); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapChatRole(store.ChatRole("X")); err == nil {
+		t.Fatal("expected chat role error")
+	}
 }

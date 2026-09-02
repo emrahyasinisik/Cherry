@@ -35,7 +35,10 @@ func (r *Resolver) projectPayload(ctx context.Context, userID, id string, full b
 	if err != nil {
 		return nil, err
 	}
-	out.Logs = mapLogs(logs)
+	out.Logs, err = mapLogs(logs)
+	if err != nil {
+		return nil, err
+	}
 	out.Files = mapFiles(files)
 	out.Maestro = maestro
 	return out, nil

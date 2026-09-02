@@ -36,10 +36,11 @@ func (s Status) Label() string {
 }
 
 type Request struct {
-	Dir    string
-	Prompt string
-	Title  string
-	Model  string
+	Dir      string
+	Prompt   string
+	Title    string
+	Model    string
+	Continue bool
 }
 
 type Result struct {
@@ -113,6 +114,9 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	runCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	args := []string{"run", "--dir", req.Dir, "--auto", "--title", titleOr(req.Title, "icerde")}
+	if req.Continue {
+		args = append(args, "--continue")
+	}
 	if model := strings.TrimSpace(firstNonEmpty(req.Model, os.Getenv("ICERDE_OPENCODE_MODEL"), os.Getenv("ICERDE_LLM_MODEL"))); model != "" {
 		args = append(args, "--model", model)
 	}
@@ -220,10 +224,11 @@ func LogBody(res Result) string {
 
 // Fake is the test double. It records the prompt and optionally writes a marker file.
 type Fake struct {
-	Ran    int
-	Prompt string
-	Dir    string
-	Result Result
+	Ran      int
+	Prompt   string
+	Dir      string
+	Continue bool
+	Result   Result
 }
 
 func (f *Fake) Probe() (string, string, bool) {
@@ -234,6 +239,7 @@ func (f *Fake) Run(_ context.Context, req Request) (Result, error) {
 	f.Ran++
 	f.Prompt = req.Prompt
 	f.Dir = req.Dir
+	f.Continue = req.Continue
 	res := f.Result
 	if res.Status == "" {
 		res.Status = StatusRan

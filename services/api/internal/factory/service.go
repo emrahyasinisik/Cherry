@@ -63,6 +63,9 @@ func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw stri
 	if err := s.log(ctx, created.ID, "Kuyruğa alındı. Ajan arka planda yazacak."); err != nil {
 		return store.Project{}, err
 	}
+	if err := s.logRole(ctx, created.ID, created.Brief, store.RoleUser); err != nil {
+		return store.Project{}, err
+	}
 	if s.AutoRun {
 		go s.run(created.ID)
 	}
@@ -231,9 +234,10 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		plan,
 	}, "\n")
 	res, err := s.OpenCode.Run(ctx, opencode.Request{
-		Dir:    project.RootPath,
-		Prompt: prompt,
-		Title:  "icerde-" + project.ID,
+		Dir:      project.RootPath,
+		Prompt:   prompt,
+		Title:    "icerde-" + project.ID,
+		Continue: false,
 	})
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
 		return writeErr
@@ -241,16 +245,118 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 	if err != nil {
 		return err
 	}
+	return s.recordOpenCode(ctx, project.ID, res)
+}
+
+func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (store.Project, error) {
+	project, err := s.Get(ctx, userID, id)
+	if err != nil {
+		return store.Project{}, err
+	}
+	body = strings.TrimSpace(body)
+	if len(body) < 1 {
+		return store.Project{}, store.ErrValidation
+	}
+	switch project.Status {
+	case store.StatusQueued, store.StatusWriting:
+		return store.Project{}, store.ErrBusy
+	case store.StatusTesting, store.StatusReady, store.StatusFailed:
+		// follow-up chat allowed
+	default:
+		return store.Project{}, fmt.Errorf("unhandled status: %s", project.Status)
+	}
+	safe, _ := gdpr.Redact(body)
+	if err := s.logRole(ctx, project.ID, body, store.RoleUser); err != nil {
+		return store.Project{}, err
+	}
+	if s.LLM != nil {
+		if err := s.LLM.SetMcpRoot(ctx, project.RootPath); err != nil {
+			return store.Project{}, err
+		}
+		_, _ = s.LLM.Complete(ctx, llm.CompleteInput{
+			UserID:     project.UserID,
+			ProjectID:  project.ID,
+			Purpose:    "chat",
+			LegalBasis: "contract",
+			Prompt:     "Amaç: sohbet düzeltmesi. Yalnızca proje kökü.\nMesaj: " + safe,
+		})
+	}
+	if s.OpenCode == nil {
+		if err := s.logRole(ctx, project.ID, "Ajan bu stüdyoda bağlı değil. OpenCode penceresi açılmaz; iskelet duruyor.", store.RoleAgent); err != nil {
+			return store.Project{}, err
+		}
+		return s.Get(ctx, userID, id)
+	}
+	if err := s.setStatus(ctx, project.ID, store.StatusWriting); err != nil {
+		return store.Project{}, err
+	}
+	prompt := strings.Join([]string{
+		"İçerde sohbeti. OpenCode TUI açma. Yalnızca bu dizin.",
+		"Kullanıcı: " + safe,
+		"Gerekirse frontend/, backend/, maestro/, preview/ güncelle.",
+	}, "\n")
+	res, err := s.OpenCode.Run(ctx, opencode.Request{
+		Dir:      project.RootPath,
+		Prompt:   prompt,
+		Title:    "icerde-" + project.ID,
+		Continue: true,
+	})
+	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
+		_ = s.setStatus(ctx, project.ID, store.StatusFailed)
+		return store.Project{}, writeErr
+	}
+	if err != nil {
+		_ = s.setStatus(ctx, project.ID, store.StatusFailed)
+		return store.Project{}, err
+	}
+	if recErr := s.recordOpenCode(ctx, project.ID, res); recErr != nil {
+		return store.Project{}, recErr
+	}
+	next := store.StatusReady
+	if res.Status == opencode.StatusFailed {
+		next = store.StatusFailed
+	}
+	if err := s.setStatus(ctx, project.ID, next); err != nil {
+		return store.Project{}, err
+	}
+	return s.Get(ctx, userID, id)
+}
+
+func (s *Service) recordOpenCode(ctx context.Context, projectID string, res opencode.Result) error {
 	switch res.Status {
 	case opencode.StatusRan:
-		return s.log(ctx, project.ID, "OpenCode "+res.Status.Label()+" ("+res.Bin+"). Günlük: llm/opencode.log")
+		reply := clipChat(res.Output, 800)
+		if reply == "" {
+			reply = "Dosyaları güncelledim. OpenCode bu pencerede çalıştı, ayrı uygulama açılmadı."
+		}
+		if err := s.logRole(ctx, projectID, reply, store.RoleAgent); err != nil {
+			return err
+		}
+		return s.log(ctx, projectID, "OpenCode "+res.Status.Label()+" ("+res.Bin+"). Günlük: llm/opencode.log")
 	case opencode.StatusMissing:
-		return s.log(ctx, project.ID, "OpenCode CLI yok — iskelet kaldı, sahte yazım yok. Kur: opencode --help")
+		if err := s.logRole(ctx, projectID, "Ajan bu bilgisayarda henüz kurulu değil. İskelet duruyor — sahte yazım yok. OpenCode penceresi açılmaz.", store.RoleAgent); err != nil {
+			return err
+		}
+		return s.log(ctx, projectID, "OpenCode CLI yok — iskelet kaldı, sahte yazım yok.")
 	case opencode.StatusFailed:
-		return s.log(ctx, project.ID, "OpenCode hata: "+res.Err+" — iskelet duruyor. llm/opencode.log")
+		if err := s.logRole(ctx, projectID, "Ajan yazamadı: "+res.Err+". İskelet duruyor.", store.RoleAgent); err != nil {
+			return err
+		}
+		return s.log(ctx, projectID, "OpenCode hata: "+res.Err+" — iskelet duruyor. llm/opencode.log")
 	default:
-		return s.log(ctx, project.ID, "OpenCode durum: "+string(res.Status))
+		return s.log(ctx, projectID, "OpenCode durum: "+string(res.Status))
 	}
+}
+
+func clipChat(s string, n int) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return ""
+	}
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "…"
 }
 
 func (s *Service) setStatus(ctx context.Context, id string, status store.ProjectStatus) error {
@@ -269,10 +375,18 @@ func (s *Service) fail(ctx context.Context, id string, cause error) error {
 }
 
 func (s *Service) log(ctx context.Context, projectID, message string) error {
+	return s.logRole(ctx, projectID, message, store.RoleSystem)
+}
+
+func (s *Service) logRole(ctx context.Context, projectID, message string, role store.ChatRole) error {
+	if role == "" {
+		role = store.RoleSystem
+	}
 	return s.Store.AppendLog(ctx, store.JobLog{
 		ProjectID: projectID,
 		At:        time.Now().UTC(),
 		Message:   message,
+		Role:      role,
 	})
 }
 

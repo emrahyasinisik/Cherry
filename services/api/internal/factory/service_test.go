@@ -60,6 +60,55 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	}
 }
 
+func TestSendMessageContinuesHeadlessOpenCode(t *testing.T) {
+	mem := store.NewMemory()
+	svc := New(mem, t.TempDir())
+	svc.StepDelay = 0
+	svc.AutoRun = false
+	ctx := context.Background()
+	if err := llm.Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+	fake := &opencode.Fake{}
+	svc.OpenCode = fake
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.RunSync(ctx, project.ID); err != nil {
+		t.Fatal(err)
+	}
+	if fake.Continue {
+		t.Fatal("first write must not continue")
+	}
+	if _, err := svc.SendMessage(ctx, "u1", project.ID, "Girişe ada@icerde.dev QR ekle"); err != nil {
+		t.Fatal(err)
+	}
+	if !fake.Continue {
+		t.Fatal("chat follow-up must continue headless OpenCode")
+	}
+	if strings.Contains(fake.Prompt, "ada@icerde.dev") {
+		t.Fatalf("chat leaked email: %s", fake.Prompt)
+	}
+	logs, err := svc.Logs(ctx, "u1", project.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sawUser, sawAgent bool
+	for _, line := range logs {
+		if line.Role == store.RoleUser && strings.Contains(line.Message, "QR") {
+			sawUser = true
+		}
+		if line.Role == store.RoleAgent {
+			sawAgent = true
+		}
+	}
+	if !sawUser || !sawAgent {
+		t.Fatalf("chat roles user=%v agent=%v", sawUser, sawAgent)
+	}
+}
+
 func TestPipelineWithoutOpenCodeKeepsScaffold(t *testing.T) {
 	mem := store.NewMemory()
 	svc := New(mem, t.TempDir())

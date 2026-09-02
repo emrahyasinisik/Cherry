@@ -63,11 +63,11 @@ Referans: [design/icerde-studio.png](design/icerde-studio.png)
 ```mermaid
 flowchart LR
   Brief[brif_ve_yigin]
-  Log[ajan_log_mono]
+  Chat[icerde_sohbet_OpenCode_gizli]
   Side[yerel_aktif_plus_Maestro]
 ```
 
-Üç sütun, min 1280px pencerede. Daralınca log alta, side sheet.
+Üç sütun, min 1280px pencerede. Orta: sohbet. Kişi yalnızca buraya yazar; OpenCode TUI yok.
 
 ## 5. LLM yönetici
 

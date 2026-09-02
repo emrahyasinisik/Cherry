@@ -17,6 +17,7 @@ var (
 	ErrMailFailed         = errors.New("mail failed")
 	ErrLLMFailed          = errors.New("llm failed")
 	ErrPath               = errors.New("path")
+	ErrBusy               = errors.New("busy")
 )
 
 type WorkspaceKind string
@@ -82,27 +83,36 @@ type Project struct {
 	UpdatedAt time.Time
 }
 
+type ChatRole string
+
+const (
+	RoleUser   ChatRole = "USER"
+	RoleAgent  ChatRole = "AGENT"
+	RoleSystem ChatRole = "SYSTEM"
+)
+
 type JobLog struct {
 	ID        string
 	ProjectID string
 	At        time.Time
 	Message   string
+	Role      ChatRole
 }
 
 type Challenge struct {
-	ID             string
-	UserID         string
-	Purpose        Purpose
-	CodeHash       string
-	LinkHash       string
-	Attempts       int
-	MaxAttempts    int
-	ExpiresAt      time.Time
-	DeviceFPHash   string
-	DeviceLabel    string
-	CodeVerified   bool
-	Consumed       bool
-	TrustDevice    bool
+	ID           string
+	UserID       string
+	Purpose      Purpose
+	CodeHash     string
+	LinkHash     string
+	Attempts     int
+	MaxAttempts  int
+	ExpiresAt    time.Time
+	DeviceFPHash string
+	DeviceLabel  string
+	CodeVerified bool
+	Consumed     bool
+	TrustDevice  bool
 }
 
 type Session struct {
@@ -201,18 +211,18 @@ type LlmState struct {
 }
 
 type AuditEvent struct {
-	ID                string
-	UserID            string
-	ProjectID         string
-	Purpose           string
-	LegalBasis        string
-	Slot              LlmSlot
-	VersionID         string
-	VersionName       string
-	Channel           string
-	InputRedactions   int
-	OutputRedactions  int
-	PromptPreview     string
-	OutputPreview     string
-	CreatedAt         time.Time
+	ID               string
+	UserID           string
+	ProjectID        string
+	Purpose          string
+	LegalBasis       string
+	Slot             LlmSlot
+	VersionID        string
+	VersionName      string
+	Channel          string
+	InputRedactions  int
+	OutputRedactions int
+	PromptPreview    string
+	OutputPreview    string
+	CreatedAt        time.Time
 }

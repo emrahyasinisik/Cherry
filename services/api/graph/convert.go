@@ -220,13 +220,30 @@ func emptyMaestro() *MaestroStudio {
 	}
 }
 
-func mapLogs(rows []store.JobLog) []*JobLog {
+func mapLogs(rows []store.JobLog) ([]*JobLog, error) {
 	out := make([]*JobLog, 0, len(rows))
 	for _, row := range rows {
 		item := row
-		out = append(out, &JobLog{At: item.At.UTC().Format(time.RFC3339), Message: item.Message})
+		role, err := mapChatRole(item.Role)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, &JobLog{At: item.At.UTC().Format(time.RFC3339), Message: item.Message, Role: role})
 	}
-	return out
+	return out, nil
+}
+
+func mapChatRole(role store.ChatRole) (ChatRole, error) {
+	switch role {
+	case "", store.RoleSystem:
+		return ChatRoleSystem, nil
+	case store.RoleUser:
+		return ChatRoleUser, nil
+	case store.RoleAgent:
+		return ChatRoleAgent, nil
+	default:
+		return "", fmt.Errorf("unhandled chat role: %s", role)
+	}
 }
 
 func mapFiles(rows []factory.DiskFile) []*ProjectFile {

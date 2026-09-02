@@ -37,8 +37,9 @@ type Mutation {
   revokeSession(id: ID!): Boolean!
   revokeDevice(id: ID!): Boolean!
   logout: Boolean!
-  createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
-  setActiveVersion(id: ID!): LlmAdmin!
+	createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
+	sendProjectMessage(projectId: ID!, body: String!): Project!
+	setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
@@ -119,9 +120,16 @@ enum MaestroResult {
   FAILED
 }
 
+enum ChatRole {
+  USER
+  AGENT
+  SYSTEM
+}
+
 type JobLog {
   at: String!
   message: String!
+  role: ChatRole!
 }
 
 type ProjectFile {

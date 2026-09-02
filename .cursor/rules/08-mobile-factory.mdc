@@ -14,6 +14,6 @@ alwaysApply: false
 - Pipeline: brief → user-selected stack → agent writes frontend + backend + Maestro YAML → files on disk.
 - Do not hard-code a single mobile stack as the only option. First implementation may ship one adapter; the interface must allow others.
 - OpenCode is the writer. The agent runs in the background.
-- The person only writes in **Icerde** (brief / chat). Never launch the OpenCode TUI or any OpenCode window. Invoke headless: `opencode run --dir … --auto`.
+- The person only writes in **Icerde chat**. Never launch the OpenCode TUI. GraphQL `sendProjectMessage` → headless `opencode run --dir --auto` (`--continue` on follow-ups).
 - Output layout: `frontend/`, `backend/`, `maestro/`, `README`.
 - Never upload the generated app to Icerde hosting. Read [docs/mobile-factory.md](docs/mobile-factory.md).

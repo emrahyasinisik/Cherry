@@ -40,9 +40,12 @@ export type ProjectStack = "EXPO" | "FLUTTER" | "NATIVE";
 export type ProjectStatus = "QUEUED" | "WRITING" | "TESTING" | "READY" | "FAILED";
 export type MaestroResult = "SKIPPED" | "PASSED" | "FAILED";
 
+export type ChatRole = "USER" | "AGENT" | "SYSTEM";
+
 export type JobLog = {
   at: string;
   message: string;
+  role: ChatRole;
 };
 
 export type ProjectFile = {
@@ -73,7 +76,7 @@ export type MaestroStudio = {
 
 export const PROJECT_FIELDS = `
   id name brief stack status rootPath createdAt
-  logs { at message }
+  logs { at message role }
   files { path kind }
   maestro {
     ready

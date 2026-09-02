@@ -74,7 +74,6 @@ export default function NewProjectPage() {
         { name: name.trim(), brief: brief.trim(), stack },
       );
       setLastProjectId(data.createProject.id);
-      sessionStorage.setItem(`icerde.watch.${data.createProject.id}`, "1");
       router.push(`/projects/${data.createProject.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Oluşturulamadı.");
@@ -105,7 +104,7 @@ export default function NewProjectPage() {
         <div>
           <h1 className="text-base font-medium">Ne üretilsin?</h1>
           <p className="text-muted-foreground">
-            Brifi yaz, yığını seç. OpenCode arka planda kodlar; sen stüdyoda günlüğü görürsün.
+            Brifi yaz, yığını seç. Stüdyo sohbetine düşersin — OpenCode açılmaz, ajan içeride yazar.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">

@@ -168,6 +168,19 @@ func (r *mutationResolver) CreateProject(ctx context.Context, name string, brief
 	return r.projectPayload(ctx, user.ID, row.ID, true)
 }
 
+// SendProjectMessage is the resolver for the sendProjectMessage field.
+func (r *mutationResolver) SendProjectMessage(ctx context.Context, projectID string, body string) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	row, err := r.Factory.SendMessage(ctx, user.ID, projectID, body)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.projectPayload(ctx, user.ID, row.ID, true)
+}
+
 // SetActiveVersion is the resolver for the setActiveVersion field.
 func (r *mutationResolver) SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
@@ -180,6 +193,7 @@ func (r *mutationResolver) SetActiveVersion(ctx context.Context, id string) (*Ll
 	return r.llmAdminPayload(ctx, user.ID)
 }
 
+// SetMcpRoot is the resolver for the setMcpRoot field.
 func (r *mutationResolver) SetMcpRoot(ctx context.Context, path string) (*LlmAdmin, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {
@@ -191,6 +205,7 @@ func (r *mutationResolver) SetMcpRoot(ctx context.Context, path string) (*LlmAdm
 	return r.llmAdminPayload(ctx, user.ID)
 }
 
+// DeleteMe is the resolver for the deleteMe field.
 func (r *mutationResolver) DeleteMe(ctx context.Context, wipeProjects bool) (bool, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {
@@ -367,6 +382,7 @@ func (r *queryResolver) LlmAdmin(ctx context.Context) (*LlmAdmin, error) {
 	return out, nil
 }
 
+// LlmStatus is the resolver for the llmStatus field.
 func (r *queryResolver) LlmStatus(ctx context.Context) (*LlmStatus, error) {
 	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
 		return nil, gqlErr(err)
@@ -378,6 +394,7 @@ func (r *queryResolver) LlmStatus(ctx context.Context) (*LlmStatus, error) {
 	return &LlmStatus{Slot: "A", VersionName: version.Name, Channel: channel, Gdpr: true}, nil
 }
 
+// McpReadFile is the resolver for the mcpReadFile field.
 func (r *queryResolver) McpReadFile(ctx context.Context, relativePath string) (string, error) {
 	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
 		return "", gqlErr(err)
@@ -389,6 +406,7 @@ func (r *queryResolver) McpReadFile(ctx context.Context, relativePath string) (s
 	return body, nil
 }
 
+// ExportMe is the resolver for the exportMe field.
 func (r *queryResolver) ExportMe(ctx context.Context) (*ExportBundle, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {

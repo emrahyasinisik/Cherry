@@ -76,6 +76,7 @@ type ComplexityRoot struct {
 	JobLog struct {
 		At      func(childComplexity int) int
 		Message func(childComplexity int) int
+		Role    func(childComplexity int) int
 	}
 
 	LlmAdmin struct {
@@ -152,21 +153,22 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ConfirmTotp      func(childComplexity int, code string) int
-		CreateProject    func(childComplexity int, name string, brief string, stack ProjectStack) int
-		DeleteMe         func(childComplexity int, wipeProjects bool) int
-		DisableTotp      func(childComplexity int, code string) int
-		EnableTotp       func(childComplexity int) int
-		Login            func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		Logout           func(childComplexity int) int
-		Register         func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		RevokeDevice     func(childComplexity int, id string) int
-		RevokeSession    func(childComplexity int, id string) int
-		SetActiveVersion func(childComplexity int, id string) int
-		SetMcpRoot       func(childComplexity int, path string) int
-		VerifyCode       func(childComplexity int, challengeID string, code string, trustDevice bool) int
-		VerifyLink       func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
-		VerifyTotp       func(childComplexity int, challengeID string, code string) int
+		ConfirmTotp        func(childComplexity int, code string) int
+		CreateProject      func(childComplexity int, name string, brief string, stack ProjectStack) int
+		DeleteMe           func(childComplexity int, wipeProjects bool) int
+		DisableTotp        func(childComplexity int, code string) int
+		EnableTotp         func(childComplexity int) int
+		Login              func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		Logout             func(childComplexity int) int
+		Register           func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		RevokeDevice       func(childComplexity int, id string) int
+		RevokeSession      func(childComplexity int, id string) int
+		SendProjectMessage func(childComplexity int, projectID string, body string) int
+		SetActiveVersion   func(childComplexity int, id string) int
+		SetMcpRoot         func(childComplexity int, path string) int
+		VerifyCode         func(childComplexity int, challengeID string, code string, trustDevice bool) int
+		VerifyLink         func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
+		VerifyTotp         func(childComplexity int, challengeID string, code string) int
 	}
 
 	Project struct {
@@ -236,6 +238,7 @@ type MutationResolver interface {
 	RevokeDevice(ctx context.Context, id string) (bool, error)
 	Logout(ctx context.Context) (bool, error)
 	CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error)
+	SendProjectMessage(ctx context.Context, projectID string, body string) (*Project, error)
 	SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error)
 	SetMcpRoot(ctx context.Context, path string) (*LlmAdmin, error)
 	DeleteMe(ctx context.Context, wipeProjects bool) (bool, error)
@@ -381,6 +384,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.JobLog.Message(childComplexity), true
+	case "JobLog.role":
+		if e.complexity.JobLog.Role == nil {
+			break
+		}
+
+		return e.complexity.JobLog.Role(childComplexity), true
 
 	case "LlmAdmin.activeSlot":
 		if e.complexity.LlmAdmin.ActiveSlot == nil {
@@ -767,6 +776,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.RevokeSession(childComplexity, args["id"].(string)), true
+	case "Mutation.sendProjectMessage":
+		if e.complexity.Mutation.SendProjectMessage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendProjectMessage_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SendProjectMessage(childComplexity, args["projectId"].(string), args["body"].(string)), true
 	case "Mutation.setActiveVersion":
 		if e.complexity.Mutation.SetActiveVersion == nil {
 			break
@@ -1307,6 +1327,22 @@ func (ec *executionContext) field_Mutation_revokeSession_args(ctx context.Contex
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sendProjectMessage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "projectId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["projectId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "body", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["body"] = arg1
 	return args, nil
 }
 
@@ -1985,6 +2021,35 @@ func (ec *executionContext) fieldContext_JobLog_message(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JobLog_role(ctx context.Context, field graphql.CollectedField, obj *JobLog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JobLog_role,
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
+		nil,
+		ec.marshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JobLog_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ChatRole does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3970,6 +4035,69 @@ func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_sendProjectMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_sendProjectMessage,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SendProjectMessage(ctx, fc.Args["projectId"].(string), fc.Args["body"].(string))
+		},
+		nil,
+		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_sendProjectMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Project_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Project_name(ctx, field)
+			case "brief":
+				return ec.fieldContext_Project_brief(ctx, field)
+			case "stack":
+				return ec.fieldContext_Project_stack(ctx, field)
+			case "status":
+				return ec.fieldContext_Project_status(ctx, field)
+			case "rootPath":
+				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Project_createdAt(ctx, field)
+			case "logs":
+				return ec.fieldContext_Project_logs(ctx, field)
+			case "files":
+				return ec.fieldContext_Project_files(ctx, field)
+			case "maestro":
+				return ec.fieldContext_Project_maestro(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_sendProjectMessage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_setActiveVersion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -4352,6 +4480,8 @@ func (ec *executionContext) fieldContext_Project_logs(_ context.Context, field g
 				return ec.fieldContext_JobLog_at(ctx, field)
 			case "message":
 				return ec.fieldContext_JobLog_message(ctx, field)
+			case "role":
+				return ec.fieldContext_JobLog_role(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobLog", field.Name)
 		},
@@ -7152,6 +7282,11 @@ func (ec *executionContext) _JobLog(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "role":
+			out.Values[i] = ec._JobLog_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7798,6 +7933,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "createProject":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createProject(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sendProjectMessage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sendProjectMessage(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -8802,6 +8944,16 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole(ctx context.Context, v any) (ChatRole, error) {
+	var res ChatRole
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole(ctx context.Context, sel ast.SelectionSet, v ChatRole) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreenᚄ(ctx context.Context, sel ast.SelectionSet, v []*DesignScreen) graphql.Marshaler {
