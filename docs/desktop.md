@@ -40,3 +40,5 @@ flowchart LR
 - `nodeIntegration: false`, `contextIsolation: true`.
 - Device fingerprint in main only.
 - Generated project path stays in userData or a chosen workspace folder.
+- **Müşteri OpenCode kurmaz.** İçerde kurucusu CLI’yi paketler (dilim 6). Geliştirmede PATH / `ICERDE_OPENCODE_BIN` yeter.
+- **The customer does not install OpenCode.** The Icerde installer vendors the CLI (slice 6). PATH is only for us while developing.
