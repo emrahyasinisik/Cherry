@@ -12,7 +12,7 @@ alwaysApply: true
 - The generated mobile stack is chosen by the user (Expo, Flutter, native, …).
 - Security is X-inspired: password, 6-digit new-device code, TOTP, trusted devices, session revoke. No SMS. No phone number as identity. One active session per account.
 - Every LLM call must pass the KVKK/GDPR layer (redact → model → scan → audit).
-- Two LLMs: A codegen, B test/review. Switching models must change subsequent answers.
+- Two LLMs: A and B are capacity workers of the same kind. They exist so concurrent users (e.g. 10 at once) can share load — not to split codegen vs test. The router picks a free worker; busy workers queue. A version pointer still changes subsequent answers on that worker.
 - OpenCode is the code-writing engine; do not reimplement it.
 - Integrations: see docs/integrations.md. Maestro+OpenCode are runtime. Email and 6-digit codes are first-party (no AgentMail). No Figma/SMS MCP.
 - Before coding a section, read its `.cursor/rules/*.mdc` and `docs/*.md`. If behavior changes, update the doc in the same change.

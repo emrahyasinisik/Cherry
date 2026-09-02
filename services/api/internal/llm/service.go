@@ -25,14 +25,14 @@ func Seed(ctx context.Context, st store.Store) error {
 		ID:        "ver-a-1",
 		Slot:      store.SlotA,
 		Name:      "v1.0",
-		Note:      "LLM A kod — stub / yerel",
+		Note:      "İşçi A — stub / yerel",
 		CreatedAt: time.Now().UTC(),
 	}
 	v2 := store.LlmVersion{
 		ID:        "ver-a-2",
 		Slot:      store.SlotA,
 		Name:      "v1.1",
-		Note:      "LLM A kod — alternatif pointer (cevap değişir)",
+		Note:      "İşçi A — alternatif pointer (cevap değişir)",
 		CreatedAt: time.Now().UTC(),
 	}
 	if err := st.PutLlmVersion(ctx, v1); err != nil {

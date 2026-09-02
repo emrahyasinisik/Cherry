@@ -23,7 +23,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 - Mobile stack of the generated app is **chosen by the user**.
 - Security is **X-inspired**: password, 6-digit new-device code, TOTP, trusted devices, session revoke. **No SMS. No phone identity.** One active session per user.
 - Every LLM call goes through the **KVKK/GDPR layer**.
-- Two LLMs: A = codegen, B = test/review. One-click switch changes subsequent answers.
+- Two LLMs: **A and B are the same kind of worker**. They exist for **concurrent load** (e.g. 10 people at once), not for splitting job types (codegen vs test). The router assigns a free worker; if both are busy, jobs queue. Version pointer still changes subsequent answers on that worker.
 - OpenCode is the code-writing engine; do not rewrite it.
 - MCP/CLI: Maestro + OpenCode required in the product. Email and 6-digit codes are first-party (no AgentMail). Optional GitHub in this Cursor project. See [docs/integrations.md](docs/integrations.md).
 - Follow [docs/build-order.md](docs/build-order.md): scaffold first, then one LLM slot (A), not Colab or LLM B.

@@ -11,7 +11,7 @@ flowchart LR
   S3 --> S4[4_LLM_A_GDPR]
   S4 --> S5[5_OpenCode]
   S5 --> S6[6_yerel_Maestro]
-  S6 --> S7[7_LLM_B_switch]
+  S6 --> S7[7_LLM_B_queue]
   S7 --> S8[8_Colab_finetune]
 ```
 
@@ -26,7 +26,7 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 ## Neden “tüm AI” değil / Why not “finish AI first”
 
 - İki LLM + versiyon + Colab, ürün döngüsü olmadan spekülatif.
-- İlk yuva **LLM A (kod)** yeter: sarmalayıcı + bir tamamlayıcı. Cevap değişimini kanıtlamak için ikinci yuva **sonra**.
+- İlk yuva **LLM A (tek işçi)** yeter: sarmalayıcı + bir tamamlayıcı. İkinci yuva **yoğunluk** içindir; eşzamanlı iş yokken spekülatif.
 
 ## Dilimler / Slices
 
@@ -36,7 +36,7 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 4. **LLM A + GDPR** — tek model, redact → tamamla → denetim. MCP read-file kökü proje klasörü. Admin’de tek aktif versiyon.
 5. **OpenCode** — stub yazıcı yerine gerçek kod motoru.
 6. **Yerel aktif + Maestro** — backend localhost, `maestro mcp`, skip-if-no-device.
-7. **LLM B + tek tuş switch** — test yuvası; switch sonraki cevapları değiştirir.
+7. **LLM B + kuyruk** — ikinci kapasite işçisi; boş olan alır, ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Versiyon pointer’ı sonraki cevapları değiştirir.
 8. **Colab fine-tune** — izler birikince.
 
 Şimdi yapılacak bir sonraki iş: **5 — OpenCode**. Dilim 4 LLM A + GDPR kodda.

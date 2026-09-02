@@ -17,7 +17,7 @@ flowchart LR
   Desktop --> Emu[Emulator]
   Desktop --> Maestro[Maestro_MCP]
   API --> GDPR[KVKK_katmani]
-  GDPR --> LLMs[LLM_A_LLM_B]
+  GDPR --> LLMs[worker_A_worker_B_load]
   Disk --> Zip[Musteri_zip_git]
   Colab[Colab_finetune] -.-> LLMs
 ```
@@ -47,6 +47,7 @@ flowchart TB
 
 - Tek GraphQL sözleşmesi: platform. Üretilen müşteri API’si bu şemada yaşamaz.
 - UI asla LLM’e doğrudan gitmez.
+- LLM A ve B aynı iş türlerini yapar; ikinci yuva eşzamanlı yoğunluk içindir.
 - v1’de müşteri backend’i için public URL yok.
 
 | Parça | Sorumluluk |

@@ -20,7 +20,7 @@ MCP sunucusu CLI’nin içinde: `maestro mcp`. Doğrulama: `maestro --help`.
 
 ```mermaid
 flowchart TB
-  Start[LLM_B_test] --> List[list_devices]
+  Start[free_worker_A_or_B] --> List[list_devices]
   List --> Boot[emulator_or_skip]
   Boot --> Inspect[inspect_screen]
   Inspect --> Write[write_yaml_flow]

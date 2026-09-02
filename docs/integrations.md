@@ -31,7 +31,7 @@ Bunlar **Cursor’a süs için değil**, İçerde ve OpenCode’un çalışması
 
 | Ne | Neden | Nasıl |
 | --- | --- | --- |
-| **Maestro CLI + `maestro mcp`** | UI test; LLM B ekranı görür | `curl -fsSL "https://get.maestro.mobile.dev" \| bash` sonra `maestro mcp`. Java 17+, `JAVA_HOME`. |
+| **Maestro CLI + `maestro mcp`** | UI test; boş işçi (A veya B) ekranı görür | `curl -fsSL "https://get.maestro.mobile.dev" \| bash` sonra `maestro mcp`. Java 17+, `JAVA_HOME`. |
 | **OpenCode CLI** | Ajanın kod yazma motoru | OpenCode kurulumu; proje `opencode.json` içinde Maestro bağlı. |
 | **Node.js LTS + Go 1.22+ + Docker** | Next.js, GraphQL, Mongo | Docker Compose ile Mongo. |
 | **Emülatör** | Maestro’nun gerçek cihazı | Android Studio AVD (Win/Mac). iOS Simulator yalnızca Mac. Yoksa test `skipped`, asla sahte `passed`. |

@@ -21,7 +21,7 @@ flowchart TB
 ```
 
 - Sidebar 220px, collapse 64px (ikon). Mobil tab bar yok.
-- Titlebar: wordmark + proje adı + **LLM A | B** segmented control (sağ).
+- Titlebar: wordmark + proje adı + **LLM A | B** (sağ) — iki kapasite işçisi; meşgul/boş, kod vs test değil.
 - Statusbar: oturum, cihaz, GDPR, yerel URL.
 
 ## 1. Giriş / Login
@@ -73,7 +73,7 @@ flowchart LR
 
 Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
 
-İki kart A/B, versiyon select, MCP kök, tek tuş “Nöbet değiştir”. Switch sonrası chip metni anında yeni model adı.
+İki kart A/B: aynı iş, ikinci kart yoğunluk işçisi. Versiyon select, MCP kök, kuyruk/meşgul durumu. Versiyon değişince chip metni anında yeni pointer.
 
 ## 6. Güvenlik
 

@@ -1,5 +1,5 @@
 ---
-description: İki LLM, versiyon, tek tuş switch, MCP read-file, yönetici ekranı, Colab fine-tune
+description: İki LLM kapasite işçisi, kuyruk, versiyon, MCP read-file, yönetici ekranı, Colab fine-tune
 globs:
   - services/api/**/llm/**
   - apps/web/**/llm/**
@@ -9,10 +9,10 @@ alwaysApply: false
 
 # LLMOps
 
-- Exactly two runtime slots: LLM A (codegen) and LLM B (test/review) unless the admin assigns the reverse after a switch.
-- One-click switch: subsequent completions must use the newly active model/version. In-flight jobs finish on the old assignment or are marked cancelled — pick one and document it (default: finish in-flight, new jobs use new model).
-- Versions are immutable records. “Active” is a pointer.
+- Exactly two runtime workers: LLM A and LLM B. **Same job types.** They exist for **concurrent load** (many people at once), not for splitting codegen vs test.
+- Router: pick a free worker. If both are busy, queue. Do not pin “code” to A and “test” to B.
+- Versions are immutable records. “Active” is a pointer per worker. Changing the pointer changes **subsequent** completions on that worker. In-flight jobs finish on the old assignment (default).
 - MCP read-file is how models read generated source. Admin can change the allowed root.
 - Fine-tune via Colab export/import. Colab is not 24/7 production inference.
-- Admin UI changes must alter answers; a switch with no effect is a bug.
+- Admin UI must show occupancy (idle/busy/queued), not fake role labels. A switch with no effect on later answers is a bug.
 - Read [docs/llmops.md](docs/llmops.md).

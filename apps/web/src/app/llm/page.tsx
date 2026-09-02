@@ -74,7 +74,8 @@ export default function LlmAdminPage() {
         <div>
           <h1 className="text-base font-medium">LLM yönetici</h1>
           <p className="text-muted-foreground">
-            Her çağrı redact → model → tarama → denetim. LLM B ve Colab henüz yok.
+            Her çağrı redact → model → tarama → denetim. A ve B aynı işi yapar; B ikinci
+            kapasite işçisidir (yoğunluk), kod/test ayrımı değildir. B ve Colab henüz yok.
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
@@ -115,9 +116,10 @@ export default function LlmAdminPage() {
           </article>
           <article className="rounded-[10px] border border-border bg-card/40 p-4">
             <p className="text-[11px] text-muted-foreground">SONRA</p>
-            <h2 className="text-base font-medium">LLM B — Test</h2>
+            <h2 className="text-base font-medium">LLM B — {admin.slotB.role}</h2>
             <p className="mt-2 text-muted-foreground">
-              Dilim 7. Sahte nöbet yok; B bağlı değil.
+              Dilim 7: ikinci işçi. On kişi aynı anda üretince boş olan alır; ikisi de
+              meşgulse kuyruk. Sahte rol yok — B bağlı değil.
             </p>
           </article>
         </div>

@@ -50,14 +50,14 @@ func (r *Resolver) llmAdminPayload(ctx context.Context, userID string) (*LlmAdmi
 		SlotA: &LlmSlotCard{
 			Slot:            "A",
 			Wired:           true,
-			Role:            "Kod",
+			Role:            "İşçi 1 — kapasite",
 			ActiveVersionID: &active,
 			Versions:        cards,
 		},
 		SlotB: &LlmSlotCard{
 			Slot:     "B",
 			Wired:    false,
-			Role:     "Test — dilim 7",
+			Role:     "İşçi 2 — yoğunluk, henüz yok",
 			Versions: []*LlmVersion{},
 		},
 		Completions: completions,
