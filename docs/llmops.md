@@ -90,4 +90,8 @@ flowchart LR
 | İki oturum = iki GPU hakkı | Paralel fine-tune; tek kartı bölme |
 | Colab üretim inferansı değil | Stüdyo işçileri İçerde’de çalışır |
 
-Dilim 8. Brif + üretilen kod + Maestro izi birikmeden notebook yazma.
+Dilim 8: dosyalar `colab/`, stüdyodan paket indirme, checkpoint → `registerLlmVersion`. Colab üretim inferansı değil.
+
+Slice 8: files in `colab/`, studio pack download, checkpoint → `registerLlmVersion`. Colab is not production inference.
+
+Adım adım: [colab.md](colab.md)

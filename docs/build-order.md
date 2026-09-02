@@ -39,7 +39,7 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 7. **LLM B + kuyruk** — ikinci kapasite işçisi; boş olan alır, ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Versiyon pointer’ı sonraki cevapları değiştirir.
 8. **Colab fine-tune** — izler birikince. İki notebook (A/B), paralel iki oturum, her biri 16GB GPU. Aynı tarif; tek kartta iki iş yok.
 
-Şimdi yapılacak bir sonraki iş: **8 — Colab fine-tune**. Dilim 7 işçi B + kuyruk kodda.
+Şimdi: dilim 1–8 kodda. Colab dosya olarak `colab/` + LLM yönetici. Üretim inferansı stüdyo işçilerinde kalır.
 
 **Duraklama notu güncellendi:** [remaining.md](remaining.md).
 

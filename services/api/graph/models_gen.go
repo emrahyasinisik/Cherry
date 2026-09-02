@@ -101,9 +101,10 @@ type LlmStatus struct {
 }
 
 type LlmVersion struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Note string `json:"note"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Note          string `json:"note"`
+	CheckpointRef string `json:"checkpointRef"`
 }
 
 type LocalActivate struct {
@@ -189,6 +190,16 @@ type Session struct {
 type TotpSetup struct {
 	Secret     string `json:"secret"`
 	OtpauthURL string `json:"otpauthUrl"`
+}
+
+type TrainingPack struct {
+	Schema       string `json:"schema"`
+	Filename     string `json:"filename"`
+	JSON         string `json:"json"`
+	Jsonl        string `json:"jsonl"`
+	LiveExamples int    `json:"liveExamples"`
+	SeedExamples int    `json:"seedExamples"`
+	Note         string `json:"note"`
 }
 
 type User struct {

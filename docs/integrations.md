@@ -74,7 +74,7 @@ GitHub MCP (aşağıdaki Cursor tablosu) **bizim** repo işi içindir; müşteri
 | MongoDB MCP | Platform Docker ile konuşur; şart değil. |
 | SMS / Twilio | Güvenlik modeli SMS yasak. |
 
-Colab **MCP değil**: Google hesabı + iki notebook export (işçi A/B). Her oturum **16GB GPU**. Cursor’a bağlanmaz. Tek kartta iki notebook varsayma.
+Colab **MCP değil**: Google hesabı + iki notebook (`colab/icerde_worker_a.ipynb`, `_b.ipynb`). Her oturum **16GB GPU**. Cursor’a bağlanmaz. Tek kartta iki notebook varsayma. Adımlar: [colab.md](colab.md).
 
 ## Kurulum sırası / Install order (senin makinen)
 

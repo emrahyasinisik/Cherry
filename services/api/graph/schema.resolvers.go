@@ -349,6 +349,18 @@ func (r *mutationResolver) SetMcpRoot(ctx context.Context, path string) (*LlmAdm
 	return r.llmAdminPayload(ctx, user.ID)
 }
 
+// RegisterLlmVersion is the resolver for the registerLlmVersion field.
+func (r *mutationResolver) RegisterLlmVersion(ctx context.Context, slot string, name string, note string, checkpointRef string) (*LlmAdmin, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if _, err := r.LLM.RegisterVersion(ctx, slot, name, note, checkpointRef); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.llmAdminPayload(ctx, user.ID)
+}
+
 // DeleteMe is the resolver for the deleteMe field.
 func (r *mutationResolver) DeleteMe(ctx context.Context, wipeProjects bool) (bool, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
@@ -595,6 +607,23 @@ func (r *queryResolver) ExportMe(ctx context.Context) (*ExportBundle, error) {
 		return nil, gqlErr(err)
 	}
 	return &ExportBundle{JSON: string(payload)}, nil
+}
+
+// TrainingPack is the resolver for the trainingPack field.
+func (r *queryResolver) TrainingPack(ctx context.Context) (*TrainingPack, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	pack, err := r.buildTrainingPack(ctx, user.ID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := trainingPackPayload(pack)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
 }
 
 // Connections is the resolver for the connections field.

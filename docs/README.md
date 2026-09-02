@@ -51,7 +51,7 @@ flowchart TB
 5. [design-system.md](design-system.md) + [motion.md](motion.md) + [screens.md](screens.md)
 6. [frontend.md](frontend.md) + [desktop.md](desktop.md)
 7. [mobile-factory.md](mobile-factory.md) + [opencode.md](opencode.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
-8. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
+8. [llmops.md](llmops.md) + [colab.md](colab.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
 9. [integrations.md](integrations.md) — MCP / CLI
 10. [connections.md](connections.md) — müşteri Bağlantılar (Supabase, GitHub, …)
 
@@ -70,7 +70,7 @@ flowchart TB
 | 08 | Mobil fabrika | [08-mobile-factory.mdc](../.cursor/rules/08-mobile-factory.mdc) | [mobile-factory.md](mobile-factory.md) · [opencode.md](opencode.md) |
 | 09 | Yerel aktif | [09-local-activate.mdc](../.cursor/rules/09-local-activate.mdc) | [local-activate.md](local-activate.md) |
 | 10 | Maestro | [10-maestro.mdc](../.cursor/rules/10-maestro.mdc) | [maestro.md](maestro.md) |
-| 11 | LLMOps | [11-llmops.mdc](../.cursor/rules/11-llmops.mdc) | [llmops.md](llmops.md) |
+| 11 | LLMOps | [11-llmops.mdc](../.cursor/rules/11-llmops.mdc) | [llmops.md](llmops.md) · [colab.md](colab.md) |
 | 12 | KVKK/GDPR | [12-gdpr-kvkk.mdc](../.cursor/rules/12-gdpr-kvkk.mdc) | [gdpr-kvkk.md](gdpr-kvkk.md) |
 | 13 | TypeScript | [13-typescript.mdc](../.cursor/rules/13-typescript.mdc) | [frontend.md](frontend.md) |
 | 14 | Go | [14-go.mdc](../.cursor/rules/14-go.mdc) | [backend-graphql.md](backend-graphql.md) |

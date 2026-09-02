@@ -253,11 +253,12 @@ const (
 )
 
 type LlmVersion struct {
-	ID        string
-	Slot      LlmSlot
-	Name      string
-	Note      string
-	CreatedAt time.Time
+	ID            string
+	Slot          LlmSlot
+	Name          string
+	Note          string
+	CheckpointRef string
+	CreatedAt     time.Time
 }
 
 type LlmState struct {

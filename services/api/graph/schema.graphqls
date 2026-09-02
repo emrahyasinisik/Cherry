@@ -13,6 +13,7 @@ type Query {
   llmStatus: LlmStatus!
   mcpReadFile(relativePath: String!): String!
   exportMe: ExportBundle!
+  trainingPack: TrainingPack!
   connections: [Connection!]!
 }
 
@@ -50,6 +51,7 @@ type Mutation {
   pushProjectGithub(projectId: ID!, repo: String!): GitPushResult!
   setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
+  registerLlmVersion(slot: String!, name: String!, note: String!, checkpointRef: String!): LlmAdmin!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
 
@@ -305,6 +307,17 @@ type LlmSlotCard {
 type LlmVersion {
   id: ID!
   name: String!
+  note: String!
+  checkpointRef: String!
+}
+
+type TrainingPack {
+  schema: String!
+  filename: String!
+  json: String!
+  jsonl: String!
+  liveExamples: Int!
+  seedExamples: Int!
   note: String!
 }
 

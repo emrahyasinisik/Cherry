@@ -133,7 +133,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":       true,
 			"store":    status,
-			"version":  "0.7.0-local",
+			"version":  "0.8.0-local",
 			"mail":     mail.Channel(),
 			"gdpr":     true,
 			"llm":      llmSvc.Completer.Channel(),
@@ -161,6 +161,40 @@ func main() {
 		w.Header().Set("Content-Type", "application/zip")
 		w.Header().Set("Content-Disposition", `attachment; filename="icerde.zip"`)
 		http.ServeFile(w, r, path)
+	})
+	colabRoot := llm.ColabDir()
+	if colabRoot != "" {
+		log.Printf("colab files=%s", colabRoot)
+	}
+	mux.HandleFunc("/colab/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		if colabRoot == "" {
+			http.NotFound(w, r)
+			return
+		}
+		rel := strings.TrimPrefix(r.URL.Path, "/colab/")
+		if rel == "" || strings.Contains(rel, "..") {
+			http.NotFound(w, r)
+			return
+		}
+		full := filepath.Join(colabRoot, filepath.FromSlash(rel))
+		clean := filepath.Clean(full)
+		root := filepath.Clean(colabRoot)
+		sep := string(os.PathSeparator)
+		if clean != root && !strings.HasPrefix(clean, root+sep) {
+			http.NotFound(w, r)
+			return
+		}
+		info, err := os.Stat(clean)
+		if err != nil || info.IsDir() {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Disposition", `attachment; filename="`+filepath.Base(clean)+`"`)
+		http.ServeFile(w, r, clean)
 	})
 	mux.HandleFunc("/oauth/decision", connectSvc.HandleDecision)
 	mux.HandleFunc("/oauth/provider/callback", connectSvc.HandleProviderCallback)

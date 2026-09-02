@@ -13,6 +13,7 @@ alwaysApply: false
 - Legal bases and purpose limitation are stored on the audit event.
 - User delete: platform PII gone or anonymized; LLM logs stripped; optional generated-project wipe if the user owns it.
 - Export: user can receive their platform data. Do not silently include other org members’ data.
+- Training pack (`trainingPack`) is redacted SFT rows for Colab, not a full privacy dump. No `.env`, tokens, or other tenants.
 - Temp mailbox content is PII with short TTL.
 - Generated customer source may contain end-user PII after the customer runs the app — Icerde still must not send raw project secrets to the LLM.
 - Read [docs/gdpr-kvkk.md](docs/gdpr-kvkk.md).

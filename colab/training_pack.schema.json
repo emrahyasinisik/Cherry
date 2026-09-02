@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://icerde.local/colab/training_pack.schema.json",
+  "title": "Icerde training pack",
+  "type": "object",
+  "required": ["schema", "recipe", "examples"],
+  "properties": {
+    "schema": { "const": "icerde.training_pack.v1" },
+    "exportedAt": { "type": "string" },
+    "recipe": {
+      "type": "object",
+      "required": ["baseModel", "method", "gpuBudgetGb"],
+      "properties": {
+        "baseModel": { "type": "string" },
+        "method": { "const": "qlora" },
+        "gpuBudgetGb": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "maxSeqLen": { "type": "integer" },
+        "loraR": { "type": "integer" }
+      }
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["instruction", "input", "output"],
+        "properties": {
+          "id": { "type": "string" },
+          "kind": { "enum": ["brief", "source", "maestro", "completion"] },
+          "source": { "enum": ["live", "seed"] },
+          "instruction": { "type": "string" },
+          "input": { "type": "string" },
+          "output": { "type": "string" },
+          "meta": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "liveExamples": { "type": "integer" },
+        "seedExamples": { "type": "integer" }
+      }
+    },
+    "note": { "type": "string" }
+  }
+}

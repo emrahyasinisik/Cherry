@@ -10,6 +10,6 @@ alwaysApply: false
 # Build order
 
 - Follow [docs/build-order.md](docs/build-order.md). Pause checklist: [docs/remaining.md](docs/remaining.md).
-- Next implementation slice is **8 — Colab fine-tune**. Slices 1–7 are done. Do not stand up Colab until traces (brief + generated code + Maestro) exist.
+- Slices 1–8 are done (Colab files + training-pack export). Colab is still not production inference. Do not host a Colab runtime inside Icerde.
 - OpenCode is the writer (`opencode run --dir`). Do not reimplement it. Missing CLI keeps the scaffold; do not fake an OpenCode write.
 - Local activate is a **child** customer API on `127.0.0.1:47000–47999`. Maestro SKIPPED if no device; never fake PASSED. Sidecars live in `vendor/bin`.

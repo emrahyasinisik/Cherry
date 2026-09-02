@@ -76,6 +76,8 @@ Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
 
 İki kart A/B: aynı iş, ikinci kart yoğunluk işçisi. Versiyon select, MCP kök, kuyruk/meşgul durumu. Versiyon değişince chip metni anında yeni pointer.
 
+Colab: eğitim paketi indir (JSON + JSONL), notebook A/B, seed paket. Adapter zip sonrası `registerLlmVersion`; aktif pointer ayrı.
+
 ## 6. Güvenlik
 
 Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yalnızca iptal.

@@ -52,7 +52,7 @@ flowchart TB
 - `Auth`: register, login, verifyCode, totp, devices, sessions, logout, mailbox (first-party; no AgentMail)
 - `Workspace`: personal profile, organizations, members
 - `Factory`: projects, jobs, artifacts path metadata (not file blobs in Mongo)
-- `LLMOps`: models, versions, active pointer, switch, mcpRoot
+- `LLMOps`: versions, active pointer, switch, mcpRoot, trainingPack, registerLlmVersion
 - `Privacy`: exportMe, deleteMe, audit (admin)
 
-Health: `GET /health` only. Everything else GraphQL.
+Health: `GET /health`. GraphQL otherwise, plus `/export/:id` (zip), `/colab/*` (notebook + seed files), `/oauth/*`.

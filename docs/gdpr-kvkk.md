@@ -22,8 +22,10 @@ flowchart LR
 ```mermaid
 flowchart TB
   User[account] --> Export[exportMe]
+  User --> Pack[trainingPack]
   User --> Delete[deleteMe]
   Export --> Bundle[json_bundle_no_other_tenants]
+  Pack --> Colab[redacted_sft_rows]
   Delete --> Anon[anonymize_platform]
   Delete --> Logs[strip_llm_logs]
   Delete --> Mail[drop_temp_mail]
@@ -37,5 +39,7 @@ flowchart TB
 - Temp mailbox bodies (our `tempMailboxes`, not a vendor inbox)
 
 Audit stores purpose, legal basis, model version id, redaction counts — not the raw secret.
+
+`trainingPack` is not `exportMe`. It is GDPR-redacted instruction rows for Colab (brief, source snippets, Maestro, completion previews). No `.env`, tokens, or other tenants. See [colab.md](colab.md).
 
 TR (KVKK) and EU (GDPR) share this pipeline; copy in the privacy screen must name both.

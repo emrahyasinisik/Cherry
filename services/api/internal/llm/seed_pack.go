@@ -1,0 +1,78 @@
+package llm
+
+func SeedExamples() []PackExample {
+	return []PackExample{
+		{
+			ID:          "seed-expo-brief",
+			Kind:        "brief",
+			Source:      "seed",
+			Instruction: "İçerde stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+			Input:       "Proje: Kahve sipariş\nYığın: EXPO\nBrif:\nMahalle kahvecisi için sipariş listesi. Giriş ve ana ekran. Yerel backend.",
+			Output:      "Plan (Expo SDK 57, TypeScript):\n- frontend/: domain / data / presentation.\n- backend/: yerel HTTP, barındırma yok.\n- maestro/: login.yaml + home.yaml.\n- preview/ zip’e girmez.",
+			Meta:        map[string]string{"stack": "EXPO", "kind": "brief"},
+		},
+		{
+			ID:          "seed-expo-entity",
+			Kind:        "source",
+			Source:      "seed",
+			Instruction: "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+			Input:       "Yığın: EXPO\nYol: frontend/src/domain/entities/item.ts\nBrif: Kahve sipariş listesi.",
+			Output:      "export type Item = {\n  id: string;\n  title: string;\n};\n",
+			Meta:        map[string]string{"stack": "EXPO", "path": "frontend/src/domain/entities/item.ts"},
+		},
+		{
+			ID:          "seed-flutter-entity",
+			Kind:        "source",
+			Source:      "seed",
+			Instruction: "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+			Input:       "Yığın: FLUTTER\nYol: frontend/lib/features/home/domain/entities/home_item.dart\nBrif: Kahve sipariş listesi.",
+			Output:      "final class HomeItem {\n  const HomeItem({required this.id, required this.title});\n  final String id;\n  final String title;\n}\n",
+			Meta:        map[string]string{"stack": "FLUTTER", "path": "frontend/lib/features/home/domain/entities/home_item.dart"},
+		},
+		{
+			ID:          "seed-swift-view",
+			Kind:        "source",
+			Source:      "seed",
+			Instruction: "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+			Input:       "Yığın: NATIVE\nYol: frontend/Presentation/Home/HomeView.swift\nBrif: Kahve sipariş listesi.",
+			Output:      "import SwiftUI\n\nstruct HomeView: View {\n  var body: some View {\n    Text(\"Siparişler\")\n  }\n}\n",
+			Meta:        map[string]string{"stack": "NATIVE", "path": "frontend/Presentation/Home/HomeView.swift"},
+		},
+		{
+			ID:          "seed-maestro-login",
+			Kind:        "maestro",
+			Source:      "seed",
+			Instruction: "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
+			Input:       "Akış: login.yaml\nSonuç: SKIPPED\nNot: Emülatör yok. PASSED sayılmaz.",
+			Output:      "appId: com.icerde.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n",
+			Meta:        map[string]string{"flow": "login.yaml", "result": "SKIPPED"},
+		},
+		{
+			ID:          "seed-maestro-home",
+			Kind:        "maestro",
+			Source:      "seed",
+			Instruction: "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
+			Input:       "Akış: home.yaml\nSonuç: SKIPPED\nNot: Cihaz yoksa SKIPPED.",
+			Output:      "appId: com.icerde.demo\n---\n- launchApp\n- assertVisible: \"Siparişler\"\n",
+			Meta:        map[string]string{"flow": "home.yaml", "result": "SKIPPED"},
+		},
+		{
+			ID:          "seed-completion",
+			Kind:        "completion",
+			Source:      "seed",
+			Instruction: "GDPR sarmalı tamamla. PII yok. İşçi A, sürüm v1.0.",
+			Input:       "Brif: [REDACTED_EMAIL] için kahve uygulaması. Kod [REDACTED_CODE].",
+			Output:      "İşçi A v1.0 plan:\n- Ekranları yığın dosyalarına böl.\n- Maestro akışını giriş + ana ekran tut.\nPII yok.",
+			Meta:        map[string]string{"slot": "A", "version": "v1.0"},
+		},
+		{
+			ID:          "seed-workers",
+			Kind:        "brief",
+			Source:      "seed",
+			Instruction: "İçerde stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+			Input:       "Proje: Kapasite notu\nYığın: EXPO\nBrif:\nA ve B aynı işi yapar. Boş işçi alır; ikisi meşgulse kuyruk. Kod/test ayrımı yok.",
+			Output:      "Plan:\n- Tek tarif, iki kapasite işçisi.\n- Versiyon pointer’ı sonraki cevabı değiştirir.\n- Colab üretim inferansı değil; checkpoint stüdyoya döner.",
+			Meta:        map[string]string{"stack": "EXPO", "kind": "capacity"},
+		},
+	}
+}

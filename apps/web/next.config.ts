@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
         destination: "http://127.0.0.1:43148/export/:id",
       },
       {
+        source: "/colab/:path*",
+        destination: "http://127.0.0.1:43148/colab/:path*",
+      },
+      {
         source: "/oauth/decision",
         destination: "http://127.0.0.1:43148/oauth/decision",
       },

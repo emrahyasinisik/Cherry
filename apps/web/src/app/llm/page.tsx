@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   LLM_ADMIN_FIELDS,
@@ -13,9 +13,22 @@ import {
   llmOccupancyLabel,
   type LlmAdmin,
   type LlmSlotCard,
+  type TrainingPack,
   type User,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+function downloadText(filename: string, body: string, mime: string) {
+  const blob = new Blob([body], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+type ColabSlot = "A" | "B";
 
 export default function LlmAdminPage() {
   const router = useRouter();
@@ -24,6 +37,11 @@ export default function LlmAdminPage() {
   const [mcpRoot, setMcpRoot] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [packNote, setPackNote] = useState<string | null>(null);
+  const [regSlot, setRegSlot] = useState<ColabSlot>("A");
+  const [regName, setRegName] = useState("v-colab");
+  const [regNote, setRegNote] = useState("");
+  const [regRef, setRegRef] = useState("icerde_adapter_worker_A.zip");
   const rooted = useRef(false);
 
   async function load() {
@@ -86,8 +104,8 @@ export default function LlmAdminPage() {
         <div>
           <h1 className="text-base font-medium">LLM yönetici</h1>
           <p className="text-muted-foreground">
-            A ve B aynı işi yapar. Boş olan alır; ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Colab yok —
-            fine-tune sonra.
+            A ve B aynı işi yapar. Boş olan alır; ikisi de meşgulse kuyruk. Fine-tune Colab’de: paketi indir,
+            iki T4 oturumu, adapter zip’ini kaydet. Colab üretim inferansı değil.
           </p>
         </div>
         {error ? (
@@ -132,6 +150,139 @@ export default function LlmAdminPage() {
             }}
           />
         </div>
+        <section className="flex flex-col gap-3 rounded-[10px] border border-border p-4">
+          <h2 className="text-sm font-medium">Colab eğitim dosyaları</h2>
+          <p className="text-muted-foreground">
+            İki notebook, aynı QLoRA tarifi. Her oturum 16GB T4. Ham PII yok — paket redakte. Canlı iz inceyse seed
+            örnekler eklenir.
+          </p>
+          {packNote ? <p className="text-muted-foreground">{packNote}</p> : null}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                setPending(true);
+                setError(null);
+                void graphql<{ trainingPack: TrainingPack }>(
+                  `query Pack {
+                    trainingPack { schema filename json jsonl liveExamples seedExamples note }
+                  }`,
+                )
+                  .then((data) => {
+                    const pack = data.trainingPack;
+                    downloadText(pack.filename, pack.json, "application/json");
+                    downloadText(
+                      pack.filename.replace(/\.json$/u, ".jsonl"),
+                      pack.jsonl,
+                      "application/x-ndjson",
+                    );
+                    setPackNote(
+                      `${pack.liveExamples} canlı · ${pack.seedExamples} seed — ${pack.note}`,
+                    );
+                  })
+                  .catch((err: unknown) => {
+                    setError(err instanceof Error ? err.message : "Paket indirilemedi.");
+                  })
+                  .finally(() => setPending(false));
+              }}
+            >
+              Eğitim paketini indir
+            </Button>
+            <a
+              className={buttonVariants({ variant: "outline" })}
+              href="/colab/icerde_worker_a.ipynb"
+              download
+            >
+              Notebook A
+            </a>
+            <a
+              className={buttonVariants({ variant: "outline" })}
+              href="/colab/icerde_worker_b.ipynb"
+              download
+            >
+              Notebook B
+            </a>
+            <a
+              className={buttonVariants({ variant: "outline" })}
+              href="/colab/examples/icerde_training_pack.json"
+              download
+            >
+              Seed paket
+            </a>
+          </div>
+          <p className="font-mono text-[11px] text-muted-foreground">
+            colab/icerde_worker_a.ipynb · colab/icerde_worker_b.ipynb
+          </p>
+          <h3 className="mt-2 text-sm font-medium">Colab sürümü kaydet</h3>
+          <p className="text-muted-foreground">
+            Adapter zip indikten sonra pointer’ı sen çevirirsin. In-flight iş eski sürüme biter.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {(["A", "B"] as const).map((slot) => (
+              <Button
+                key={slot}
+                type="button"
+                size="sm"
+                variant={regSlot === slot ? "default" : "outline"}
+                onClick={() => {
+                  setRegSlot(slot);
+                  setRegRef(`icerde_adapter_worker_${slot}.zip`);
+                }}
+              >
+                İşçi {slot}
+              </Button>
+            ))}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input
+              value={regName}
+              onChange={(event) => setRegName(event.target.value)}
+              placeholder="v-colab"
+              className="icerde-focus font-mono text-[12px]"
+            />
+            <Input
+              value={regRef}
+              onChange={(event) => setRegRef(event.target.value)}
+              placeholder="icerde_adapter_worker_A.zip"
+              className="icerde-focus font-mono text-[12px]"
+            />
+          </div>
+          <Input
+            value={regNote}
+            onChange={(event) => setRegNote(event.target.value)}
+            placeholder="T4 QLoRA notu (isteğe bağlı)"
+            className="icerde-focus text-[12px]"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={pending}
+            onClick={() => {
+              setPending(true);
+              setError(null);
+              void graphql<{ registerLlmVersion: LlmAdmin }>(
+                `mutation Reg($slot: String!, $name: String!, $note: String!, $ref: String!) {
+                  registerLlmVersion(slot: $slot, name: $name, note: $note, checkpointRef: $ref) {
+                    ${LLM_ADMIN_FIELDS}
+                  }
+                }`,
+                { slot: regSlot, name: regName, note: regNote, ref: regRef },
+              )
+                .then((data) => {
+                  setAdmin(data.registerLlmVersion);
+                  setPackNote(`Kayıt: işçi ${regSlot} · ${regName} · ${regRef}. Aktif yapmak için sürüm düğmesine bas.`);
+                })
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : "Sürüm kaydedilemedi.");
+                })
+                .finally(() => setPending(false));
+            }}
+          >
+            Sürümü kaydet
+          </Button>
+        </section>
         <section className="flex flex-col gap-2 rounded-[10px] border border-border p-4">
           <h2 className="text-sm font-medium">MCP kök</h2>
           <p className="text-muted-foreground">Model yalnızca bu kök altını okur. Yeni proje üretince otomatik o klasöre iner.</p>
@@ -213,6 +364,7 @@ function SlotCard({
   onSelect: (id: string) => void;
 }) {
   const busy = card.occupancy === "BUSY";
+  const active = card.versions.find((item) => item.id === card.activeVersionId);
   return (
     <article
       className={cn(
@@ -239,9 +391,10 @@ function SlotCard({
           </Button>
         ))}
       </div>
-      <p className="mt-3 font-mono text-[11px] text-muted-foreground">
-        {card.versions.find((item) => item.id === card.activeVersionId)?.note}
-      </p>
+      <p className="mt-3 font-mono text-[11px] text-muted-foreground">{active?.note}</p>
+      {active?.checkpointRef ? (
+        <p className="font-mono text-[11px] text-muted-foreground">{active.checkpointRef}</p>
+      ) : null}
     </article>
   );
 }

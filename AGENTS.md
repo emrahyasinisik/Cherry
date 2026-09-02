@@ -9,7 +9,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 ## Map
 
 1. [docs/README.md](docs/README.md) — index and drawings overview
-2. [docs/remaining.md](docs/remaining.md) — pause note: next code is slice 7; user notes (Flutter zip ≠ HTML, Connections menu) are recorded, not the current slice
+2. [docs/remaining.md](docs/remaining.md) — pause note: slices 1–8 done; Colab is files, not production inference
 3. Matching `.cursor/rules/*.mdc` for the files you will touch
 4. Matching `docs/*.md` for the drawing and invariants
 
@@ -26,7 +26,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 - Two LLMs: **A and B are the same kind of worker**. They exist for **concurrent load** (e.g. 10 people at once), not for splitting job types (codegen vs test). The router assigns a free worker; if both are busy, jobs queue. Version pointer still changes subsequent answers on that worker.
 - OpenCode is the code-writing engine; do not rewrite it.
 - MCP/CLI: Maestro + OpenCode required in the product. Email and 6-digit codes are first-party (no AgentMail). Optional GitHub in this Cursor project. See [docs/integrations.md](docs/integrations.md).
-- Follow [docs/build-order.md](docs/build-order.md): scaffold first, then one LLM slot (A), not Colab or LLM B.
+- Follow [docs/build-order.md](docs/build-order.md): scaffold first, then one LLM slot (A). Colab notebooks live in `colab/` (slice 8).
 - UI must look like a professional desktop atelier: [docs/design-system.md](docs/design-system.md), motion [docs/motion.md](docs/motion.md), screens [docs/screens.md](docs/screens.md). No slop gradients or spring animations.
 
 ## Intended layout (when coding starts)

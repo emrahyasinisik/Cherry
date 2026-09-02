@@ -153,6 +153,7 @@ export type LlmVersion = {
   id: string;
   name: string;
   note: string;
+  checkpointRef: string;
 };
 
 export type LlmSlotCard = {
@@ -186,10 +187,20 @@ export type LlmAdmin = {
   completions: LlmCompletion[];
 };
 
+export type TrainingPack = {
+  schema: string;
+  filename: string;
+  json: string;
+  jsonl: string;
+  liveExamples: number;
+  seedExamples: number;
+  note: string;
+};
+
 export const LLM_ADMIN_FIELDS = `
   gdpr activeSlot mcpRoot queued
-  slotA { slot wired role occupancy activeVersionId versions { id name note } }
-  slotB { slot wired role occupancy activeVersionId versions { id name note } }
+  slotA { slot wired role occupancy activeVersionId versions { id name note checkpointRef } }
+  slotB { slot wired role occupancy activeVersionId versions { id name note checkpointRef } }
   completions { at purpose slot versionName channel inputRedactions outputRedactions promptPreview outputPreview }
 `;
 

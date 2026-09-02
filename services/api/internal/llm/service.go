@@ -100,6 +100,39 @@ func (s *Service) SetActiveA(ctx context.Context, versionID string) error {
 	return s.SetActive(ctx, versionID)
 }
 
+func (s *Service) RegisterVersion(ctx context.Context, slotRaw, name, note, checkpointRef string) (store.LlmVersion, error) {
+	name = strings.TrimSpace(name)
+	note = strings.TrimSpace(note)
+	checkpointRef = strings.TrimSpace(checkpointRef)
+	if name == "" || checkpointRef == "" {
+		return store.LlmVersion{}, store.ErrValidation
+	}
+	var slot store.LlmSlot
+	switch strings.ToUpper(strings.TrimSpace(slotRaw)) {
+	case string(store.SlotA):
+		slot = store.SlotA
+	case string(store.SlotB):
+		slot = store.SlotB
+	default:
+		return store.LlmVersion{}, store.ErrValidation
+	}
+	version := store.LlmVersion{
+		ID:            "ver-colab-" + store.NewID()[:12],
+		Slot:          slot,
+		Name:          name,
+		Note:          note,
+		CheckpointRef: checkpointRef,
+		CreatedAt:     time.Now().UTC(),
+	}
+	if version.Note == "" {
+		version.Note = "Colab QLoRA — " + checkpointRef
+	}
+	if err := s.Store.PutLlmVersion(ctx, version); err != nil {
+		return store.LlmVersion{}, err
+	}
+	return version, nil
+}
+
 func (s *Service) SetMcpRoot(ctx context.Context, root string) error {
 	state, err := s.Store.GetLlmState(ctx)
 	if err != nil {

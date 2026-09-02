@@ -27,7 +27,7 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 | Mobil fabrika | [.cursor/rules/08-mobile-factory.mdc](.cursor/rules/08-mobile-factory.mdc) | [docs/mobile-factory.md](docs/mobile-factory.md) |
 | Yerel aktif | [.cursor/rules/09-local-activate.mdc](.cursor/rules/09-local-activate.mdc) | [docs/local-activate.md](docs/local-activate.md) |
 | Maestro | [.cursor/rules/10-maestro.mdc](.cursor/rules/10-maestro.mdc) | [docs/maestro.md](docs/maestro.md) |
-| LLMOps | [.cursor/rules/11-llmops.mdc](.cursor/rules/11-llmops.mdc) | [docs/llmops.md](docs/llmops.md) |
+| LLMOps | [.cursor/rules/11-llmops.mdc](.cursor/rules/11-llmops.mdc) | [docs/llmops.md](docs/llmops.md) · [docs/colab.md](docs/colab.md) |
 | KVKK / GDPR | [.cursor/rules/12-gdpr-kvkk.mdc](.cursor/rules/12-gdpr-kvkk.mdc) | [docs/gdpr-kvkk.md](docs/gdpr-kvkk.md) |
 
 ## Çalıştır / Run
@@ -45,5 +45,5 @@ UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya 
 
 ## Dilim durumu / Slice status
 
-Dilim 1–7 bitti. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki: dilim 8 (Colab fine-tune).
+Dilim 1–8 bitti. Colab dosyaları: [colab/](colab/) ve [docs/colab.md](docs/colab.md). Kalan: [docs/remaining.md](docs/remaining.md).
 
