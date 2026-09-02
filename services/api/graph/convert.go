@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/icerde/api/internal/auth"
+	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 )
 
@@ -65,7 +66,15 @@ func mapLoginResult(result auth.Result) (*LoginResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := &LoginResult{Next: next}
+	channel, err := mapEmailChannel(result.EmailChannel)
+	if err != nil {
+		return nil, err
+	}
+	out := &LoginResult{
+		Next:         next,
+		EmailSent:    result.EmailSent,
+		EmailChannel: channel,
+	}
 	if result.Token != "" {
 		token := result.Token
 		out.Token = &token
@@ -82,6 +91,17 @@ func mapLoginResult(result auth.Result) (*LoginResult, error) {
 		out.User = user
 	}
 	return out, nil
+}
+
+func mapEmailChannel(channel string) (string, error) {
+	switch channel {
+	case "", "none":
+		return "", nil
+	case mailer.ChannelInbox, mailer.ChannelSMTP, mailer.ChannelResend:
+		return channel, nil
+	default:
+		return "", fmt.Errorf("unhandled mail channel: %s", channel)
+	}
 }
 
 func mapProjects(rows []store.Project) []*Project {

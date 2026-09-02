@@ -55,16 +55,19 @@ type ComplexityRoot struct {
 	}
 
 	Health struct {
+		Mail    func(childComplexity int) int
 		Ok      func(childComplexity int) int
 		Store   func(childComplexity int) int
 		Version func(childComplexity int) int
 	}
 
 	LoginResult struct {
-		ChallengeID func(childComplexity int) int
-		Next        func(childComplexity int) int
-		Token       func(childComplexity int) int
-		User        func(childComplexity int) int
+		ChallengeID  func(childComplexity int) int
+		EmailChannel func(childComplexity int) int
+		EmailSent    func(childComplexity int) int
+		Next         func(childComplexity int) int
+		Token        func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	MailMessage struct {
@@ -199,6 +202,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Device.Trusted(childComplexity), true
 
+	case "Health.mail":
+		if e.complexity.Health.Mail == nil {
+			break
+		}
+
+		return e.complexity.Health.Mail(childComplexity), true
 	case "Health.ok":
 		if e.complexity.Health.Ok == nil {
 			break
@@ -224,6 +233,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LoginResult.ChallengeID(childComplexity), true
+	case "LoginResult.emailChannel":
+		if e.complexity.LoginResult.EmailChannel == nil {
+			break
+		}
+
+		return e.complexity.LoginResult.EmailChannel(childComplexity), true
+	case "LoginResult.emailSent":
+		if e.complexity.LoginResult.EmailSent == nil {
+			break
+		}
+
+		return e.complexity.LoginResult.EmailSent(childComplexity), true
 	case "LoginResult.next":
 		if e.complexity.LoginResult.Next == nil {
 			break
@@ -1105,6 +1126,35 @@ func (ec *executionContext) fieldContext_Health_version(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Health_mail(ctx context.Context, field graphql.CollectedField, obj *Health) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Health_mail,
+		func(ctx context.Context) (any, error) {
+			return obj.Mail, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Health_mail(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Health",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LoginResult_next(ctx context.Context, field graphql.CollectedField, obj *LoginResult) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1226,6 +1276,64 @@ func (ec *executionContext) fieldContext_LoginResult_user(_ context.Context, fie
 				return ec.fieldContext_User_totpEnabled(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LoginResult_emailSent(ctx context.Context, field graphql.CollectedField, obj *LoginResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LoginResult_emailSent,
+		func(ctx context.Context) (any, error) {
+			return obj.EmailSent, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LoginResult_emailSent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LoginResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LoginResult_emailChannel(ctx context.Context, field graphql.CollectedField, obj *LoginResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LoginResult_emailChannel,
+		func(ctx context.Context) (any, error) {
+			return obj.EmailChannel, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LoginResult_emailChannel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LoginResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1409,6 +1517,10 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 				return ec.fieldContext_LoginResult_challengeId(ctx, field)
 			case "user":
 				return ec.fieldContext_LoginResult_user(ctx, field)
+			case "emailSent":
+				return ec.fieldContext_LoginResult_emailSent(ctx, field)
+			case "emailChannel":
+				return ec.fieldContext_LoginResult_emailChannel(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResult", field.Name)
 		},
@@ -1460,6 +1572,10 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 				return ec.fieldContext_LoginResult_challengeId(ctx, field)
 			case "user":
 				return ec.fieldContext_LoginResult_user(ctx, field)
+			case "emailSent":
+				return ec.fieldContext_LoginResult_emailSent(ctx, field)
+			case "emailChannel":
+				return ec.fieldContext_LoginResult_emailChannel(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResult", field.Name)
 		},
@@ -1511,6 +1627,10 @@ func (ec *executionContext) fieldContext_Mutation_verifyCode(ctx context.Context
 				return ec.fieldContext_LoginResult_challengeId(ctx, field)
 			case "user":
 				return ec.fieldContext_LoginResult_user(ctx, field)
+			case "emailSent":
+				return ec.fieldContext_LoginResult_emailSent(ctx, field)
+			case "emailChannel":
+				return ec.fieldContext_LoginResult_emailChannel(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResult", field.Name)
 		},
@@ -1562,6 +1682,10 @@ func (ec *executionContext) fieldContext_Mutation_verifyLink(ctx context.Context
 				return ec.fieldContext_LoginResult_challengeId(ctx, field)
 			case "user":
 				return ec.fieldContext_LoginResult_user(ctx, field)
+			case "emailSent":
+				return ec.fieldContext_LoginResult_emailSent(ctx, field)
+			case "emailChannel":
+				return ec.fieldContext_LoginResult_emailChannel(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResult", field.Name)
 		},
@@ -1613,6 +1737,10 @@ func (ec *executionContext) fieldContext_Mutation_verifyTotp(ctx context.Context
 				return ec.fieldContext_LoginResult_challengeId(ctx, field)
 			case "user":
 				return ec.fieldContext_LoginResult_user(ctx, field)
+			case "emailSent":
+				return ec.fieldContext_LoginResult_emailSent(ctx, field)
+			case "emailChannel":
+				return ec.fieldContext_LoginResult_emailChannel(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResult", field.Name)
 		},
@@ -2005,6 +2133,8 @@ func (ec *executionContext) fieldContext_Query_health(_ context.Context, field g
 				return ec.fieldContext_Health_store(ctx, field)
 			case "version":
 				return ec.fieldContext_Health_version(ctx, field)
+			case "mail":
+				return ec.fieldContext_Health_mail(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Health", field.Name)
 		},
@@ -4201,6 +4331,11 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "mail":
+			out.Values[i] = ec._Health_mail(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4246,6 +4381,16 @@ func (ec *executionContext) _LoginResult(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._LoginResult_challengeId(ctx, field, obj)
 		case "user":
 			out.Values[i] = ec._LoginResult_user(ctx, field, obj)
+		case "emailSent":
+			out.Values[i] = ec._LoginResult_emailSent(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "emailChannel":
+			out.Values[i] = ec._LoginResult_emailChannel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

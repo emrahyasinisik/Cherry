@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import {
   graphql,
   setToken,
+  type EmailChannel,
   type LoginResult,
   type MailMessage,
 } from "@/lib/api";
@@ -19,6 +20,8 @@ const LOGIN_RESULT = `
   next
   token
   challengeId
+  emailSent
+  emailChannel
   user { id email workspaceKind totpEnabled }
 `;
 
@@ -36,6 +39,8 @@ export function LoginForm() {
   const [trustDevice, setTrustDevice] = useState(true);
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [mailbox, setMailbox] = useState<MailMessage | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailChannel, setEmailChannel] = useState<EmailChannel>("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -99,8 +104,14 @@ export function LoginForm() {
           return;
         }
         setChallengeId(result.challengeId);
+        setEmailSent(result.emailSent);
+        setEmailChannel(normalizeEmailChannel(result.emailChannel));
         setStep("code");
-        await loadMailbox(result.challengeId);
+        if (!result.emailSent) {
+          await loadMailbox(result.challengeId);
+        } else {
+          setMailbox(null);
+        }
         return;
       case "TOTP":
         if (!result.challengeId) {
@@ -226,10 +237,19 @@ export function LoginForm() {
   if (step === "code") {
     return (
       <form onSubmit={(event) => void handleCode(event)} className="flex flex-col gap-4">
-        <p className="text-muted-foreground">
-          Yeni veya tanınmayan cihaz. 6 haneli kod geçici kutuya düştü.
-        </p>
-        {mailbox ? (
+        <p className="text-muted-foreground">{codeStepCopy(emailSent, emailChannel)}</p>
+        {emailSent ? (
+          <p className="text-[13px] text-muted-foreground">
+            Gelen kutusunu ve spam klasörünü kontrol et. Aynı kayıt için e-postadaki link de çalışır.
+          </p>
+        ) : (
+          <p className="rounded-md border border-border bg-background/60 p-3 text-[13px] text-muted-foreground">
+            Bu ortamda SMTP veya Resend yok — kod gerçek e-postaya gitmedi. Geliştirme kutusu aşağıda.
+            Production için <code className="font-mono text-[11px]">SMTP_HOST</code> veya{" "}
+            <code className="font-mono text-[11px]">RESEND_API_KEY</code> tanımla.
+          </p>
+        )}
+        {!emailSent && mailbox ? (
           <pre className="overflow-auto rounded-md border border-border bg-background/60 p-3 font-mono text-[11px] leading-4 whitespace-pre-wrap">
             {mailbox.body}
           </pre>
@@ -319,4 +339,34 @@ export function LoginForm() {
       </button>
     </form>
   );
+}
+
+function normalizeEmailChannel(channel: string): EmailChannel {
+  switch (channel) {
+    case "inbox":
+    case "smtp":
+    case "resend":
+    case "":
+      return channel;
+    default:
+      return "";
+  }
+}
+
+function codeStepCopy(sent: boolean, channel: EmailChannel): string {
+  if (!sent) {
+    return "Yeni veya tanınmayan cihaz. 6 haneli kodu gir.";
+  }
+  switch (channel) {
+    case "smtp":
+    case "resend":
+      return "Kod e-postana gönderildi (10 dakika, 5 deneme).";
+    case "inbox":
+    case "":
+      return "Kod gönderildi. Gelen kutunu kontrol et.";
+    default: {
+      const exhaustive: never = channel;
+      return exhaustive;
+    }
+  }
 }

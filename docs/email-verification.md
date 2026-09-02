@@ -2,9 +2,35 @@
 
 **Kural:** [.cursor/rules/18-email-verification.mdc](../.cursor/rules/18-email-verification.mdc)
 
-**TR:** E-posta gönderimi, geçici kutu ve 6 haneli / link doğrulama **bizim kodumuz**. AgentMail, Resend-MCP, harici “inbox API” yok.
+**TR:** E-posta gönderimi, geçici kutu ve 6 haneli / link doğrulama **bizim kodumuz**. AgentMail, Resend-MCP, harici “inbox API” yok. Resend yalnızca Go sürecinden HTTP API; SMTP `net/smtp`.
 
-**EN:** Mail send, temp inbox, and 6-digit / link verification are **first-party**. No AgentMail, Resend-MCP, or third-party inbox API.
+**EN:** Mail send, temp inbox, and 6-digit / link verification are **first-party**. No AgentMail, Resend-MCP, or third-party inbox API. Resend is our HTTP call; SMTP is `net/smtp`.
+
+## Nasıl gerçek mail atılır / How to send real mail
+
+Kod **her zaman** in-app `tempMailboxes` satırına yazılır. Gerçek çıkış için **birini** doldur:
+
+1. **SMTP** (Gmail uygulama şifresi, Workspace, vs.)
+2. **Resend** (`RESEND_API_KEY` + doğrulanmış `RESEND_FROM`)
+
+İkisi de yoksa kanal `inbox`: geliştirmede kutu + log. GraphQL `emailSent: false`. Sahte “gönderildi” yok.
+
+Production’da `ICERDE_MAIL_REQUIRE=1` — çıkış yoksa kayıt/giriş kod adımı hata verir.
+
+```bash
+# Gmail app password (not the account password)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=you@gmail.com
+SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+SMTP_FROM=İçerde <you@gmail.com>
+
+# or Resend
+RESEND_API_KEY=re_...
+RESEND_FROM=İçerde <hello@yourdomain.com>
+```
+
+`register` / `login` yanıtı: `emailSent`, `emailChannel` (`inbox` | `smtp` | `resend`). UI, gönderildiyse kodu kartta göstermez.
 
 ## Akış / Flow
 
@@ -15,18 +41,20 @@ sequenceDiagram
   participant API as GoGraphQL
   participant Mailer as Icerde_mailer
   participant Box as tempMailboxes
-  participant SMTP as SMTP_or_dev_sink
+  participant Out as SMTP_or_Resend
   participant DB as verificationCodes
   U->>App: login_or_new_device
   App->>API: request_code
   API->>DB: store_codeHash_TTL
-  API->>Box: insert_message_redacted_later
-  API->>Mailer: send
-  Mailer->>SMTP: message
-  alt production
-    SMTP-->>U: account_email
-  else development
-    SMTP-->>Box: same_row_visible_in_app
+  API->>Box: insert_message
+  alt RESEND_API_KEY
+    Mailer->>Out: HTTPS Resend
+    Out-->>U: account_email
+  else SMTP_HOST
+    Mailer->>Out: STARTTLS SMTP
+    Out-->>U: account_email
+  else no transport
+    Mailer-->>Box: inbox_only_dev_sink
   end
   U->>App: six_digits_or_link
   App->>API: verify_code
@@ -37,12 +65,12 @@ sequenceDiagram
 
 | Parça | Nerede | Not |
 | --- | --- | --- |
-| Mailer | `services/api` Go | SMTP env (`SMTP_HOST`…). Kütüphane (net/smtp) taşıma; ürün mantığı bizde. |
-| Şablon | düz metin + basit HTML | İçerde wordmark, kod 6 hane mono, TTL metni. |
-| `verificationCodes` | Mongo | `codeHash`, `purpose`, `expiresAt`, `attempts`, `userId`, `deviceId` |
-| `tempMailboxes` | Mongo | Kullanıcının in-app kutusu (kod / şüpheli giriş). Gövde PII; silmede drop. |
+| Mailer | `services/api/internal/mailer` | SMTP env veya Resend HTTP. Kütüphane taşıma; ürün mantığı bizde. |
+| Şablon | düz metin + HTML | İçerde wordmark, kod 6 hane mono, TTL metni. |
+| `verificationCodes` | store / Mongo | `codeHash`, `purpose`, `expiresAt`, `attempts`, `userId`, `deviceId` |
+| `tempMailboxes` | store / Mongo | In-app kutu. Gövde PII; silmede drop. |
 | UI | Next.js | 6 kutu + “e-postadaki link”; güvenlik ekranında kutu listesi |
-| Dev sink | mailer | SMTP yoksa kutu + log; sahte “gönderildi” yok. |
+| Dev sink | mailer | SMTP/Resend yoksa kutu + log; `emailSent=false`. |
 
 ## Kod kuralları / Code rules
 
@@ -52,6 +80,7 @@ sequenceDiagram
 - Link: imzalı token (aynı doğrulama kaydı); UI hâlâ 6 haneyi de kabul eder.
 - Rate limit: kullanıcı + IP. SMS yok.
 - GDPR: kod ve kutu gövdesi LLM’e gitmez. `deleteMe` kod + kutu siler.
+- Login mutation payload’ında düz kod yok. Üretimde kart kodu dump etmez.
 
 ## Yasak / Forbidden
 

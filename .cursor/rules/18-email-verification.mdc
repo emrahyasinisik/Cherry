@@ -11,7 +11,7 @@ alwaysApply: false
 # Email and 6-digit codes (first-party)
 
 - We implement mail + verification in Icerde (`services/api` + UI). **No AgentMail, no inbox SaaS MCP, no SMS.**
-- Transport is SMTP from env. Missing SMTP in dev → in-app `tempMailboxes` sink + server log, never a fake GraphQL success that reveals the code in the mutation payload in production.
+- Transport is SMTP (`SMTP_*`) or Resend HTTP (`RESEND_API_KEY`) from **our** Go process. Missing both in dev → in-app `tempMailboxes` + `emailSent: false` (never a fake “sent”). Production: `ICERDE_MAIL_REQUIRE=1`.
 - Store only `codeHash` (pepper + SHA-256), ~10 min TTL, max 5 attempts, one active code per purpose (new code invalidates old).
 - Purposes: `new_device`, `login_challenge`, `email_verify`, `suspicious_login`. Exhaustive switch with `never` / Go equivalent.
 - Link token and 6-digit UI both resolve the same record.

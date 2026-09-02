@@ -21,13 +21,16 @@ type Health struct {
 	Ok      bool   `json:"ok"`
 	Store   string `json:"store"`
 	Version string `json:"version"`
+	Mail    string `json:"mail"`
 }
 
 type LoginResult struct {
-	Next        LoginNext `json:"next"`
-	Token       *string   `json:"token,omitempty"`
-	ChallengeID *string   `json:"challengeId,omitempty"`
-	User        *User     `json:"user,omitempty"`
+	Next         LoginNext `json:"next"`
+	Token        *string   `json:"token,omitempty"`
+	ChallengeID  *string   `json:"challengeId,omitempty"`
+	User         *User     `json:"user,omitempty"`
+	EmailSent    bool      `json:"emailSent"`
+	EmailChannel string    `json:"emailChannel"`
 }
 
 type MailMessage struct {

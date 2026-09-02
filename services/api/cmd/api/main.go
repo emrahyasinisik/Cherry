@@ -44,16 +44,20 @@ func main() {
 	}
 
 	mail := &mailer.Service{
-		Store:  memory,
-		WebURL: webOrigin,
+		Store:      memory,
+		WebURL:     webOrigin,
+		ResendKey:  os.Getenv("RESEND_API_KEY"),
+		ResendFrom: os.Getenv("RESEND_FROM"),
+		Require:    envTruthy("ICERDE_MAIL_REQUIRE"),
 		SMTP: mailer.Config{
 			Host:     os.Getenv("SMTP_HOST"),
 			Port:     getenv("SMTP_PORT", "587"),
 			User:     os.Getenv("SMTP_USER"),
 			Password: os.Getenv("SMTP_PASSWORD"),
-			From:     getenv("SMTP_FROM", "icerde@localhost"),
+			From:     getenv("SMTP_FROM", "İçerde <icerde@localhost>"),
 		},
 	}
+	log.Printf("mailer channel=%s require=%v", mail.Channel(), mail.Require)
 	authSvc := auth.New(memory, mail, pepper, webOrigin)
 	resolver := &graph.Resolver{Auth: authSvc}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
@@ -73,7 +77,8 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":      true,
 			"store":   status,
-			"version": "0.2.0-auth",
+			"version": "0.2.1-mail",
+			"mail":    mail.Channel(),
 		})
 	})
 
@@ -127,4 +132,14 @@ func getenv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func envTruthy(key string) bool {
+	value := strings.ToLower(strings.TrimSpace(os.Getenv(key)))
+	switch value {
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }

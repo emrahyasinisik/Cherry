@@ -251,6 +251,9 @@ export default function SecurityPage() {
 
         <section className="flex flex-col gap-3">
           <h2 className="font-medium">Geçici kutu</h2>
+          <p className="text-muted-foreground">
+            SMTP veya Resend açıksa kod ayrıca hesabın e-postasına gider. Bu kutu stüdyo içi arşivdir; giriş kartında kod gösterilmez.
+          </p>
           {mailbox.length === 0 ? (
             <p className="text-muted-foreground">Kutu boş.</p>
           ) : (

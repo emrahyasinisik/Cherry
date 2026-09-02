@@ -21,10 +21,12 @@ const (
 )
 
 type Result struct {
-	Next        string
-	Token       string
-	ChallengeID string
-	User        store.User
+	Next         string
+	Token        string
+	ChallengeID  string
+	User         store.User
+	EmailSent    bool
+	EmailChannel string
 }
 
 type Service struct {
@@ -289,18 +291,26 @@ func (s *Service) startDeviceChallenge(ctx context.Context, user store.User, dev
 	if err := s.Store.PutChallenge(ctx, challenge); err != nil {
 		return Result{}, err
 	}
-	subject, body := mailer.CodeEmail(code, link, s.WebURL)
-	if err := s.Mailer.Send(ctx, mailer.Message{
+	subject, plain, html := mailer.CodeEmail(code, link, s.WebURL)
+	delivery, err := s.Mailer.Send(ctx, mailer.Message{
 		To:          user.Email,
 		Subject:     subject,
-		PlainBody:   body,
+		PlainBody:   plain,
+		HTMLBody:    html,
 		UserID:      user.ID,
 		ChallengeID: challenge.ID,
 		Purpose:     purpose,
-	}); err != nil {
-		return Result{}, err
+	})
+	if err != nil {
+		return Result{}, fmt.Errorf("%w: %v", store.ErrMailFailed, err)
 	}
-	return Result{Next: NextDeviceCode, ChallengeID: challenge.ID, User: user}, nil
+	return Result{
+		Next:         NextDeviceCode,
+		ChallengeID:  challenge.ID,
+		User:         user,
+		EmailSent:    delivery.Sent,
+		EmailChannel: delivery.Channel,
+	}, nil
 }
 
 func (s *Service) startTotpOnly(ctx context.Context, user store.User, deviceFP, deviceLabel string) (Result, error) {

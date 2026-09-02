@@ -51,12 +51,15 @@ type LoginResult {
   token: String
   challengeId: ID
   user: User
+  emailSent: Boolean!
+  emailChannel: String!
 }
 
 type Health {
   ok: Boolean!
   store: String!
   version: String!
+  mail: String!
 }
 
 type User {

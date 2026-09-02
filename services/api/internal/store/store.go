@@ -14,6 +14,7 @@ var (
 	ErrExists             = errors.New("exists")
 	ErrLocked             = errors.New("locked")
 	ErrExpired            = errors.New("expired")
+	ErrMailFailed         = errors.New("mail failed")
 )
 
 type WorkspaceKind string

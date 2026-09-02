@@ -22,6 +22,12 @@ func TestRegisterVerifyCodeSession(t *testing.T) {
 	if result.Next != NextDeviceCode || result.ChallengeID == "" {
 		t.Fatalf("expected device code, got %#v", result)
 	}
+	if result.EmailSent {
+		t.Fatal("inbox-only must not claim email was sent")
+	}
+	if result.EmailChannel != mailer.ChannelInbox {
+		t.Fatalf("channel=%q", result.EmailChannel)
+	}
 
 	msg, err := mem.MailByChallenge(ctx, result.ChallengeID)
 	if err != nil {
@@ -51,6 +57,16 @@ func TestRegisterVerifyCodeSession(t *testing.T) {
 	}
 	if again.Next != NextSession {
 		t.Fatalf("trusted device should skip code, got %#v", again)
+	}
+}
+
+func TestRegisterRequiresMailWhenConfigured(t *testing.T) {
+	mem := store.NewMemory()
+	mail := &mailer.Service{Store: mem, WebURL: "http://127.0.0.1:43147", Require: true}
+	svc := New(mem, mail, "pepper", "http://127.0.0.1:43147")
+	_, err := svc.Register(context.Background(), "ada@icerde.dev", "secret12", "fp-1", "Test", "127.0.0.1")
+	if err == nil {
+		t.Fatal("expected mail failure when Require is set and no SMTP/Resend")
 	}
 }
 

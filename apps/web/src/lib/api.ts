@@ -1,5 +1,6 @@
 export type WorkspaceKind = "PERSONAL" | "ORGANIZATION";
 export type LoginNext = "SESSION" | "DEVICE_CODE" | "TOTP";
+export type EmailChannel = "inbox" | "smtp" | "resend" | "";
 export type VerifyPurpose =
   | "NEW_DEVICE"
   | "LOGIN_CHALLENGE"
@@ -18,6 +19,8 @@ export type LoginResult = {
   token?: string | null;
   challengeId?: string | null;
   user?: User | null;
+  emailSent: boolean;
+  emailChannel: EmailChannel;
 };
 
 export type Project = {
@@ -54,6 +57,7 @@ export type Health = {
   ok: boolean;
   store: string;
   version: string;
+  mail: string;
 };
 
 type GraphQLResponse<T> = {

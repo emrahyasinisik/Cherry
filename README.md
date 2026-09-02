@@ -32,14 +32,16 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 
 ## Çalıştır / Run
 
-İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). SMTP yoksa kod **in-app geçici kutuya** düşer. Oturum bellekte (Docker yoksa).
+İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). SMTP veya Resend yoksa kod **in-app geçici kutuya** düşer (`emailSent: false`). Oturum bellekte (Docker yoksa).
 
 ```bash
 npm run dev:api
 npm run dev:web
 ```
 
-UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8), 6 haneli kod kutudan, “bu cihaza güven”. Güvenlik ekranı: cihaz, oturum, TOTP, kutu.
+Gerçek e-posta için `.env.example` → `SMTP_*` (Gmail uygulama şifresi) **veya** `RESEND_API_KEY`. Ayrıntı: [docs/email-verification.md](docs/email-verification.md).
+
+UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya gittiyse kartta görünmez; gitmediyse geliştirme kutusu. Güvenlik ekranı: cihaz, oturum, TOTP, kutu.
 
 ## Dilim durumu / Slice status
 
