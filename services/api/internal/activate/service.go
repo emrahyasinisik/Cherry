@@ -56,6 +56,7 @@ type run struct {
 	cmd    *exec.Cmd
 	cancel context.CancelFunc
 	snap   Snapshot
+	done   chan struct{}
 }
 
 type Service struct {
@@ -85,6 +86,7 @@ func (s *Service) Start(ctx context.Context, id, projectRoot string) (Snapshot, 
 		return snap, nil
 	}
 	s.mu.Unlock()
+	_ = s.Stop(id)
 
 	backend := filepath.Join(projectRoot, "backend")
 	if _, err := os.Stat(filepath.Join(backend, "main.go")); err != nil {
@@ -107,9 +109,11 @@ func (s *Service) Start(ctx context.Context, id, projectRoot string) (Snapshot, 
 	if runtime.GOOS != "windows" {
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	}
+	done := make(chan struct{})
 	item := &run{
 		cmd:    cmd,
 		cancel: cancel,
+		done:   done,
 		snap: Snapshot{
 			Status: StatusStarting,
 			URL:    "http://" + addr,
@@ -122,11 +126,23 @@ func (s *Service) Start(ctx context.Context, id, projectRoot string) (Snapshot, 
 	s.mu.Unlock()
 	if err := cmd.Start(); err != nil {
 		cancel()
+		close(done)
 		item.snap.Status = StatusFailed
 		item.snap.Note = err.Error()
 		return item.snap, err
 	}
 	item.snap.PID = cmd.Process.Pid
+	go func() {
+		_ = cmd.Wait()
+		close(done)
+		s.mu.Lock()
+		if current, ok := s.procs[id]; ok && current.cmd == cmd && current.snap.Status == StatusRunning {
+			current.snap.Status = StatusIdle
+			current.snap.Note = "Süreç bitti."
+			current.snap.PID = 0
+		}
+		s.mu.Unlock()
+	}()
 	health := "http://" + addr + "/health"
 	if err := waitHealth(ctx, health, 12*time.Second); err != nil {
 		_ = s.Stop(id)
@@ -141,42 +157,59 @@ func (s *Service) Start(ctx context.Context, id, projectRoot string) (Snapshot, 
 	item.snap.Note = "Müşteri API " + item.snap.URL + " — barındırma yok."
 	snap := item.snap
 	s.mu.Unlock()
-	go func() {
-		_ = cmd.Wait()
-		s.mu.Lock()
-		if current, ok := s.procs[id]; ok && current.cmd == cmd && current.snap.Status == StatusRunning {
-			current.snap.Status = StatusIdle
-			current.snap.Note = "Süreç bitti."
-			current.snap.PID = 0
-		}
-		s.mu.Unlock()
-	}()
 	return snap, nil
 }
 
 func (s *Service) Stop(id string) Snapshot {
 	s.mu.Lock()
 	item, ok := s.procs[id]
-	if !ok {
+	if !ok || item.cmd == nil {
+		idle := Snapshot{Status: StatusIdle, Note: "Yerel API kapalı."}
+		if ok {
+			idle = item.snap
+			if idle.Status != StatusFailed {
+				idle = Snapshot{Status: StatusIdle, Note: "Yerel API kapalı."}
+			}
+		}
 		s.mu.Unlock()
-		return Snapshot{Status: StatusIdle, Note: "Yerel API kapalı."}
+		return idle
 	}
 	item.snap.Status = StatusStopping
 	cmd := item.cmd
 	cancel := item.cancel
+	done := item.done
 	s.mu.Unlock()
 	if cancel != nil {
 		cancel()
 	}
 	if cmd != nil && cmd.Process != nil {
 		killProcess(cmd)
-		_ = cmd.Wait()
 	}
+	waitDone(done, cmd, 4*time.Second)
 	idle := Snapshot{Status: StatusIdle, Note: "Yerel API durdu."}
 	s.mu.Lock()
 	s.procs[id] = &run{snap: idle}
 	s.mu.Unlock()
 	return idle
+}
+
+func waitDone(done chan struct{}, cmd *exec.Cmd, d time.Duration) {
+	if done == nil {
+		return
+	}
+	select {
+	case <-done:
+		return
+	case <-time.After(d):
+		if cmd != nil && cmd.Process != nil && runtime.GOOS != "windows" {
+			_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+			_ = cmd.Process.Kill()
+		}
+	}
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+	}
 }
 
 func freePort() (int, error) {

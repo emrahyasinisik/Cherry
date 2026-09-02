@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -151,6 +152,9 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	}
 	s.pause()
 	if err := writeTree(project); err != nil {
+		return err
+	}
+	if err := initCustomerRepo(project.RootPath); err != nil {
 		return err
 	}
 	if err := s.log(ctx, project.ID, "Dosya ağacı hazır: "+project.RootPath); err != nil {
@@ -522,6 +526,18 @@ func (s *Service) pause() {
 		return
 	}
 	time.Sleep(s.StepDelay)
+}
+
+func initCustomerRepo(root string) error {
+	if _, err := exec.LookPath("git"); err != nil {
+		return nil
+	}
+	if _, err := os.Stat(filepath.Join(root, ".git")); err == nil {
+		return nil
+	}
+	cmd := exec.Command("git", "init")
+	cmd.Dir = root
+	return cmd.Run()
 }
 
 func fileKind(rel string) string {

@@ -186,6 +186,12 @@ func zipProject(root, dest string) error {
 			return err
 		}
 		if info.IsDir() {
+			switch filepath.Base(path) {
+			case ".git", "node_modules", ".opencode":
+				if path != root {
+					return filepath.SkipDir
+				}
+			}
 			return nil
 		}
 		if filepath.Base(path) == "icerde.zip" {
