@@ -79,6 +79,15 @@ Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
 
 Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yalnızca iptal.
 
-## 7. Org / gizlilik
+## 8. Maestro
+
+Test aşaması veya yan menü. Telefon maketi (üretilen ekranlar) + YAML akış listesi. SKIPPED kırmızı “geçti” değildir.
+
+```mermaid
+flowchart LR
+  Phone[ekran_maketi] --> Flows[yaml_akislar]
+  Flows --> Result[skipped_or_run]
+```
+
 
 Üye tablosu; `Verilerimi dışa aktar` / `Hesabı sil` ayrı, tehlikeli aksiyon onay dialog (320ms panel).

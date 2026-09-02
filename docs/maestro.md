@@ -43,6 +43,9 @@ flowchart LR
   Host --> View[open_maestro_viewer]
 ```
 
+Dilim 3 viewer: stüdyo UI (telefon maketi + YAML). Dilim 6: gerçek `maestro mcp`.
+
+
 ## Kurallar / Rules
 
 - YAML under `maestro/` ships with zip/git.

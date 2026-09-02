@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-const apiVersion = "0.2.1-mail"
+const apiVersion = "0.3.0-disk"
 
 func gqlErr(err error) error {
 	switch {

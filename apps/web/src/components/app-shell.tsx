@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   FolderKanban,
   Bot,
@@ -15,6 +15,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getLastProjectId } from "@/lib/last-project";
 import { graphql, setToken, workspaceLabel, type User } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -25,25 +26,36 @@ type NavItem = {
   enabled: boolean;
 };
 
-const NAV: NavItem[] = [
-  { href: "/projects", label: "Projeler", icon: FolderKanban, enabled: true },
-  { href: "/projects", label: "Ajan", icon: Bot, enabled: false },
-  { href: "/projects", label: "Maestro", icon: Smartphone, enabled: false },
-  { href: "/security", label: "Güvenlik", icon: Shield, enabled: true },
-  { href: "/projects", label: "Organizasyon", icon: Building2, enabled: false },
-  { href: "/projects", label: "LLM", icon: Cpu, enabled: false },
-  { href: "/projects", label: "Gizlilik", icon: Scale, enabled: false },
-];
-
 export function AppShell({
   user,
+  title,
+  status,
   children,
 }: {
   user: User;
+  title?: string;
+  status?: string;
   children: ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [lastProject, setLastProject] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLastProject(getLastProjectId());
+  }, [pathname]);
+  const maestroHref = lastProject ? `/projects/${lastProject}/maestro` : "/maestro";
+  const agentHref = lastProject ? `/projects/${lastProject}` : "/projects";
+
+  const nav: NavItem[] = [
+    { href: "/projects", label: "Projeler", icon: FolderKanban, enabled: true },
+    { href: agentHref, label: "Ajan", icon: Bot, enabled: true },
+    { href: maestroHref, label: "Maestro", icon: Smartphone, enabled: true },
+    { href: "/security", label: "Güvenlik", icon: Shield, enabled: true },
+    { href: "/projects", label: "Organizasyon", icon: Building2, enabled: false },
+    { href: "/projects", label: "LLM", icon: Cpu, enabled: false },
+    { href: "/projects", label: "Gizlilik", icon: Scale, enabled: false },
+  ];
 
   async function handleLogout() {
     try {
@@ -61,9 +73,7 @@ export function AppShell({
         <div className="flex items-center gap-3">
           <span className="text-[15px] font-medium tracking-tight">İçerde</span>
           <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground">
-            {pathname.startsWith("/security") ? "Güvenlik" : "Projeler"}
-          </span>
+          <span className="text-muted-foreground">{title ?? headerTitle(pathname)}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
@@ -80,9 +90,9 @@ export function AppShell({
       <div className="flex min-h-0 flex-1">
         <aside className="flex w-[220px] shrink-0 flex-col border-r border-border bg-sidebar">
           <nav className="flex flex-1 flex-col gap-0.5 p-2">
-            {NAV.map((item) => {
+            {nav.map((item) => {
               const Icon = item.icon;
-              const active = item.enabled && pathname.startsWith(item.href);
+              const active = navActive(pathname, item.label, item.href);
               if (!item.enabled) {
                 return (
                   <span
@@ -116,9 +126,7 @@ export function AppShell({
           </nav>
           <div className="border-t border-border p-3">
             <p className="truncate text-foreground">{user.email}</p>
-            <p className="text-muted-foreground">
-              {workspaceLabel(user.workspaceKind)}
-            </p>
+            <p className="text-muted-foreground">{workspaceLabel(user.workspaceKind)}</p>
             <Button
               variant="ghost"
               size="sm"
@@ -137,10 +145,41 @@ export function AppShell({
       <footer className="flex h-8 shrink-0 items-center gap-3 border-t border-border px-4 font-mono text-[11px] text-muted-foreground">
         <span>1 oturum</span>
         <span>·</span>
-        <span>kayıtlı cihaz</span>
+        <span>{status ?? "kayıtlı cihaz"}</span>
         <span>·</span>
         <span>GDPR katmanı henüz bağlı değil</span>
       </footer>
     </div>
   );
+}
+
+function headerTitle(pathname: string): string {
+  if (pathname.includes("/maestro")) {
+    return "Maestro";
+  }
+  if (pathname.startsWith("/security")) {
+    return "Güvenlik";
+  }
+  if (pathname.startsWith("/projects/new")) {
+    return "Yeni proje";
+  }
+  if (pathname.startsWith("/projects/") && pathname !== "/projects") {
+    return "Ajan";
+  }
+  return "Projeler";
+}
+
+function navActive(pathname: string, label: string, href: string): boolean {
+  switch (label) {
+    case "Maestro":
+      return pathname.includes("/maestro") || pathname === "/maestro";
+    case "Ajan":
+      return pathname.startsWith("/projects/") && pathname !== "/projects" && pathname !== "/projects/new" && !pathname.includes("/maestro");
+    case "Projeler":
+      return pathname === "/projects" || pathname === "/projects/new";
+    case "Güvenlik":
+      return pathname.startsWith("/security");
+    default:
+      return pathname.startsWith(href);
+  }
 }

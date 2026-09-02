@@ -3,6 +3,8 @@ type Query {
   health: Health!
   me: User
   projects: [Project!]!
+  project(id: ID!): Project
+  maestroStudio(projectId: ID!): MaestroStudio!
   devices: [Device!]!
   sessions: [Session!]!
   mailbox: [MailMessage!]!
@@ -31,6 +33,7 @@ type Mutation {
   revokeSession(id: ID!): Boolean!
   revokeDevice(id: ID!): Boolean!
   logout: Boolean!
+  createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
 }
 
 enum LoginNext {
@@ -77,8 +80,65 @@ enum WorkspaceKind {
 type Project {
   id: ID!
   name: String!
-  stack: String!
-  status: String!
+  brief: String!
+  stack: ProjectStack!
+  status: ProjectStatus!
+  rootPath: String!
+  createdAt: String!
+  logs: [JobLog!]!
+  files: [ProjectFile!]!
+  maestro: MaestroStudio!
+}
+
+enum ProjectStack {
+  EXPO
+  FLUTTER
+  NATIVE
+}
+
+enum ProjectStatus {
+  QUEUED
+  WRITING
+  TESTING
+  READY
+  FAILED
+}
+
+enum MaestroResult {
+  SKIPPED
+  PASSED
+  FAILED
+}
+
+type JobLog {
+  at: String!
+  message: String!
+}
+
+type ProjectFile {
+  path: String!
+  kind: String!
+}
+
+type MaestroStudio {
+  ready: Boolean!
+  deviceStatus: String!
+  screens: [DesignScreen!]!
+  flows: [MaestroFlow!]!
+}
+
+type DesignScreen {
+  id: ID!
+  name: String!
+  html: String!
+}
+
+type MaestroFlow {
+  id: ID!
+  name: String!
+  yaml: String!
+  result: MaestroResult!
+  note: String!
 }
 
 type Device {

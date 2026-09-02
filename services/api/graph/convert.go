@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/icerde/api/internal/auth"
+	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 )
@@ -104,16 +105,135 @@ func mapEmailChannel(channel string) (string, error) {
 	}
 }
 
-func mapProjects(rows []store.Project) []*Project {
+func mapProjects(rows []store.Project) ([]*Project, error) {
 	out := make([]*Project, 0, len(rows))
 	for _, row := range rows {
-		item := row
-		out = append(out, &Project{
+		item, err := mapProjectMeta(row)
+		if err != nil {
+			return nil, err
+		}
+		item.Logs = []*JobLog{}
+		item.Files = []*ProjectFile{}
+		item.Maestro = emptyMaestro()
+		out = append(out, item)
+	}
+	return out, nil
+}
+
+func mapProjectMeta(row store.Project) (*Project, error) {
+	stack, err := mapProjectStack(row.Stack)
+	if err != nil {
+		return nil, err
+	}
+	status, err := mapProjectStatus(row.Status)
+	if err != nil {
+		return nil, err
+	}
+	return &Project{
+		ID:        row.ID,
+		Name:      row.Name,
+		Brief:     row.Brief,
+		Stack:     stack,
+		Status:    status,
+		RootPath:  row.RootPath,
+		CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339),
+	}, nil
+}
+
+func mapProjectStack(stack store.ProjectStack) (ProjectStack, error) {
+	switch stack {
+	case store.StackExpo:
+		return ProjectStackExpo, nil
+	case store.StackFlutter:
+		return ProjectStackFlutter, nil
+	case store.StackNative:
+		return ProjectStackNative, nil
+	default:
+		return "", fmt.Errorf("unhandled project stack: %s", stack)
+	}
+}
+
+func mapProjectStatus(status store.ProjectStatus) (ProjectStatus, error) {
+	switch status {
+	case store.StatusQueued:
+		return ProjectStatusQueued, nil
+	case store.StatusWriting:
+		return ProjectStatusWriting, nil
+	case store.StatusTesting:
+		return ProjectStatusTesting, nil
+	case store.StatusReady:
+		return ProjectStatusReady, nil
+	case store.StatusFailed:
+		return ProjectStatusFailed, nil
+	default:
+		return "", fmt.Errorf("unhandled project status: %s", status)
+	}
+}
+
+func mapMaestroResult(result store.MaestroResult) (MaestroResult, error) {
+	switch result {
+	case store.MaestroSkipped:
+		return MaestroResultSkipped, nil
+	case store.MaestroPassed:
+		return MaestroResultPassed, nil
+	case store.MaestroFailed:
+		return MaestroResultFailed, nil
+	default:
+		return "", fmt.Errorf("unhandled maestro result: %s", result)
+	}
+}
+
+func mapMaestro(studio factory.MaestroStudio) (*MaestroStudio, error) {
+	out := &MaestroStudio{
+		Ready:        studio.Ready,
+		DeviceStatus: studio.DeviceStatus,
+		Screens:      make([]*DesignScreen, 0, len(studio.Screens)),
+		Flows:        make([]*MaestroFlow, 0, len(studio.Flows)),
+	}
+	for _, screen := range studio.Screens {
+		item := screen
+		out.Screens = append(out.Screens, &DesignScreen{ID: item.ID, Name: item.Name, HTML: item.HTML})
+	}
+	for _, flow := range studio.Flows {
+		result, err := mapMaestroResult(flow.Result)
+		if err != nil {
+			return nil, err
+		}
+		item := flow
+		out.Flows = append(out.Flows, &MaestroFlow{
 			ID:     item.ID,
 			Name:   item.Name,
-			Stack:  item.Stack,
-			Status: item.Status,
+			Yaml:   item.YAML,
+			Result: result,
+			Note:   item.Note,
 		})
+	}
+	return out, nil
+}
+
+func emptyMaestro() *MaestroStudio {
+	return &MaestroStudio{
+		Ready:        false,
+		DeviceStatus: "none",
+		Screens:      []*DesignScreen{},
+		Flows:        []*MaestroFlow{},
+	}
+}
+
+func mapLogs(rows []store.JobLog) []*JobLog {
+	out := make([]*JobLog, 0, len(rows))
+	for _, row := range rows {
+		item := row
+		out = append(out, &JobLog{At: item.At.UTC().Format(time.RFC3339), Message: item.Message})
+	}
+	return out
+}
+
+func mapFiles(rows []factory.DiskFile) []*ProjectFile {
+	out := make([]*ProjectFile, 0, len(rows))
+	for _, row := range rows {
+		item := row
+		out = append(out, &ProjectFile{Path: item.Path, Kind: item.Kind})
 	}
 	return out
 }

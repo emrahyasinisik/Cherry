@@ -9,6 +9,12 @@ import (
 	"strconv"
 )
 
+type DesignScreen struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	HTML string `json:"html"`
+}
+
 type Device struct {
 	ID         string `json:"id"`
 	Label      string `json:"label"`
@@ -24,6 +30,11 @@ type Health struct {
 	Mail    string `json:"mail"`
 }
 
+type JobLog struct {
+	At      string `json:"at"`
+	Message string `json:"message"`
+}
+
 type LoginResult struct {
 	Next         LoginNext `json:"next"`
 	Token        *string   `json:"token,omitempty"`
@@ -31,6 +42,21 @@ type LoginResult struct {
 	User         *User     `json:"user,omitempty"`
 	EmailSent    bool      `json:"emailSent"`
 	EmailChannel string    `json:"emailChannel"`
+}
+
+type MaestroFlow struct {
+	ID     string        `json:"id"`
+	Name   string        `json:"name"`
+	Yaml   string        `json:"yaml"`
+	Result MaestroResult `json:"result"`
+	Note   string        `json:"note"`
+}
+
+type MaestroStudio struct {
+	Ready        bool            `json:"ready"`
+	DeviceStatus string          `json:"deviceStatus"`
+	Screens      []*DesignScreen `json:"screens"`
+	Flows        []*MaestroFlow  `json:"flows"`
 }
 
 type MailMessage struct {
@@ -45,10 +71,21 @@ type Mutation struct {
 }
 
 type Project struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Stack  string `json:"stack"`
-	Status string `json:"status"`
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Brief     string         `json:"brief"`
+	Stack     ProjectStack   `json:"stack"`
+	Status    ProjectStatus  `json:"status"`
+	RootPath  string         `json:"rootPath"`
+	CreatedAt string         `json:"createdAt"`
+	Logs      []*JobLog      `json:"logs"`
+	Files     []*ProjectFile `json:"files"`
+	Maestro   *MaestroStudio `json:"maestro"`
+}
+
+type ProjectFile struct {
+	Path string `json:"path"`
+	Kind string `json:"kind"`
 }
 
 // Icerde platform GraphQL — not the generated customer app API.
@@ -126,6 +163,181 @@ func (e *LoginNext) UnmarshalJSON(b []byte) error {
 }
 
 func (e LoginNext) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type MaestroResult string
+
+const (
+	MaestroResultSkipped MaestroResult = "SKIPPED"
+	MaestroResultPassed  MaestroResult = "PASSED"
+	MaestroResultFailed  MaestroResult = "FAILED"
+)
+
+var AllMaestroResult = []MaestroResult{
+	MaestroResultSkipped,
+	MaestroResultPassed,
+	MaestroResultFailed,
+}
+
+func (e MaestroResult) IsValid() bool {
+	switch e {
+	case MaestroResultSkipped, MaestroResultPassed, MaestroResultFailed:
+		return true
+	}
+	return false
+}
+
+func (e MaestroResult) String() string {
+	return string(e)
+}
+
+func (e *MaestroResult) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MaestroResult(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MaestroResult", str)
+	}
+	return nil
+}
+
+func (e MaestroResult) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MaestroResult) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MaestroResult) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ProjectStack string
+
+const (
+	ProjectStackExpo    ProjectStack = "EXPO"
+	ProjectStackFlutter ProjectStack = "FLUTTER"
+	ProjectStackNative  ProjectStack = "NATIVE"
+)
+
+var AllProjectStack = []ProjectStack{
+	ProjectStackExpo,
+	ProjectStackFlutter,
+	ProjectStackNative,
+}
+
+func (e ProjectStack) IsValid() bool {
+	switch e {
+	case ProjectStackExpo, ProjectStackFlutter, ProjectStackNative:
+		return true
+	}
+	return false
+}
+
+func (e ProjectStack) String() string {
+	return string(e)
+}
+
+func (e *ProjectStack) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProjectStack(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProjectStack", str)
+	}
+	return nil
+}
+
+func (e ProjectStack) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProjectStack) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProjectStack) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ProjectStatus string
+
+const (
+	ProjectStatusQueued  ProjectStatus = "QUEUED"
+	ProjectStatusWriting ProjectStatus = "WRITING"
+	ProjectStatusTesting ProjectStatus = "TESTING"
+	ProjectStatusReady   ProjectStatus = "READY"
+	ProjectStatusFailed  ProjectStatus = "FAILED"
+)
+
+var AllProjectStatus = []ProjectStatus{
+	ProjectStatusQueued,
+	ProjectStatusWriting,
+	ProjectStatusTesting,
+	ProjectStatusReady,
+	ProjectStatusFailed,
+}
+
+func (e ProjectStatus) IsValid() bool {
+	switch e {
+	case ProjectStatusQueued, ProjectStatusWriting, ProjectStatusTesting, ProjectStatusReady, ProjectStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ProjectStatus) String() string {
+	return string(e)
+}
+
+func (e *ProjectStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProjectStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProjectStatus", str)
+	}
+	return nil
+}
+
+func (e ProjectStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProjectStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProjectStatus) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

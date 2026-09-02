@@ -14,6 +14,8 @@ type Memory struct {
 	sessions   map[string]Session
 	devices    map[string]Device
 	mail       map[string]Mail
+	projects   map[string]Project
+	logs       map[string][]JobLog
 }
 
 func NewMemory() *Memory {
@@ -24,6 +26,8 @@ func NewMemory() *Memory {
 		sessions:   make(map[string]Session),
 		devices:    make(map[string]Device),
 		mail:       make(map[string]Mail),
+		projects:   make(map[string]Project),
+		logs:       make(map[string][]JobLog),
 	}
 }
 
@@ -274,6 +278,75 @@ func (m *Memory) MailByChallenge(_ context.Context, challengeID string) (*Mail, 
 	return latest, nil
 }
 
-func (m *Memory) Projects(_ context.Context, _ string) ([]Project, error) {
-	return []Project{}, nil
+func (m *Memory) Projects(ctx context.Context, userID string) ([]Project, error) {
+	return m.ListProjects(ctx, userID)
+}
+
+func (m *Memory) ListProjects(_ context.Context, userID string) ([]Project, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]Project, 0)
+	for _, project := range m.projects {
+		if project.UserID == userID {
+			out = append(out, project)
+		}
+	}
+	for i := 0; i < len(out); i++ {
+		for j := i + 1; j < len(out); j++ {
+			if out[j].CreatedAt.After(out[i].CreatedAt) {
+				out[i], out[j] = out[j], out[i]
+			}
+		}
+	}
+	return out, nil
+}
+
+func (m *Memory) CreateProject(_ context.Context, project Project) (Project, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if project.ID == "" {
+		project.ID = NewID()
+	}
+	m.projects[project.ID] = project
+	return project, nil
+}
+
+func (m *Memory) GetProject(_ context.Context, id string) (*Project, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	project, ok := m.projects[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	copy := project
+	return &copy, nil
+}
+
+func (m *Memory) UpdateProject(_ context.Context, project Project) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, ok := m.projects[project.ID]; !ok {
+		return ErrNotFound
+	}
+	m.projects[project.ID] = project
+	return nil
+}
+
+func (m *Memory) AppendLog(_ context.Context, log JobLog) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if log.ID == "" {
+		log.ID = NewID()
+	}
+	m.logs[log.ProjectID] = append(m.logs[log.ProjectID], log)
+	return nil
+}
+
+func (m *Memory) ListLogs(_ context.Context, projectID string) ([]JobLog, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	src := m.logs[projectID]
+	out := make([]JobLog, len(src))
+	copy(out, src)
+	return out, nil
 }

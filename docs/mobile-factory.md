@@ -43,6 +43,13 @@ Adapters behind one interface, for example:
 
 v1 may implement one adapter fully; others stay as explicit “not wired” rather than fake success.
 
+## Stüdyo akışı / Studio flow
+
+Kişi brifi yazar. Ajan **arka planda** `frontend/`, `backend/`, `maestro/` üretir. Test aşamasına gelince (veya kişi isterse) Maestro ekranı açılır: üretilen tasarım maketleri + YAML. Cihaz yoksa sonuç `SKIPPED`.
+
+The user writes a brief. The agent writes `frontend/`, `backend/`, `maestro/` **in the background**. At the test stage (or on demand) the Maestro screen opens: design mocks + YAML. No device → `SKIPPED`.
+
+
 ## İki backend / Two backends
 
 ```mermaid

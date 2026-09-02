@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/icerde/api/graph"
 	"github.com/icerde/api/internal/auth"
+	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/mailer"
 	"github.com/icerde/api/internal/store"
 	"github.com/rs/cors"
@@ -59,7 +61,10 @@ func main() {
 	}
 	log.Printf("mailer channel=%s require=%v", mail.Channel(), mail.Require)
 	authSvc := auth.New(memory, mail, pepper, webOrigin)
-	resolver := &graph.Resolver{Auth: authSvc}
+	projectsRoot := getenv("ICERDE_PROJECTS_ROOT", filepath.Join("var", "projects"))
+	fact := factory.New(memory, projectsRoot)
+	log.Printf("projects root=%s", projectsRoot)
+	resolver := &graph.Resolver{Auth: authSvc, Factory: fact}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -77,9 +82,30 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":      true,
 			"store":   status,
-			"version": "0.2.1-mail",
+			"version": "0.3.0-disk",
 			"mail":    mail.Channel(),
 		})
+	})
+	mux.HandleFunc("/export/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/export/"), "/")
+		token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+		user, _, err := authSvc.SessionUser(r.Context(), token)
+		if err != nil {
+			http.Error(w, "oturum gerekli", http.StatusUnauthorized)
+			return
+		}
+		path, err := fact.ZipPath(r.Context(), user.ID, id)
+		if err != nil {
+			http.Error(w, "zip henüz yok", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/zip")
+		w.Header().Set("Content-Disposition", `attachment; filename="icerde.zip"`)
+		http.ServeFile(w, r, path)
 	})
 
 	handlerWithCORS := cors.New(cors.Options{

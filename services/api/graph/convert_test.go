@@ -42,3 +42,36 @@ func TestMapEmailChannelExhaustive(t *testing.T) {
 		t.Fatal("expected error for unknown channel")
 	}
 }
+
+func TestMapProjectEnumsExhaustive(t *testing.T) {
+	if _, err := mapProjectStack(store.StackExpo); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := mapProjectStack(store.StackFlutter); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := mapProjectStack(store.StackNative); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := mapProjectStack(store.ProjectStack("X")); err == nil {
+		t.Fatal("expected stack error")
+	}
+	for _, status := range []store.ProjectStatus{
+		store.StatusQueued, store.StatusWriting, store.StatusTesting, store.StatusReady, store.StatusFailed,
+	} {
+		if _, err := mapProjectStatus(status); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapProjectStatus(store.ProjectStatus("X")); err == nil {
+		t.Fatal("expected status error")
+	}
+	for _, result := range []store.MaestroResult{store.MaestroSkipped, store.MaestroPassed, store.MaestroFailed} {
+		if _, err := mapMaestroResult(result); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapMaestroResult(store.MaestroResult("X")); err == nil {
+		t.Fatal("expected maestro error")
+	}
+}

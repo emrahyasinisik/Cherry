@@ -42,11 +42,49 @@ type User struct {
 	TotpEnabled   bool
 }
 
+type ProjectStack string
+
+const (
+	StackExpo    ProjectStack = "EXPO"
+	StackFlutter ProjectStack = "FLUTTER"
+	StackNative  ProjectStack = "NATIVE"
+)
+
+type ProjectStatus string
+
+const (
+	StatusQueued  ProjectStatus = "QUEUED"
+	StatusWriting ProjectStatus = "WRITING"
+	StatusTesting ProjectStatus = "TESTING"
+	StatusReady   ProjectStatus = "READY"
+	StatusFailed  ProjectStatus = "FAILED"
+)
+
+type MaestroResult string
+
+const (
+	MaestroSkipped MaestroResult = "SKIPPED"
+	MaestroPassed  MaestroResult = "PASSED"
+	MaestroFailed  MaestroResult = "FAILED"
+)
+
 type Project struct {
-	ID     string
-	Name   string
-	Stack  string
-	Status string
+	ID        string
+	UserID    string
+	Name      string
+	Brief     string
+	Stack     ProjectStack
+	Status    ProjectStatus
+	RootPath  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type JobLog struct {
+	ID        string
+	ProjectID string
+	At        time.Time
+	Message   string
 }
 
 type Challenge struct {
@@ -124,4 +162,9 @@ type Store interface {
 	MailByChallenge(ctx context.Context, challengeID string) (*Mail, error)
 
 	Projects(ctx context.Context, userID string) ([]Project, error)
+	CreateProject(ctx context.Context, project Project) (Project, error)
+	GetProject(ctx context.Context, id string) (*Project, error)
+	UpdateProject(ctx context.Context, project Project) error
+	AppendLog(ctx context.Context, log JobLog) error
+	ListLogs(ctx context.Context, projectID string) ([]JobLog, error)
 }

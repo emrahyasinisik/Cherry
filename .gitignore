@@ -16,3 +16,5 @@ generated/
 .cursor/mcp.json
 opencode.json
 apps/desktop/out/
+var/projects/
+services/api/var/

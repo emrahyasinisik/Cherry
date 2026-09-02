@@ -46,6 +46,12 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	DesignScreen struct {
+		HTML func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
 	Device struct {
 		Current    func(childComplexity int) int
 		ID         func(childComplexity int) int
@@ -61,6 +67,11 @@ type ComplexityRoot struct {
 		Version func(childComplexity int) int
 	}
 
+	JobLog struct {
+		At      func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
 	LoginResult struct {
 		ChallengeID  func(childComplexity int) int
 		EmailChannel func(childComplexity int) int
@@ -68,6 +79,21 @@ type ComplexityRoot struct {
 		Next         func(childComplexity int) int
 		Token        func(childComplexity int) int
 		User         func(childComplexity int) int
+	}
+
+	MaestroFlow struct {
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Note   func(childComplexity int) int
+		Result func(childComplexity int) int
+		Yaml   func(childComplexity int) int
+	}
+
+	MaestroStudio struct {
+		DeviceStatus func(childComplexity int) int
+		Flows        func(childComplexity int) int
+		Ready        func(childComplexity int) int
+		Screens      func(childComplexity int) int
 	}
 
 	MailMessage struct {
@@ -80,6 +106,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		ConfirmTotp   func(childComplexity int, code string) int
+		CreateProject func(childComplexity int, name string, brief string, stack ProjectStack) int
 		DisableTotp   func(childComplexity int, code string) int
 		EnableTotp    func(childComplexity int) int
 		Login         func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
@@ -93,18 +120,31 @@ type ComplexityRoot struct {
 	}
 
 	Project struct {
-		ID     func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Stack  func(childComplexity int) int
-		Status func(childComplexity int) int
+		Brief     func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Files     func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Logs      func(childComplexity int) int
+		Maestro   func(childComplexity int) int
+		Name      func(childComplexity int) int
+		RootPath  func(childComplexity int) int
+		Stack     func(childComplexity int) int
+		Status    func(childComplexity int) int
+	}
+
+	ProjectFile struct {
+		Kind func(childComplexity int) int
+		Path func(childComplexity int) int
 	}
 
 	Query struct {
 		ChallengeMailbox func(childComplexity int, challengeID string) int
 		Devices          func(childComplexity int) int
 		Health           func(childComplexity int) int
+		MaestroStudio    func(childComplexity int, projectID string) int
 		Mailbox          func(childComplexity int) int
 		Me               func(childComplexity int) int
+		Project          func(childComplexity int, id string) int
 		Projects         func(childComplexity int) int
 		Sessions         func(childComplexity int) int
 	}
@@ -141,11 +181,14 @@ type MutationResolver interface {
 	RevokeSession(ctx context.Context, id string) (bool, error)
 	RevokeDevice(ctx context.Context, id string) (bool, error)
 	Logout(ctx context.Context) (bool, error)
+	CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (*Health, error)
 	Me(ctx context.Context) (*User, error)
 	Projects(ctx context.Context) ([]*Project, error)
+	Project(ctx context.Context, id string) (*Project, error)
+	MaestroStudio(ctx context.Context, projectID string) (*MaestroStudio, error)
 	Devices(ctx context.Context) ([]*Device, error)
 	Sessions(ctx context.Context) ([]*Session, error)
 	Mailbox(ctx context.Context) ([]*MailMessage, error)
@@ -170,6 +213,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "DesignScreen.html":
+		if e.complexity.DesignScreen.HTML == nil {
+			break
+		}
+
+		return e.complexity.DesignScreen.HTML(childComplexity), true
+	case "DesignScreen.id":
+		if e.complexity.DesignScreen.ID == nil {
+			break
+		}
+
+		return e.complexity.DesignScreen.ID(childComplexity), true
+	case "DesignScreen.name":
+		if e.complexity.DesignScreen.Name == nil {
+			break
+		}
+
+		return e.complexity.DesignScreen.Name(childComplexity), true
 
 	case "Device.current":
 		if e.complexity.Device.Current == nil {
@@ -227,6 +289,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Health.Version(childComplexity), true
 
+	case "JobLog.at":
+		if e.complexity.JobLog.At == nil {
+			break
+		}
+
+		return e.complexity.JobLog.At(childComplexity), true
+	case "JobLog.message":
+		if e.complexity.JobLog.Message == nil {
+			break
+		}
+
+		return e.complexity.JobLog.Message(childComplexity), true
+
 	case "LoginResult.challengeId":
 		if e.complexity.LoginResult.ChallengeID == nil {
 			break
@@ -263,6 +338,62 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LoginResult.User(childComplexity), true
+
+	case "MaestroFlow.id":
+		if e.complexity.MaestroFlow.ID == nil {
+			break
+		}
+
+		return e.complexity.MaestroFlow.ID(childComplexity), true
+	case "MaestroFlow.name":
+		if e.complexity.MaestroFlow.Name == nil {
+			break
+		}
+
+		return e.complexity.MaestroFlow.Name(childComplexity), true
+	case "MaestroFlow.note":
+		if e.complexity.MaestroFlow.Note == nil {
+			break
+		}
+
+		return e.complexity.MaestroFlow.Note(childComplexity), true
+	case "MaestroFlow.result":
+		if e.complexity.MaestroFlow.Result == nil {
+			break
+		}
+
+		return e.complexity.MaestroFlow.Result(childComplexity), true
+	case "MaestroFlow.yaml":
+		if e.complexity.MaestroFlow.Yaml == nil {
+			break
+		}
+
+		return e.complexity.MaestroFlow.Yaml(childComplexity), true
+
+	case "MaestroStudio.deviceStatus":
+		if e.complexity.MaestroStudio.DeviceStatus == nil {
+			break
+		}
+
+		return e.complexity.MaestroStudio.DeviceStatus(childComplexity), true
+	case "MaestroStudio.flows":
+		if e.complexity.MaestroStudio.Flows == nil {
+			break
+		}
+
+		return e.complexity.MaestroStudio.Flows(childComplexity), true
+	case "MaestroStudio.ready":
+		if e.complexity.MaestroStudio.Ready == nil {
+			break
+		}
+
+		return e.complexity.MaestroStudio.Ready(childComplexity), true
+	case "MaestroStudio.screens":
+		if e.complexity.MaestroStudio.Screens == nil {
+			break
+		}
+
+		return e.complexity.MaestroStudio.Screens(childComplexity), true
 
 	case "MailMessage.body":
 		if e.complexity.MailMessage.Body == nil {
@@ -306,6 +437,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ConfirmTotp(childComplexity, args["code"].(string)), true
+	case "Mutation.createProject":
+		if e.complexity.Mutation.CreateProject == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createProject_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateProject(childComplexity, args["name"].(string), args["brief"].(string), args["stack"].(ProjectStack)), true
 	case "Mutation.disableTotp":
 		if e.complexity.Mutation.DisableTotp == nil {
 			break
@@ -407,18 +549,54 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.VerifyTotp(childComplexity, args["challengeId"].(string), args["code"].(string)), true
 
+	case "Project.brief":
+		if e.complexity.Project.Brief == nil {
+			break
+		}
+
+		return e.complexity.Project.Brief(childComplexity), true
+	case "Project.createdAt":
+		if e.complexity.Project.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Project.CreatedAt(childComplexity), true
+	case "Project.files":
+		if e.complexity.Project.Files == nil {
+			break
+		}
+
+		return e.complexity.Project.Files(childComplexity), true
 	case "Project.id":
 		if e.complexity.Project.ID == nil {
 			break
 		}
 
 		return e.complexity.Project.ID(childComplexity), true
+	case "Project.logs":
+		if e.complexity.Project.Logs == nil {
+			break
+		}
+
+		return e.complexity.Project.Logs(childComplexity), true
+	case "Project.maestro":
+		if e.complexity.Project.Maestro == nil {
+			break
+		}
+
+		return e.complexity.Project.Maestro(childComplexity), true
 	case "Project.name":
 		if e.complexity.Project.Name == nil {
 			break
 		}
 
 		return e.complexity.Project.Name(childComplexity), true
+	case "Project.rootPath":
+		if e.complexity.Project.RootPath == nil {
+			break
+		}
+
+		return e.complexity.Project.RootPath(childComplexity), true
 	case "Project.stack":
 		if e.complexity.Project.Stack == nil {
 			break
@@ -431,6 +609,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Project.Status(childComplexity), true
+
+	case "ProjectFile.kind":
+		if e.complexity.ProjectFile.Kind == nil {
+			break
+		}
+
+		return e.complexity.ProjectFile.Kind(childComplexity), true
+	case "ProjectFile.path":
+		if e.complexity.ProjectFile.Path == nil {
+			break
+		}
+
+		return e.complexity.ProjectFile.Path(childComplexity), true
 
 	case "Query.challengeMailbox":
 		if e.complexity.Query.ChallengeMailbox == nil {
@@ -455,6 +646,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
+	case "Query.maestroStudio":
+		if e.complexity.Query.MaestroStudio == nil {
+			break
+		}
+
+		args, err := ec.field_Query_maestroStudio_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MaestroStudio(childComplexity, args["projectId"].(string)), true
 	case "Query.mailbox":
 		if e.complexity.Query.Mailbox == nil {
 			break
@@ -467,6 +669,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Me(childComplexity), true
+	case "Query.project":
+		if e.complexity.Query.Project == nil {
+			break
+		}
+
+		args, err := ec.field_Query_project_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Project(childComplexity, args["id"].(string)), true
 	case "Query.projects":
 		if e.complexity.Query.Projects == nil {
 			break
@@ -677,6 +890,27 @@ func (ec *executionContext) field_Mutation_confirmTotp_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createProject_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["name"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "brief", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["brief"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "stack", ec.unmarshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack)
+	if err != nil {
+		return nil, err
+	}
+	args["stack"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_disableTotp_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -842,6 +1076,28 @@ func (ec *executionContext) field_Query_challengeMailbox_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_maestroStudio_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "projectId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["projectId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_project_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -893,6 +1149,93 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _DesignScreen_id(ctx context.Context, field graphql.CollectedField, obj *DesignScreen) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DesignScreen_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DesignScreen_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DesignScreen",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DesignScreen_name(ctx context.Context, field graphql.CollectedField, obj *DesignScreen) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DesignScreen_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DesignScreen_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DesignScreen",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DesignScreen_html(ctx context.Context, field graphql.CollectedField, obj *DesignScreen) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DesignScreen_html,
+		func(ctx context.Context) (any, error) {
+			return obj.HTML, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DesignScreen_html(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DesignScreen",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Device_id(ctx context.Context, field graphql.CollectedField, obj *Device) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1155,6 +1498,64 @@ func (ec *executionContext) fieldContext_Health_mail(_ context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _JobLog_at(ctx context.Context, field graphql.CollectedField, obj *JobLog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JobLog_at,
+		func(ctx context.Context) (any, error) {
+			return obj.At, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JobLog_at(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JobLog_message(ctx context.Context, field graphql.CollectedField, obj *JobLog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JobLog_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JobLog_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobLog",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LoginResult_next(ctx context.Context, field graphql.CollectedField, obj *LoginResult) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1334,6 +1735,287 @@ func (ec *executionContext) fieldContext_LoginResult_emailChannel(_ context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroFlow_id(ctx context.Context, field graphql.CollectedField, obj *MaestroFlow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroFlow_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroFlow_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroFlow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroFlow_name(ctx context.Context, field graphql.CollectedField, obj *MaestroFlow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroFlow_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroFlow_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroFlow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroFlow_yaml(ctx context.Context, field graphql.CollectedField, obj *MaestroFlow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroFlow_yaml,
+		func(ctx context.Context) (any, error) {
+			return obj.Yaml, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroFlow_yaml(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroFlow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroFlow_result(ctx context.Context, field graphql.CollectedField, obj *MaestroFlow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroFlow_result,
+		func(ctx context.Context) (any, error) {
+			return obj.Result, nil
+		},
+		nil,
+		ec.marshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroFlow_result(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroFlow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type MaestroResult does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroFlow_note(ctx context.Context, field graphql.CollectedField, obj *MaestroFlow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroFlow_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroFlow_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroFlow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroStudio_ready(ctx context.Context, field graphql.CollectedField, obj *MaestroStudio) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroStudio_ready,
+		func(ctx context.Context) (any, error) {
+			return obj.Ready, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroStudio_ready(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroStudio",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroStudio_deviceStatus(ctx context.Context, field graphql.CollectedField, obj *MaestroStudio) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroStudio_deviceStatus,
+		func(ctx context.Context) (any, error) {
+			return obj.DeviceStatus, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroStudio_deviceStatus(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroStudio",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroStudio_screens(ctx context.Context, field graphql.CollectedField, obj *MaestroStudio) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroStudio_screens,
+		func(ctx context.Context) (any, error) {
+			return obj.Screens, nil
+		},
+		nil,
+		ec.marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreenᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroStudio_screens(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroStudio",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_DesignScreen_id(ctx, field)
+			case "name":
+				return ec.fieldContext_DesignScreen_name(ctx, field)
+			case "html":
+				return ec.fieldContext_DesignScreen_html(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DesignScreen", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MaestroStudio_flows(ctx context.Context, field graphql.CollectedField, obj *MaestroStudio) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_MaestroStudio_flows,
+		func(ctx context.Context) (any, error) {
+			return obj.Flows, nil
+		},
+		nil,
+		ec.marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlowᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_MaestroStudio_flows(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MaestroStudio",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_MaestroFlow_id(ctx, field)
+			case "name":
+				return ec.fieldContext_MaestroFlow_name(ctx, field)
+			case "yaml":
+				return ec.fieldContext_MaestroFlow_yaml(ctx, field)
+			case "result":
+				return ec.fieldContext_MaestroFlow_result(ctx, field)
+			case "note":
+				return ec.fieldContext_MaestroFlow_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MaestroFlow", field.Name)
 		},
 	}
 	return fc, nil
@@ -1987,6 +2669,69 @@ func (ec *executionContext) fieldContext_Mutation_logout(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createProject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createProject,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateProject(ctx, fc.Args["name"].(string), fc.Args["brief"].(string), fc.Args["stack"].(ProjectStack))
+		},
+		nil,
+		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Project_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Project_name(ctx, field)
+			case "brief":
+				return ec.fieldContext_Project_brief(ctx, field)
+			case "stack":
+				return ec.fieldContext_Project_stack(ctx, field)
+			case "status":
+				return ec.fieldContext_Project_status(ctx, field)
+			case "rootPath":
+				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Project_createdAt(ctx, field)
+			case "logs":
+				return ec.fieldContext_Project_logs(ctx, field)
+			case "files":
+				return ec.fieldContext_Project_files(ctx, field)
+			case "maestro":
+				return ec.fieldContext_Project_maestro(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createProject_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Project_id(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2045,6 +2790,35 @@ func (ec *executionContext) fieldContext_Project_name(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Project_brief(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_brief,
+		func(ctx context.Context) (any, error) {
+			return obj.Brief, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_brief(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Project_stack(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2055,7 +2829,7 @@ func (ec *executionContext) _Project_stack(ctx context.Context, field graphql.Co
 			return obj.Stack, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack,
 		true,
 		true,
 	)
@@ -2068,7 +2842,7 @@ func (ec *executionContext) fieldContext_Project_stack(_ context.Context, field 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ProjectStack does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2084,7 +2858,7 @@ func (ec *executionContext) _Project_status(ctx context.Context, field graphql.C
 			return obj.Status, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus,
 		true,
 		true,
 	)
@@ -2093,6 +2867,231 @@ func (ec *executionContext) _Project_status(ctx context.Context, field graphql.C
 func (ec *executionContext) fieldContext_Project_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ProjectStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_rootPath(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_rootPath,
+		func(ctx context.Context) (any, error) {
+			return obj.RootPath, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_rootPath(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_createdAt(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_logs(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_logs,
+		func(ctx context.Context) (any, error) {
+			return obj.Logs, nil
+		},
+		nil,
+		ec.marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLogᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_logs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "at":
+				return ec.fieldContext_JobLog_at(ctx, field)
+			case "message":
+				return ec.fieldContext_JobLog_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobLog", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_files(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_files,
+		func(ctx context.Context) (any, error) {
+			return obj.Files, nil
+		},
+		nil,
+		ec.marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFileᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_files(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "path":
+				return ec.fieldContext_ProjectFile_path(ctx, field)
+			case "kind":
+				return ec.fieldContext_ProjectFile_kind(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProjectFile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_maestro(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_maestro,
+		func(ctx context.Context) (any, error) {
+			return obj.Maestro, nil
+		},
+		nil,
+		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_maestro(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ready":
+				return ec.fieldContext_MaestroStudio_ready(ctx, field)
+			case "deviceStatus":
+				return ec.fieldContext_MaestroStudio_deviceStatus(ctx, field)
+			case "screens":
+				return ec.fieldContext_MaestroStudio_screens(ctx, field)
+			case "flows":
+				return ec.fieldContext_MaestroStudio_flows(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MaestroStudio", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProjectFile_path(ctx context.Context, field graphql.CollectedField, obj *ProjectFile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProjectFile_path,
+		func(ctx context.Context) (any, error) {
+			return obj.Path, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProjectFile_path(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProjectFile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProjectFile_kind(ctx context.Context, field graphql.CollectedField, obj *ProjectFile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProjectFile_kind,
+		func(ctx context.Context) (any, error) {
+			return obj.Kind, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProjectFile_kind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProjectFile",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2209,13 +3208,139 @@ func (ec *executionContext) fieldContext_Query_projects(_ context.Context, field
 				return ec.fieldContext_Project_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Project_name(ctx, field)
+			case "brief":
+				return ec.fieldContext_Project_brief(ctx, field)
 			case "stack":
 				return ec.fieldContext_Project_stack(ctx, field)
 			case "status":
 				return ec.fieldContext_Project_status(ctx, field)
+			case "rootPath":
+				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Project_createdAt(ctx, field)
+			case "logs":
+				return ec.fieldContext_Project_logs(ctx, field)
+			case "files":
+				return ec.fieldContext_Project_files(ctx, field)
+			case "maestro":
+				return ec.fieldContext_Project_maestro(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_project(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_project,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Project(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_project(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Project_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Project_name(ctx, field)
+			case "brief":
+				return ec.fieldContext_Project_brief(ctx, field)
+			case "stack":
+				return ec.fieldContext_Project_stack(ctx, field)
+			case "status":
+				return ec.fieldContext_Project_status(ctx, field)
+			case "rootPath":
+				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Project_createdAt(ctx, field)
+			case "logs":
+				return ec.fieldContext_Project_logs(ctx, field)
+			case "files":
+				return ec.fieldContext_Project_files(ctx, field)
+			case "maestro":
+				return ec.fieldContext_Project_maestro(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Project", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_project_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_maestroStudio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_maestroStudio,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().MaestroStudio(ctx, fc.Args["projectId"].(string))
+		},
+		nil,
+		ec.marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_maestroStudio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ready":
+				return ec.fieldContext_MaestroStudio_ready(ctx, field)
+			case "deviceStatus":
+				return ec.fieldContext_MaestroStudio_deviceStatus(ctx, field)
+			case "screens":
+				return ec.fieldContext_MaestroStudio_screens(ctx, field)
+			case "flows":
+				return ec.fieldContext_MaestroStudio_flows(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MaestroStudio", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_maestroStudio_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4246,6 +5371,55 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** object.gotpl ****************************
 
+var designScreenImplementors = []string{"DesignScreen"}
+
+func (ec *executionContext) _DesignScreen(ctx context.Context, sel ast.SelectionSet, obj *DesignScreen) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, designScreenImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DesignScreen")
+		case "id":
+			out.Values[i] = ec._DesignScreen_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._DesignScreen_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "html":
+			out.Values[i] = ec._DesignScreen_html(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var deviceImplementors = []string{"Device"}
 
 func (ec *executionContext) _Device(ctx context.Context, sel ast.SelectionSet, obj *Device) graphql.Marshaler {
@@ -4359,6 +5533,50 @@ func (ec *executionContext) _Health(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var jobLogImplementors = []string{"JobLog"}
+
+func (ec *executionContext) _JobLog(ctx context.Context, sel ast.SelectionSet, obj *JobLog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, jobLogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("JobLog")
+		case "at":
+			out.Values[i] = ec._JobLog_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._JobLog_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var loginResultImplementors = []string{"LoginResult"}
 
 func (ec *executionContext) _LoginResult(ctx context.Context, sel ast.SelectionSet, obj *LoginResult) graphql.Marshaler {
@@ -4388,6 +5606,119 @@ func (ec *executionContext) _LoginResult(ctx context.Context, sel ast.SelectionS
 			}
 		case "emailChannel":
 			out.Values[i] = ec._LoginResult_emailChannel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var maestroFlowImplementors = []string{"MaestroFlow"}
+
+func (ec *executionContext) _MaestroFlow(ctx context.Context, sel ast.SelectionSet, obj *MaestroFlow) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, maestroFlowImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MaestroFlow")
+		case "id":
+			out.Values[i] = ec._MaestroFlow_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._MaestroFlow_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "yaml":
+			out.Values[i] = ec._MaestroFlow_yaml(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "result":
+			out.Values[i] = ec._MaestroFlow_result(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._MaestroFlow_note(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var maestroStudioImplementors = []string{"MaestroStudio"}
+
+func (ec *executionContext) _MaestroStudio(ctx context.Context, sel ast.SelectionSet, obj *MaestroStudio) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, maestroStudioImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MaestroStudio")
+		case "ready":
+			out.Values[i] = ec._MaestroStudio_ready(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deviceStatus":
+			out.Values[i] = ec._MaestroStudio_deviceStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "screens":
+			out.Values[i] = ec._MaestroStudio_screens(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "flows":
+			out.Values[i] = ec._MaestroStudio_flows(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4569,6 +5900,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createProject":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createProject(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4613,6 +5951,11 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "brief":
+			out.Values[i] = ec._Project_brief(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "stack":
 			out.Values[i] = ec._Project_stack(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4620,6 +5963,75 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "status":
 			out.Values[i] = ec._Project_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "rootPath":
+			out.Values[i] = ec._Project_rootPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Project_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "logs":
+			out.Values[i] = ec._Project_logs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "files":
+			out.Values[i] = ec._Project_files(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "maestro":
+			out.Values[i] = ec._Project_maestro(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var projectFileImplementors = []string{"ProjectFile"}
+
+func (ec *executionContext) _ProjectFile(ctx context.Context, sel ast.SelectionSet, obj *ProjectFile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, projectFileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProjectFile")
+		case "path":
+			out.Values[i] = ec._ProjectFile_path(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "kind":
+			out.Values[i] = ec._ProjectFile_kind(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4716,6 +6128,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_projects(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "project":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_project(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "maestroStudio":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_maestroStudio(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -5347,6 +6800,60 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNDesignScreen2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreenᚄ(ctx context.Context, sel ast.SelectionSet, v []*DesignScreen) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDesignScreen2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreen(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNDesignScreen2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDesignScreen(ctx context.Context, sel ast.SelectionSet, v *DesignScreen) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DesignScreen(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNDevice2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐDeviceᚄ(ctx context.Context, sel ast.SelectionSet, v []*Device) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5431,6 +6938,60 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) marshalNJobLog2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*JobLog) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLog(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNJobLog2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐJobLog(ctx context.Context, sel ast.SelectionSet, v *JobLog) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._JobLog(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNLoginNext2githubᚗcomᚋicerdeᚋapiᚋgraphᚐLoginNext(ctx context.Context, v any) (LoginNext, error) {
 	var res LoginNext
 	err := res.UnmarshalGQL(v)
@@ -5453,6 +7014,84 @@ func (ec *executionContext) marshalNLoginResult2ᚖgithubᚗcomᚋicerdeᚋapi�
 		return graphql.Null
 	}
 	return ec._LoginResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNMaestroFlow2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlowᚄ(ctx context.Context, sel ast.SelectionSet, v []*MaestroFlow) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNMaestroFlow2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlow(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNMaestroFlow2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroFlow(ctx context.Context, sel ast.SelectionSet, v *MaestroFlow) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MaestroFlow(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult(ctx context.Context, v any) (MaestroResult, error) {
+	var res MaestroResult
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNMaestroResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroResult(ctx context.Context, sel ast.SelectionSet, v MaestroResult) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNMaestroStudio2githubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v MaestroStudio) graphql.Marshaler {
+	return ec._MaestroStudio(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMaestroStudio2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMaestroStudio(ctx context.Context, sel ast.SelectionSet, v *MaestroStudio) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MaestroStudio(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNMailMessage2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐMailMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*MailMessage) graphql.Marshaler {
@@ -5509,6 +7148,10 @@ func (ec *executionContext) marshalNMailMessage2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._MailMessage(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProject2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v Project) graphql.Marshaler {
+	return ec._Project(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNProject2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectᚄ(ctx context.Context, sel ast.SelectionSet, v []*Project) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -5561,6 +7204,80 @@ func (ec *executionContext) marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgra
 		return graphql.Null
 	}
 	return ec._Project(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNProjectFile2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*ProjectFile) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNProjectFile2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNProjectFile2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectFile(ctx context.Context, sel ast.SelectionSet, v *ProjectFile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProjectFile(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack(ctx context.Context, v any) (ProjectStack, error) {
+	var res ProjectStack
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProjectStack2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStack(ctx context.Context, sel ast.SelectionSet, v ProjectStack) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus(ctx context.Context, v any) (ProjectStatus, error) {
+	var res ProjectStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNProjectStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProjectStatus(ctx context.Context, sel ast.SelectionSet, v ProjectStatus) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNSession2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐSessionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Session) graphql.Marshaler {
@@ -5973,6 +7690,13 @@ func (ec *executionContext) marshalOMailMessage2ᚖgithubᚗcomᚋicerdeᚋapi�
 		return graphql.Null
 	}
 	return ec._MailMessage(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v *Project) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Project(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

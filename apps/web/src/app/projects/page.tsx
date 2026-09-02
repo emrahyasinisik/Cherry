@@ -1,18 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { getToken, graphql, type Project, type User } from "@/lib/api";
+import {
+  getToken,
+  graphql,
+  projectStatusLabel,
+  stackLabel,
+  type ProjectStatus,
+  type ProjectStack,
+  type User,
+} from "@/lib/api";
 
 export default function ProjectsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [projects, setProjects] = useState<Project[] | null>(null);
+  const [projects, setProjects] = useState<
+    {
+      id: string;
+      name: string;
+      brief: string;
+      stack: ProjectStack;
+      status: ProjectStatus;
+      createdAt: string;
+    }[] | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -22,10 +39,20 @@ export default function ProjectsPage() {
         return;
       }
       try {
-        const data = await graphql<{ me: User | null; projects: Project[] }>(
+        const data = await graphql<{
+          me: User | null;
+          projects: {
+            id: string;
+            name: string;
+            brief: string;
+            stack: ProjectStack;
+            status: ProjectStatus;
+            createdAt: string;
+          }[];
+        }>(
           `query ProjectsHome {
             me { id email workspaceKind totpEnabled }
-            projects { id name stack status }
+            projects { id name brief stack status createdAt }
           }`,
         );
         if (cancelled) {
@@ -68,41 +95,39 @@ export default function ProjectsPage() {
   return (
     <AppShell user={user}>
       <div className="mx-auto flex max-w-3xl flex-col gap-6 p-8">
-        <div className="flex items-end justify-between">
+        <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-base font-medium">Projeler</h1>
             <p className="text-muted-foreground">
-              Üretilen mobil uygulamalar burada listelenir.
+              Uygulamayı tarif et; ajan arka planda yazar. Test aşamasında Maestro açılır.
             </p>
           </div>
-          <Button
-            type="button"
-            onClick={() => {
-              setInfo("Proje oluşturma dilim 3’te (proje diski).");
-            }}
-          >
+          <Button type="button" onClick={() => router.push("/projects/new")}>
             Yeni proje
           </Button>
         </div>
-        {info ? <p className="text-muted-foreground">{info}</p> : null}
         {projects.length === 0 ? (
           <div className="icerde-enter rounded-[10px] border border-dashed border-border bg-card/40 px-6 py-16 text-center">
             <p className="text-base font-medium">Henüz proje yok</p>
             <p className="mt-1 text-muted-foreground">
-              İlk mobil uygulamayı ajan yazacak. Şimdilik kabuk hazır.
+              İstediğin mobil uygulamayı anlat. Kodlama ve test arka planda yürür.
             </p>
           </div>
         ) : (
           <ul className="divide-y divide-border rounded-[10px] border border-border">
             {projects.map((project) => (
-              <li
-                key={project.id}
-                className="flex items-center justify-between px-4 py-3"
-              >
-                <span>{project.name}</span>
-                <span className="font-mono text-muted-foreground">
-                  {project.stack}
-                </span>
+              <li key={project.id}>
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/40"
+                >
+                  <span>
+                    <span className="block">{project.name}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {stackLabel(project.stack)} · {projectStatusLabel(project.status)}
+                    </span>
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>

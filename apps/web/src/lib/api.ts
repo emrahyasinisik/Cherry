@@ -26,9 +26,62 @@ export type LoginResult = {
 export type Project = {
   id: string;
   name: string;
-  stack: string;
-  status: string;
+  brief: string;
+  stack: ProjectStack;
+  status: ProjectStatus;
+  rootPath: string;
+  createdAt: string;
+  logs: JobLog[];
+  files: ProjectFile[];
+  maestro: MaestroStudio;
 };
+
+export type ProjectStack = "EXPO" | "FLUTTER" | "NATIVE";
+export type ProjectStatus = "QUEUED" | "WRITING" | "TESTING" | "READY" | "FAILED";
+export type MaestroResult = "SKIPPED" | "PASSED" | "FAILED";
+
+export type JobLog = {
+  at: string;
+  message: string;
+};
+
+export type ProjectFile = {
+  path: string;
+  kind: string;
+};
+
+export type DesignScreen = {
+  id: string;
+  name: string;
+  html: string;
+};
+
+export type MaestroFlow = {
+  id: string;
+  name: string;
+  yaml: string;
+  result: MaestroResult;
+  note: string;
+};
+
+export type MaestroStudio = {
+  ready: boolean;
+  deviceStatus: string;
+  screens: DesignScreen[];
+  flows: MaestroFlow[];
+};
+
+export const PROJECT_FIELDS = `
+  id name brief stack status rootPath createdAt
+  logs { at message }
+  files { path kind }
+  maestro {
+    ready
+    deviceStatus
+    screens { id name html }
+    flows { id name yaml result note }
+  }
+`;
 
 export type Device = {
   id: string;
@@ -153,6 +206,55 @@ export function purposeLabel(purpose: VerifyPurpose): string {
       return "Şüpheli giriş";
     default: {
       const exhaustive: never = purpose;
+      return exhaustive;
+    }
+  }
+}
+
+export function stackLabel(stack: ProjectStack): string {
+  switch (stack) {
+    case "EXPO":
+      return "Expo / React Native";
+    case "FLUTTER":
+      return "Flutter";
+    case "NATIVE":
+      return "Native iOS + Android";
+    default: {
+      const exhaustive: never = stack;
+      return exhaustive;
+    }
+  }
+}
+
+export function projectStatusLabel(status: ProjectStatus): string {
+  switch (status) {
+    case "QUEUED":
+      return "Kuyrukta";
+    case "WRITING":
+      return "Arka planda yazılıyor";
+    case "TESTING":
+      return "Test aşaması";
+    case "READY":
+      return "Hazır";
+    case "FAILED":
+      return "Durdu";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
+export function maestroResultLabel(result: MaestroResult): string {
+  switch (result) {
+    case "SKIPPED":
+      return "Atlandı (cihaz yok)";
+    case "PASSED":
+      return "Geçti";
+    case "FAILED":
+      return "Kaldı";
+    default: {
+      const exhaustive: never = result;
       return exhaustive;
     }
   }

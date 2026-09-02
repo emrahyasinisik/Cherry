@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
         destination: "http://127.0.0.1:43148/graphql",
       },
       {
-        source: "/health",
-        destination: "http://127.0.0.1:43148/health",
+        source: "/export/:id",
+        destination: "http://127.0.0.1:43148/export/:id",
       },
     ];
   },

@@ -154,6 +154,19 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
+// CreateProject is the resolver for the createProject field.
+func (r *mutationResolver) CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	row, err := r.Factory.Create(ctx, user.ID, name, brief, string(stack))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.projectPayload(ctx, user.ID, row.ID, true)
+}
+
 // Health is the resolver for the health field.
 func (r *queryResolver) Health(ctx context.Context) (*Health, error) {
 	ok := r.Auth.Store.Ping(ctx) == nil
@@ -182,11 +195,41 @@ func (r *queryResolver) Projects(ctx context.Context) ([]*Project, error) {
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	rows, err := r.Auth.Store.Projects(ctx, user.ID)
+	rows, err := r.Factory.List(ctx, user.ID)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	return mapProjects(rows), nil
+	return mapProjects(rows)
+}
+
+// Project is the resolver for the project field.
+func (r *queryResolver) Project(ctx context.Context, id string) (*Project, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := r.projectPayload(ctx, user.ID, id, true)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
+}
+
+// MaestroStudio is the resolver for the maestroStudio field.
+func (r *queryResolver) MaestroStudio(ctx context.Context, projectID string) (*MaestroStudio, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	studio, err := r.Factory.Maestro(ctx, user.ID, projectID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := mapMaestro(studio)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
 }
 
 // Devices is the resolver for the devices field.
