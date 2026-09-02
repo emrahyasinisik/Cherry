@@ -19,7 +19,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 - There are **two backends**. Never mix them:
   - Platform API: Go GraphQL + MongoDB (Icerde)
   - Generated customer backend: files on disk, activated locally for tests only
-- Customer delivery is **files** (folder / zip / git). **No hosting** in v1. Zip must be the chosen stack’s source, not `preview/` HTML.
+- Customer delivery is **files** (folder / zip / git). **No hosting** in v1. Zip is the chosen stack’s **language** (TypeScript, Dart, Swift/Kotlin) — never `preview/` HTML.
 - Mobile stack of the generated app is **chosen by the user**. Backend **target** will also be chosen by the user (local / Supabase / Cloudflare / plugins) via **Bağlantılar** — see [docs/connections.md](docs/connections.md). Not built yet.
 - Security is **X-inspired**: password, 6-digit new-device code, TOTP, trusted devices, session revoke. **No SMS. No phone identity.** One active session per user.
 - Every LLM call goes through the **KVKK/GDPR layer**.

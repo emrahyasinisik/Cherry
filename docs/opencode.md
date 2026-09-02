@@ -25,13 +25,13 @@ opencode run --dir <absoluteProjectRoot> --auto
 
 `--dir` mutlak olmalı. Göreli yol `chdir` hatası verir.
 
-Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü.
+Prompt stdin’den, GDPR’den geçmiş brif + plan. Çalışma dizini yalnızca müşteri klasörü. Prompt seçilen yığının dilini zorunlu kılar (TS / Dart / Swift+Kotlin); HTML site yazdırmaz.
+
+The prompt is stdin; already redacted. Working directory is the customer folder only. It requires the selected stack’s language — never an HTML website as the app.
 
 **Kişi OpenCode görmez.** Yalnızca İçerde sohbetine yazar. TUI açılmaz. Program `sendProjectMessage` → `opencode run --dir --auto` (sonraki mesajda `--continue`).
 
 **The person never sees OpenCode.** They only write in Icerde. Do not launch the TUI. The program calls `run --auto` in the background.
-
-The prompt is stdin; already redacted. Working directory is the customer folder only.
 
 | Env | Anlam |
 | --- | --- |

@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"archive/zip"
 	"context"
 	"os"
 	"path/filepath"
@@ -175,6 +176,12 @@ func TestOpenCodePromptRedactsEmail(t *testing.T) {
 	if !strings.Contains(fake.Prompt, "[REDACTED_EMAIL]") {
 		t.Fatalf("expected redaction in %s", fake.Prompt)
 	}
+	if !strings.Contains(fake.Prompt, "TypeScript") {
+		t.Fatalf("expo prompt must name the source language: %s", fake.Prompt)
+	}
+	if !strings.Contains(fake.Prompt, "HTML") {
+		t.Fatalf("prompt must forbid HTML as the app: %s", fake.Prompt)
+	}
 }
 
 func TestStacksExhaustive(t *testing.T) {
@@ -187,6 +194,9 @@ func TestStacksExhaustive(t *testing.T) {
 		}
 		if _, err := frontendKind(store.ProjectStack(stack)); err != nil {
 			t.Fatalf("kind %s: %v", stack, err)
+		}
+		if _, err := stackSourceRule(store.ProjectStack(stack)); err != nil {
+			t.Fatalf("source %s: %v", stack, err)
 		}
 	}
 	if _, err := parseStack("UNITY"); err == nil {
@@ -279,6 +289,90 @@ func TestActivateAndRunMaestroNeverPassWithoutDevice(t *testing.T) {
 	if act.snap.Status != activate.StatusIdle {
 		t.Fatalf("%s", act.snap.Status)
 	}
+}
+
+func TestHandoffZipIsStackSourceNotHTML(t *testing.T) {
+	cases := []struct {
+		stack string
+		want  string
+		lang  string
+	}{
+		{stack: "EXPO", want: "frontend/app/index.tsx", lang: "TypeScript"},
+		{stack: "FLUTTER", want: "frontend/lib/main.dart", lang: "Dart"},
+		{stack: "NATIVE", want: "frontend/ios/README.md", lang: "Swift"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.stack, func(t *testing.T) {
+			mem := store.NewMemory()
+			svc := New(mem, t.TempDir())
+			svc.StepDelay = 0
+			svc.AutoRun = false
+			ctx := context.Background()
+			if err := llm.Seed(ctx, mem); err != nil {
+				t.Fatal(err)
+			}
+			svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
+			fake := &opencode.Fake{}
+			svc.OpenCode = fake
+			svc.MaestroRun = skipMaestro{}
+			project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", tc.stack)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := svc.RunSync(ctx, project.ID); err != nil {
+				t.Fatal(err)
+			}
+			got, err := svc.Get(ctx, "u1", project.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := os.Stat(filepath.Join(got.RootPath, "preview", "home.html")); err != nil {
+				t.Fatalf("studio mock missing: %v", err)
+			}
+			names := zipEntryNames(t, filepath.Join(got.RootPath, "icerde.zip"))
+			joined := strings.Join(names, "\n")
+			if !strings.Contains(joined, tc.want) {
+				t.Fatalf("zip missing %s:\n%s", tc.want, joined)
+			}
+			for _, name := range names {
+				if strings.HasSuffix(name, ".html") || strings.HasPrefix(name, "preview/") {
+					t.Fatalf("zip must not ship HTML app files: %s", name)
+				}
+			}
+			if !strings.Contains(fake.Prompt, tc.lang) {
+				t.Fatalf("prompt must name %s: %s", tc.lang, fake.Prompt)
+			}
+			files, err := svc.Files(ctx, "u1", project.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(files) == 0 {
+				t.Fatal("expected delivery files")
+			}
+			if files[0].Path != "README.md" && !strings.HasPrefix(files[0].Path, "frontend/") {
+				t.Fatalf("delivery list should lead with source, got %s", files[0].Path)
+			}
+			for _, file := range files {
+				if strings.HasPrefix(file.Path, "preview/") || strings.HasSuffix(file.Path, ".html") {
+					t.Fatalf("studio list leaked HTML: %s", file.Path)
+				}
+			}
+		})
+	}
+}
+
+func zipEntryNames(t *testing.T, path string) []string {
+	t.Helper()
+	reader, err := zip.OpenReader(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+	names := make([]string, 0, len(reader.File))
+	for _, file := range reader.File {
+		names = append(names, file.Name)
+	}
+	return names
 }
 
 type skipMaestro struct{}

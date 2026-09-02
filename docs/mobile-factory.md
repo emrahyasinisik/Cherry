@@ -33,9 +33,15 @@ flowchart TB
   Root --> D[docker_compose_optional]
 ```
 
-**Teslim / Handoff:** Zip ve git, seçilen yığının kaynağıdır (`frontend/lib` Flutter, `frontend/app` Expo, …) + `backend/` + `maestro/` + README.
+**Teslim / Handoff:** Zip ve git, seçilen yığının **dilinde** kaynaktır — HTML site değildir.
 
-`preview/*.html` stüdyo / Maestro maketidir. Müşteri “uygulamayı indirdim” dediğinde HTML sitesi görmemelidir. Zip’ten `preview/` ayrı tutulur veya net `studio-preview/` diye etiketlenir; liste ve indirme `frontend/` öne çıkar.
+| Yığın | Dil | Örnek |
+| --- | --- | --- |
+| Expo | TypeScript / React Native | `frontend/app/*.tsx` |
+| Flutter | Dart | `frontend/lib/*.dart` |
+| Native | Swift + Kotlin | `frontend/ios`, `frontend/android` |
+
+`preview/*.html` stüdyo / Maestro maketidir; zip’e **girmez**. Stüdyo dosya listesi `frontend/` öne çıkar.
 
 **Backend hedefi:** Kişi Bağlantılar’dan seçer (yerel, Supabase, Cloudflare, …). Ayrıntı: [connections.md](connections.md). İçerde barındırmaz.
 

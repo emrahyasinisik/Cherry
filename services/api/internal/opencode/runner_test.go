@@ -64,8 +64,19 @@ func TestWriteConfigAndLog(t *testing.T) {
 	if !strings.Contains(string(body), "opencode.ai/config.json") {
 		t.Fatalf("%s", body)
 	}
-	if err := WriteAgents(dir, "Kahve", "Expo", "sipariş"); err != nil {
+	if err := WriteAgents(dir, "Kahve", "Expo / React Native", "sipariş", "Uygulama kodu TypeScript / React Native (Expo)."); err != nil {
 		t.Fatal(err)
+	}
+	agents, err := os.ReadFile(filepath.Join(dir, "AGENTS.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(agents)
+	if !strings.Contains(text, "TypeScript") {
+		t.Fatalf("AGENTS.md must name the stack language: %s", text)
+	}
+	if !strings.Contains(text, "HTML") {
+		t.Fatalf("AGENTS.md must forbid HTML as the app: %s", text)
 	}
 	if err := WriteLog(dir, LogBody(Result{Status: StatusRan, Bin: "opencode", Output: "ok"})); err != nil {
 		t.Fatal(err)

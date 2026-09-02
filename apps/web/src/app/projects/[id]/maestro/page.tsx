@@ -122,7 +122,7 @@ export default function MaestroPage() {
               <h1 className="text-base font-medium">Maestro</h1>
               <p className="text-muted-foreground">
                 {project.status === "TESTING" || project.status === "READY"
-                  ? "Üretilen ekranlar ve Maestro YAML. Cihaz yoksa akış SKIPPED — sahte geçiş yok."
+                  ? "HTML maket stüdyo içindir, zip’e girmez. Asıl uygulama seçilen dil. Cihaz yoksa akış SKIPPED — sahte geçiş yok."
                   : "Ajan yazınca tasarım ve testler burada durur."}
               </p>
               {project.activate.url ? (

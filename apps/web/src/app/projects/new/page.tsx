@@ -13,6 +13,7 @@ import {
   graphql,
   PROJECT_FIELDS,
   stackLabel,
+  stackSourceHint,
   type Project,
   type ProjectStack,
   type User,
@@ -104,7 +105,8 @@ export default function NewProjectPage() {
         <div>
           <h1 className="text-base font-medium">Ne üretilsin?</h1>
           <p className="text-muted-foreground">
-            Brifi yaz, yığını seç. Stüdyo sohbetine düşersin — OpenCode açılmaz, ajan içeride yazar.
+            Brifi yaz, yığını seç. Ajan o dilde yazar (TypeScript, Dart, Swift/Kotlin) — HTML site değil.
+            Stüdyo sohbetine düşersin; OpenCode açılmaz.
           </p>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -142,6 +144,7 @@ export default function NewProjectPage() {
                 )}
               >
                 {stackLabel(item)}
+                <span className="mt-1 block text-[11px] text-muted-foreground">{stackSourceHint(item)}</span>
               </button>
             ))}
           </div>

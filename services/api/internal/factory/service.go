@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -164,7 +165,11 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 		return err
 	}
 	briefSafe, _ := gdpr.Redact(project.Brief)
-	if err := opencode.WriteAgents(project.RootPath, project.Name, label, briefSafe); err != nil {
+	rule, err := stackSourceRule(project.Stack)
+	if err != nil {
+		return err
+	}
+	if err := opencode.WriteAgents(project.RootPath, project.Name, label, briefSafe, rule); err != nil {
 		return err
 	}
 	s.pause()
@@ -193,7 +198,7 @@ func (s *Service) pipeline(ctx context.Context, project store.Project) error {
 	if err := s.setStatus(ctx, project.ID, store.StatusReady); err != nil {
 		return err
 	}
-	return s.log(ctx, project.ID, "Hazır. Zip ve Maestro YAML müşteri dosyalarında. Yazıcı: OpenCode. Yerel API durdu.")
+	return s.log(ctx, project.ID, "Hazır. Zip seçilen dilin kaynağı (HTML site değil). Yazıcı: OpenCode. Yerel API durdu.")
 }
 
 func (s *Service) runLocalTest(ctx context.Context, project store.Project) error {
@@ -311,7 +316,7 @@ func (s *Service) runLLM(ctx context.Context, project store.Project) error {
 	if err != nil {
 		readme = ""
 	}
-	prompt := "Amaç: codegen. Yalnızca proje kökündeki dosyalar.\nAd: " + project.Name + "\nBrif: " + project.Brief + "\nREADME:\n" + readme
+	prompt := "Amaç: codegen. Yalnızca proje kökündeki dosyalar.\nYığın: " + string(project.Stack) + "\nAd: " + project.Name + "\nBrif: " + project.Brief + "\nUygulamayı seçilen dilde yaz; HTML site değil.\nREADME:\n" + readme
 	out, err := s.LLM.Complete(ctx, llm.CompleteInput{
 		UserID:     project.UserID,
 		ProjectID:  project.ID,
@@ -353,12 +358,18 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 	}
 	briefSafe, _ := gdpr.Redact(project.Brief)
 	nameSafe, _ := gdpr.Redact(project.Name)
+	rule, err := stackSourceRule(project.Stack)
+	if err != nil {
+		return err
+	}
 	prompt := strings.Join([]string{
 		"İçerde müşteri uygulamasını bu dizinde yaz. Kök dışına çıkma.",
 		"Yığın: " + label,
+		rule,
 		"Ad: " + nameSafe,
 		"Brif: " + briefSafe,
-		"Klasörler: frontend/, backend/, maestro/, preview/.",
+		"Asıl klasörler: frontend/ (seçilen dil), backend/, maestro/.",
+		"preview/ HTML makettir; uygulamayı HTML ile yazma. Teslim zip HTML site olmasın.",
 		"Barındırma yok. Teslim dosya. Maestro YAML yaz; emülatör yoksa test çalıştırma.",
 		"İçerde platform GraphQL’ine dokunma.",
 		"Plan:",
@@ -421,10 +432,15 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 	if err := s.setStatus(ctx, project.ID, store.StatusWriting); err != nil {
 		return store.Project{}, err
 	}
+	rule, err := stackSourceRule(project.Stack)
+	if err != nil {
+		return store.Project{}, err
+	}
 	prompt := strings.Join([]string{
 		"İçerde sohbeti. OpenCode TUI açma. Yalnızca bu dizin.",
 		"Kullanıcı: " + safe,
-		"Gerekirse frontend/, backend/, maestro/, preview/ güncelle.",
+		rule,
+		"Gerekirse frontend/, backend/, maestro/ güncelle. HTML site yazma.",
 	}, "\n")
 	res, err := s.OpenCode.Run(ctx, opencode.Request{
 		Dir:      project.RootPath,
@@ -575,11 +591,18 @@ func (s *Service) Files(ctx context.Context, userID, id string) ([]DiskFile, err
 	}
 	out := make([]DiskFile, 0, len(paths))
 	for _, rel := range paths {
-		if rel == "icerde.zip" {
+		if skipDeliveryRel(rel) {
 			continue
 		}
 		out = append(out, DiskFile{Path: rel, Kind: fileKind(rel)})
 	}
+	sort.Slice(out, func(i, j int) bool {
+		ri, rj := rankDelivery(out[i].Path), rankDelivery(out[j].Path)
+		if ri != rj {
+			return ri < rj
+		}
+		return out[i].Path < out[j].Path
+	})
 	return out, nil
 }
 

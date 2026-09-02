@@ -228,7 +228,7 @@ export async function graphql<T>(
 
   let response: Response;
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 20000);
+  const timer = setTimeout(() => controller.abort(), 20000);
   try {
     response = await fetch(`${getApiBase()}/graphql`, {
       method: "POST",
@@ -242,7 +242,7 @@ export async function graphql<T>(
     }
     throw new Error("API’ye ulaşılamadı. Go sunucusunun açık olduğundan emin ol.");
   } finally {
-    window.clearTimeout(timer);
+    clearTimeout(timer);
   }
 
   const payload = (await response.json()) as GraphQLResponse<T>;
@@ -293,6 +293,21 @@ export function stackLabel(stack: ProjectStack): string {
       return "Flutter";
     case "NATIVE":
       return "Native iOS + Android";
+    default: {
+      const exhaustive: never = stack;
+      return exhaustive;
+    }
+  }
+}
+
+export function stackSourceHint(stack: ProjectStack): string {
+  switch (stack) {
+    case "EXPO":
+      return "TypeScript / React Native";
+    case "FLUTTER":
+      return "Dart";
+    case "NATIVE":
+      return "Swift + Kotlin";
     default: {
       const exhaustive: never = stack;
       return exhaustive;

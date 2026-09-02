@@ -185,23 +185,21 @@ func zipProject(root, dest string) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			switch filepath.Base(path) {
-			case ".git", "node_modules", ".opencode":
-				if path != root {
-					return filepath.SkipDir
-				}
-			}
-			return nil
-		}
-		if filepath.Base(path) == "icerde.zip" {
-			return nil
-		}
 		rel, err := filepath.Rel(root, path)
 		if err != nil {
 			return err
 		}
-		w, err := zw.Create(filepath.ToSlash(rel))
+		slash := filepath.ToSlash(rel)
+		if info.IsDir() {
+			if path != root && skipDeliveryDir(filepath.Base(path)) {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if skipDeliveryRel(slash) {
+			return nil
+		}
+		w, err := zw.Create(slash)
 		if err != nil {
 			return err
 		}
@@ -231,4 +229,38 @@ func listFiles(root string) ([]string, error) {
 		return nil
 	})
 	return out, err
+}
+
+func skipDeliveryDir(base string) bool {
+	switch base {
+	case ".git", "node_modules", ".opencode", "preview", "llm":
+		return true
+	default:
+		return false
+	}
+}
+
+func skipDeliveryRel(rel string) bool {
+	rel = filepath.ToSlash(rel)
+	switch rel {
+	case "icerde.zip", "opencode.json", "AGENTS.md":
+		return true
+	}
+	first, _, _ := strings.Cut(rel, "/")
+	return skipDeliveryDir(first)
+}
+
+func rankDelivery(rel string) int {
+	switch {
+	case rel == "README.md":
+		return 0
+	case strings.HasPrefix(rel, "frontend/"):
+		return 1
+	case strings.HasPrefix(rel, "backend/"):
+		return 2
+	case strings.HasPrefix(rel, "maestro/"):
+		return 3
+	default:
+		return 4
+	}
 }

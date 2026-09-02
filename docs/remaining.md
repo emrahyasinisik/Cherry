@@ -9,13 +9,11 @@ User notes below are not the current slice. Do not attach speculative providers.
 
 ## Kullanıcı notları / User notes (kayıt)
 
-### 1. Zip HTML verdi, Flutter vermedi / Zip looked like HTML, not Flutter
+### 1. Zip HTML verdi, kaynak dil vermedi / Zip looked like HTML, not the stack language
 
-**TR:** Kişi Flutter seçip uygulamayı bitirdi; bilgisayara indirince HTML dosyaları gördü.
+**TR:** Teslim HTML değil. Seçilen yığının dili: Expo → TypeScript, Flutter → Dart, Native → Swift+Kotlin. `preview/` yalnızca stüdyo maketi; zip’e girmez. **Kodda düzeltildi.**
 
-**EN:** Person chose Flutter, finished the app, downloaded it, and got HTML files.
-
-Kök: `preview/*.html` zip’e tam teslim gibi giriyor; stüdyo ilk 12 dosyayı listeliyor; Maestro ekranı HTML iframe. Asıl yığın `frontend/` (`lib/main.dart`). Teslim = seçilen yığın; HTML yalnızca stüdyo maketi.
+**EN:** Handoff is never an HTML site. Expo → TypeScript, Flutter → Dart, Native → Swift+Kotlin. `preview/` is a studio mock only; it is not in the zip.
 
 ### 2. Bağlantılar menüsü / Connections menu
 
@@ -25,7 +23,7 @@ Kök: `preview/*.html` zip’e tam teslim gibi giriyor; stüdyo ilk 12 dosyayı 
 
 İçerde hâlâ barındırmaz. Ayrıntı: [connections.md](connections.md).
 
-Sıra: dilim 7 → 8 Colab → sonra teslim düzeltmesi + bağlantılar (kişi öne çekmedikçe).
+Sıra: dilim 7 → 8 Colab → Bağlantılar (kişi öne çekmedikçe). Teslim artık seçilen dil; HTML zip’te yok.
 
 ## Bitti / Done
 
@@ -40,7 +38,7 @@ LLM anahtarı yoksa `mock` kanal; `ICERDE_LLM_API_KEY` varsa HTTP + OpenCode’a
 
 ## Kalan / Remaining
 
-7 ikinci işçi B + kuyruk → 8 Colab → teslim (Flutter ≠ HTML) + Bağlantılar (Supabase / Cloudflare / GitHub / Vercel / Render).
+7 ikinci işçi B + kuyruk → 8 Colab → Bağlantılar (Supabase / Cloudflare / GitHub / Vercel / Render).
 
 ```bash
 npm run dev:api

@@ -33,13 +33,15 @@ func WriteConfig(dir string) error {
 	return os.WriteFile(filepath.Join(dir, "opencode.json"), []byte(body), 0o644)
 }
 
-func WriteAgents(dir, name, stack, brief string) error {
+func WriteAgents(dir, name, stack, brief, sourceRule string) error {
 	body := "# " + name + "\n\n" +
 		"Bu klasör İçerde müşteri uygulamasıdır. OpenCode yalnızca bu kökte yazar.\n\n" +
 		"- Yığın: " + stack + "\n" +
 		"- Brif: " + brief + "\n" +
-		"- Çıktı: `frontend/`, `backend/`, `maestro/`, `preview/`\n" +
-		"- Barındırma yok. Teslim klasör / zip / git.\n" +
+		"- " + sourceRule + "\n" +
+		"- Asıl çıktı: `frontend/` (seçilen dil), `backend/`, `maestro/`.\n" +
+		"- `preview/*.html` stüdyo maketidir. Uygulamayı HTML ile değiştirme; zip’e HTML site koyma.\n" +
+		"- Barındırma yok. Teslim klasör / zip / git — seçilen dilin kaynağı.\n" +
 		"- Maestro YAML yaz; cihaz yoksa test çalıştırma, SKIPPED bırak.\n" +
 		"- İçerde GraphQL’ine dokunma; müşteri backend’i ayrıdır.\n"
 	if err := os.MkdirAll(dir, 0o755); err != nil {

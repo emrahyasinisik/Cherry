@@ -17,5 +17,5 @@ alwaysApply: false
 - The person only writes in **Icerde chat**. Never launch the OpenCode TUI. GraphQL `sendProjectMessage` → headless `opencode run --dir --auto` (`--continue` on follow-ups).
 - The **customer does not install OpenCode**. Icerde’s installer vendors the CLI into `vendor/bin`. PATH / `ICERDE_OPENCODE_BIN` is a developer fallback only.
 - Output layout: `frontend/`, `backend/`, `maestro/`, `README`.
-- Zip/git handoff is that tree for the **selected stack**. `preview/` HTML is a studio mock, not the downloaded app.
+- Zip/git handoff is that tree in the **selected language** (Expo TypeScript, Flutter Dart, native Swift/Kotlin). `preview/` HTML is a studio mock and is **not** in the zip.
 - Backend files target a user-chosen provider when Connections exist (local default today). Never upload the generated app to Icerde hosting. Read [docs/mobile-factory.md](docs/mobile-factory.md) and [docs/connections.md](docs/connections.md).

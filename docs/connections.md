@@ -70,7 +70,7 @@ Bağlı değilse hedef seçilemez; ajan uydurma URL yazmaz.
 | **Vercel** | Kişi hesabına frontend (veya seçilen parça) deploy — İçerde host değil. |
 | **Render** | Kişi hesabına backend/servis deploy — İçerde host değil. |
 
-GitHub push: `frontend/` + `backend/` + `maestro/` + README. **`preview/*.html` teslim uygulaması değildir.**
+GitHub push: `frontend/` + `backend/` + `maestro/` + README — seçilen dil. **`preview/*.html` zip/git teslimine girmez.**
 
 ## Sırlar / Secrets
 

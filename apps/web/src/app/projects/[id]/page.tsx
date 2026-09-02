@@ -15,6 +15,7 @@ import {
   maestroResultLabel,
   projectStatusLabel,
   stackLabel,
+  stackSourceHint,
   type ActivateStatus,
   type ChatRole,
   type JobLog,
@@ -188,7 +189,10 @@ export default function StudioPage() {
           <h1 className="text-base font-medium">{project.name}</h1>
           <p className="text-muted-foreground">{project.brief}</p>
           <p className="font-mono text-[11px] text-muted-foreground">
-            {stackLabel(project.stack)} · {projectStatusLabel(project.status)}
+            {stackLabel(project.stack)} · {stackSourceHint(project.stack)} · {projectStatusLabel(project.status)}
+          </p>
+          <p className="text-muted-foreground">
+            Teslim bu dilin kaynağıdır. HTML maket yalnızca Maestro ekranında; zip’e girmez.
           </p>
           <p className="break-all font-mono text-[11px] text-muted-foreground">{project.rootPath}</p>
           <Button type="button" variant="outline" onClick={() => router.push(`/projects/${id}/maestro`)}>
@@ -201,14 +205,14 @@ export default function StudioPage() {
                 void downloadZip(id);
               }}
             >
-              Zip indir
+              Zip indir — {stackSourceHint(project.stack)}
             </Button>
           ) : null}
           <ul className="font-mono text-[11px] text-muted-foreground">
             {project.files.length === 0 ? (
               <li>{working ? "Dosyalar yazılıyor…" : "Dosya yok"}</li>
             ) : (
-              project.files.slice(0, 12).map((file) => <li key={file.path}>{file.path}</li>)
+              project.files.slice(0, 16).map((file) => <li key={file.path}>{file.path}</li>)
             )}
           </ul>
         </section>
