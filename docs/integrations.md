@@ -47,14 +47,24 @@ Geliştirirken (İçerde’yi biz yazarken):
 
 | Ne | Durum | Ne işe yarar |
 | --- | --- | --- |
-| **GitHub MCP** | İsteğe bağlı | Müşteri teslimi git ise. Zip-only ise gerekmez. |
+| **GitHub MCP** | İsteğe bağlı | Biz İçerde’yi geliştirirken. Müşterinin GitHub push’u [connections.md](connections.md) — henüz yok. |
 | **Maestro MCP** | Geliştirici makinede | Flow’ları sen elle denersin. Ürün host’unun yerine geçmez. |
 
 Örnek: [../.cursor/mcp.json.example](../.cursor/mcp.json.example) → kopyala `.cursor/mcp.json` (secret koyma, git’e atma).
 
 **E-posta / 6 haneli kod için MCP bağlama.** Birinci parti: [email-verification.md](email-verification.md).
 
-## 3. Bağlama / Do not connect
+## 3. Müşteri bağlantıları (ürün içi, henüz yok) / In-app customer connections (not built)
+
+Bu **Cursor MCP’si değildir.** Kişi İçerde’de **Bağlantılar** menüsünden kendi hesaplarını bağlar: Supabase, Cloudflare, GitHub, Vercel, Render.
+
+- Amaç: üretilen uygulamanın backend’i ve teslimi (git/deploy) kişinin platformunda.
+- İçerde host olmaz. Platform GraphQL’e karışmaz.
+- Belge: [connections.md](connections.md)
+
+GitHub MCP (aşağıdaki Cursor tablosu) **bizim** repo işi içindir; müşterinin “projeyi GitHub’a çek” akışının yerine geçmez.
+
+## 4. Bağlama / Do not connect
 
 | Ne | Neden |
 | --- | --- |

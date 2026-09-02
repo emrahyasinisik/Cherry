@@ -9,7 +9,7 @@ Before writing code, read that section’s **rule and document**. If the documen
 ## Map
 
 1. [docs/README.md](docs/README.md) — index and drawings overview
-2. [docs/remaining.md](docs/remaining.md) — pause note: next is slice 7 (worker B + queue)
+2. [docs/remaining.md](docs/remaining.md) — pause note: next code is slice 7; user notes (Flutter zip ≠ HTML, Connections menu) are recorded, not the current slice
 3. Matching `.cursor/rules/*.mdc` for the files you will touch
 4. Matching `docs/*.md` for the drawing and invariants
 
@@ -19,8 +19,8 @@ Before writing code, read that section’s **rule and document**. If the documen
 - There are **two backends**. Never mix them:
   - Platform API: Go GraphQL + MongoDB (Icerde)
   - Generated customer backend: files on disk, activated locally for tests only
-- Customer delivery is **files** (folder / zip / git). **No hosting** in v1.
-- Mobile stack of the generated app is **chosen by the user**.
+- Customer delivery is **files** (folder / zip / git). **No hosting** in v1. Zip must be the chosen stack’s source, not `preview/` HTML.
+- Mobile stack of the generated app is **chosen by the user**. Backend **target** will also be chosen by the user (local / Supabase / Cloudflare / plugins) via **Bağlantılar** — see [docs/connections.md](docs/connections.md). Not built yet.
 - Security is **X-inspired**: password, 6-digit new-device code, TOTP, trusted devices, session revoke. **No SMS. No phone identity.** One active session per user.
 - Every LLM call goes through the **KVKK/GDPR layer**.
 - Two LLMs: **A and B are the same kind of worker**. They exist for **concurrent load** (e.g. 10 people at once), not for splitting job types (codegen vs test). The router assigns a free worker; if both are busy, jobs queue. Version pointer still changes subsequent answers on that worker.

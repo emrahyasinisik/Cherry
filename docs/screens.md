@@ -21,6 +21,7 @@ flowchart TB
 ```
 
 - Sidebar 220px, collapse 64px (ikon). Mobil tab bar yok.
+- Nav (hedef): Projeler, Ajan, Maestro, Güvenlik, Organizasyon, **Bağlantılar**, LLM, Gizlilik. Bağlantılar henüz kapalı eklenti yuvası; sahte “bağlı” gösterme.
 - Titlebar: wordmark + proje adı + **LLM A | B** (sağ) — iki kapasite işçisi; meşgul/boş, kod vs test değil.
 - Statusbar: oturum, cihaz, GDPR, OpenCode/Maestro sidecar, yerel URL.
 
@@ -79,6 +80,21 @@ Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
 
 Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yalnızca iptal.
 
+## 7. Bağlantılar / Connections (henüz yok)
+
+Plugin menüsü. Kişi kendi hesaplarını bağlar; İçerde host olmaz.
+
+```mermaid
+flowchart TB
+  List[baglanti_listesi] --> Empty[empty_henuz_yok]
+  List --> Row[ad_durum_hesap]
+  Row --> OAuth[bagla_veya_kopar]
+```
+
+Kartlar (ilk set): Supabase, Cloudflare, GitHub, Vercel, Render. Boş: “Hesap bağla”. Hata: yetki yok / token yok — yeşil tik yok.
+
+Proje: yığın (Expo/Flutter/native) + **backend hedefi** (yerel / bağlı sağlayıcı). Zip, seçilen yığının kaynağıdır; `preview/` HTML teslim değildir.
+
 ## 8. Maestro
 
 Test aşaması veya yan menü. Telefon maketi (üretilen ekranlar) + YAML akış listesi. SKIPPED kırmızı “geçti” değildir.
@@ -89,5 +105,6 @@ flowchart LR
   Flows --> Result[skipped_or_run]
 ```
 
+## 9. Gizlilik / org
 
 Üye tablosu; `Verilerimi dışa aktar` / `Hesabı sil` ayrı, tehlikeli aksiyon onay dialog (320ms panel).

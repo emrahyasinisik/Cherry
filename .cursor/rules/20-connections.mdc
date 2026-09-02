@@ -1,0 +1,21 @@
+---
+description: Müşteri bağlantıları — Supabase/Cloudflare backend hedefi, GitHub/Vercel/Render teslim; İçerde host değil
+globs:
+  - apps/web/**/connections/**
+  - apps/web/**/plugins/**
+  - services/api/**/connect/**
+  - docs/connections.md
+alwaysApply: false
+---
+
+# Customer connections / plugins
+
+- Read [docs/connections.md](docs/connections.md) before adding a provider.
+- The person connects **their** accounts under sidebar **Bağlantılar**. Icerde does not host customer apps.
+- Backend target is chosen by the person (local, Supabase, Cloudflare, similar plugins). OpenCode writes the generated `backend/` for that target.
+- Never mix Icerde Go GraphQL + MongoDB with the customer backend, even when the customer backend is Supabase or Cloudflare.
+- GitHub: the person can push the developed project to their repo. Vercel and Render are the person’s deploys, not Icerde hosting.
+- Zip/git handoff is the chosen mobile stack (`frontend/`) plus that backend — not `preview/` HTML.
+- Do not fake a connected provider. Missing OAuth/token → explicit error.
+- Do not send connection secrets to the LLM unredacted.
+- Do not implement this slice before the current build-order item unless the user asks.

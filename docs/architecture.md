@@ -48,7 +48,7 @@ flowchart TB
 - Tek GraphQL sözleşmesi: platform. Üretilen müşteri API’si bu şemada yaşamaz.
 - UI asla LLM’e doğrudan gitmez.
 - LLM A ve B aynı iş türlerini yapar; ikinci yuva eşzamanlı yoğunluk içindir.
-- v1’de müşteri backend’i için public URL yok.
+- v1’de İçerde müşteri backend’i için public URL vermez. Kişi ileride kendi Supabase/Cloudflare/Vercel/Render hesabını Bağlantılar’dan bağlar; o URL onundur.
 
 | Parça | Sorumluluk |
 | --- | --- |
