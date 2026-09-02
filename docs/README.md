@@ -43,6 +43,7 @@ flowchart TB
 ## Okuma sırası / Read order
 
 1. [build-order.md](build-order.md) — ne önce
+1b. [remaining.md](remaining.md) — duraklama: bitti / kalan
 2. [architecture.md](architecture.md) — sistem resmi
 2. [security.md](security.md) + [email-verification.md](email-verification.md)
 3. [organizations.md](organizations.md) — kişisel / org

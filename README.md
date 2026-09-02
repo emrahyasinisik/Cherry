@@ -45,4 +45,5 @@ UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya 
 
 ## Dilim durumu / Slice status
 
-Dilim 2 (auth + posta) kodda. Sıradaki: [docs/build-order.md](docs/build-order.md) dilim 3 (proje diski).
+Dilim 1–2 bitti; **duraklama**. Kalan iş: [docs/remaining.md](docs/remaining.md). Sıradaki uygulama: dilim 3 (proje diski).
+

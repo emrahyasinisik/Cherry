@@ -40,3 +40,6 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 8. **Colab fine-tune** — izler birikince.
 
 Şimdi yapılacak bir sonraki iş: **3 — proje diski**. Dilim 2 auth kodda.
+
+**Duraklama (2026-09-02):** uygulama durdu. Kalan iş listesi: [remaining.md](remaining.md). Kod yazmaya dönünce oradan devam.
+
