@@ -98,16 +98,26 @@ const (
 	TargetRender     BackendTarget = "RENDER"
 )
 
+type ConnectionAuth string
+
+const (
+	AuthNone  ConnectionAuth = "NONE"
+	AuthOAuth ConnectionAuth = "OAUTH"
+	AuthToken ConnectionAuth = "TOKEN"
+)
+
 type Connection struct {
-	ID        string
-	UserID    string
-	Kind      ConnectionKind
-	Status    ConnectionStatus
-	Account   string
-	Token     string
-	TokenHint string
-	Note      string
-	UpdatedAt time.Time
+	ID         string
+	UserID     string
+	Kind       ConnectionKind
+	Status     ConnectionStatus
+	Account    string
+	Token      string
+	TokenHint  string
+	Note       string
+	AuthMethod ConnectionAuth
+	Scopes     []string
+	UpdatedAt  time.Time
 }
 
 type Project struct {

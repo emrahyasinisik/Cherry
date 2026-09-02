@@ -123,4 +123,24 @@ func TestMapProjectEnumsExhaustive(t *testing.T) {
 	if _, err := mapConnectionStatus(store.ConnectionStatus("X")); err == nil {
 		t.Fatal("expected conn status error")
 	}
+	for _, method := range []store.ConnectionAuth{store.AuthNone, store.AuthOAuth, store.AuthToken, ""} {
+		if _, err := mapConnectionAuth(method, store.ConnDisconnected); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapConnectionAuth(store.ConnectionAuth("X"), store.ConnDisconnected); err == nil {
+		t.Fatal("expected auth error")
+	}
+	connectedToken, err := mapConnectionAuth("", store.ConnConnected)
+	if err != nil || connectedToken != ConnectionAuthToken {
+		t.Fatalf("%v %s", err, connectedToken)
+	}
+	for _, mode := range []string{"CONSENT", "PROVIDER"} {
+		if _, err := mapOAuthMode(mode); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapOAuthMode("X"); err == nil {
+		t.Fatal("expected mode error")
+	}
 }

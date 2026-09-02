@@ -47,11 +47,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Connection struct {
-		Account   func(childComplexity int) int
-		Kind      func(childComplexity int) int
-		Note      func(childComplexity int) int
-		Status    func(childComplexity int) int
-		TokenHint func(childComplexity int) int
+		Account    func(childComplexity int) int
+		AuthMethod func(childComplexity int) int
+		Kind       func(childComplexity int) int
+		Note       func(childComplexity int) int
+		Scopes     func(childComplexity int) int
+		Status     func(childComplexity int) int
+		TokenHint  func(childComplexity int) int
 	}
 
 	DesignScreen struct {
@@ -174,28 +176,36 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ActivateProject    func(childComplexity int, id string) int
-		ConfirmTotp        func(childComplexity int, code string) int
-		ConnectProvider    func(childComplexity int, kind ConnectionKind, account string, token string) int
-		CreateProject      func(childComplexity int, name string, brief string, stack ProjectStack, backendTarget *BackendTarget) int
-		DeactivateProject  func(childComplexity int, id string) int
-		DeleteMe           func(childComplexity int, wipeProjects bool) int
-		DisableTotp        func(childComplexity int, code string) int
-		DisconnectProvider func(childComplexity int, kind ConnectionKind) int
-		EnableTotp         func(childComplexity int) int
-		Login              func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		Logout             func(childComplexity int) int
-		PushProjectGithub  func(childComplexity int, projectID string, repo string) int
-		Register           func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
-		RevokeDevice       func(childComplexity int, id string) int
-		RevokeSession      func(childComplexity int, id string) int
-		RunMaestro         func(childComplexity int, projectID string) int
-		SendProjectMessage func(childComplexity int, projectID string, body string) int
-		SetActiveVersion   func(childComplexity int, id string) int
-		SetMcpRoot         func(childComplexity int, path string) int
-		VerifyCode         func(childComplexity int, challengeID string, code string, trustDevice bool) int
-		VerifyLink         func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
-		VerifyTotp         func(childComplexity int, challengeID string, code string) int
+		ActivateProject         func(childComplexity int, id string) int
+		CompleteConnectionOAuth func(childComplexity int, code string, state string) int
+		ConfirmTotp             func(childComplexity int, code string) int
+		ConnectProvider         func(childComplexity int, kind ConnectionKind, account string, token string) int
+		CreateProject           func(childComplexity int, name string, brief string, stack ProjectStack, backendTarget *BackendTarget) int
+		DeactivateProject       func(childComplexity int, id string) int
+		DeleteMe                func(childComplexity int, wipeProjects bool) int
+		DisableTotp             func(childComplexity int, code string) int
+		DisconnectProvider      func(childComplexity int, kind ConnectionKind) int
+		EnableTotp              func(childComplexity int) int
+		Login                   func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		Logout                  func(childComplexity int) int
+		PushProjectGithub       func(childComplexity int, projectID string, repo string) int
+		Register                func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
+		RevokeDevice            func(childComplexity int, id string) int
+		RevokeSession           func(childComplexity int, id string) int
+		RunMaestro              func(childComplexity int, projectID string) int
+		SendProjectMessage      func(childComplexity int, projectID string, body string) int
+		SetActiveVersion        func(childComplexity int, id string) int
+		SetMcpRoot              func(childComplexity int, path string) int
+		StartConnectionOAuth    func(childComplexity int, kind ConnectionKind) int
+		VerifyCode              func(childComplexity int, challengeID string, code string, trustDevice bool) int
+		VerifyLink              func(childComplexity int, token string, deviceFingerprint string, deviceLabel string) int
+		VerifyTotp              func(childComplexity int, challengeID string, code string) int
+	}
+
+	OAuthStart struct {
+		AuthorizeURL func(childComplexity int) int
+		Mode         func(childComplexity int) int
+		State        func(childComplexity int) int
 	}
 
 	Project struct {
@@ -273,6 +283,8 @@ type MutationResolver interface {
 	DeactivateProject(ctx context.Context, id string) (*Project, error)
 	RunMaestro(ctx context.Context, projectID string) (*Project, error)
 	ConnectProvider(ctx context.Context, kind ConnectionKind, account string, token string) (*Connection, error)
+	StartConnectionOAuth(ctx context.Context, kind ConnectionKind) (*OAuthStart, error)
+	CompleteConnectionOAuth(ctx context.Context, code string, state string) (*Connection, error)
 	DisconnectProvider(ctx context.Context, kind ConnectionKind) (*Connection, error)
 	PushProjectGithub(ctx context.Context, projectID string, repo string) (*GitPushResult, error)
 	SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error)
@@ -321,6 +333,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Connection.Account(childComplexity), true
+	case "Connection.authMethod":
+		if e.complexity.Connection.AuthMethod == nil {
+			break
+		}
+
+		return e.complexity.Connection.AuthMethod(childComplexity), true
 	case "Connection.kind":
 		if e.complexity.Connection.Kind == nil {
 			break
@@ -333,6 +351,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Connection.Note(childComplexity), true
+	case "Connection.scopes":
+		if e.complexity.Connection.Scopes == nil {
+			break
+		}
+
+		return e.complexity.Connection.Scopes(childComplexity), true
 	case "Connection.status":
 		if e.complexity.Connection.Status == nil {
 			break
@@ -799,6 +823,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ActivateProject(childComplexity, args["id"].(string)), true
+	case "Mutation.completeConnectionOAuth":
+		if e.complexity.Mutation.CompleteConnectionOAuth == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_completeConnectionOAuth_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CompleteConnectionOAuth(childComplexity, args["code"].(string), args["state"].(string)), true
 	case "Mutation.confirmTotp":
 		if e.complexity.Mutation.ConfirmTotp == nil {
 			break
@@ -987,6 +1022,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.SetMcpRoot(childComplexity, args["path"].(string)), true
+	case "Mutation.startConnectionOAuth":
+		if e.complexity.Mutation.StartConnectionOAuth == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_startConnectionOAuth_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.StartConnectionOAuth(childComplexity, args["kind"].(ConnectionKind)), true
 	case "Mutation.verifyCode":
 		if e.complexity.Mutation.VerifyCode == nil {
 			break
@@ -1020,6 +1066,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.VerifyTotp(childComplexity, args["challengeId"].(string), args["code"].(string)), true
+
+	case "OAuthStart.authorizeUrl":
+		if e.complexity.OAuthStart.AuthorizeURL == nil {
+			break
+		}
+
+		return e.complexity.OAuthStart.AuthorizeURL(childComplexity), true
+	case "OAuthStart.mode":
+		if e.complexity.OAuthStart.Mode == nil {
+			break
+		}
+
+		return e.complexity.OAuthStart.Mode(childComplexity), true
+	case "OAuthStart.state":
+		if e.complexity.OAuthStart.State == nil {
+			break
+		}
+
+		return e.complexity.OAuthStart.State(childComplexity), true
 
 	case "Project.activate":
 		if e.complexity.Project.Activate == nil {
@@ -1409,6 +1474,22 @@ func (ec *executionContext) field_Mutation_activateProject_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_completeConnectionOAuth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "code", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["code"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "state", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["state"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_confirmTotp_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1647,6 +1728,17 @@ func (ec *executionContext) field_Mutation_setMcpRoot_args(ctx context.Context, 
 		return nil, err
 	}
 	args["path"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_startConnectionOAuth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	if err != nil {
+		return nil, err
+	}
+	args["kind"] = arg0
 	return args, nil
 }
 
@@ -1948,6 +2040,64 @@ func (ec *executionContext) _Connection_note(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Connection_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_authMethod(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_authMethod,
+		func(ctx context.Context) (any, error) {
+			return obj.AuthMethod, nil
+		},
+		nil,
+		ec.marshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_authMethod(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ConnectionAuth does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_scopes(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_scopes,
+		func(ctx context.Context) (any, error) {
+			return obj.Scopes, nil
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_scopes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Connection",
 		Field:      field,
@@ -4972,6 +5122,10 @@ func (ec *executionContext) fieldContext_Mutation_connectProvider(ctx context.Co
 				return ec.fieldContext_Connection_tokenHint(ctx, field)
 			case "note":
 				return ec.fieldContext_Connection_note(ctx, field)
+			case "authMethod":
+				return ec.fieldContext_Connection_authMethod(ctx, field)
+			case "scopes":
+				return ec.fieldContext_Connection_scopes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -4984,6 +5138,112 @@ func (ec *executionContext) fieldContext_Mutation_connectProvider(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_connectProvider_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_startConnectionOAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_startConnectionOAuth,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().StartConnectionOAuth(ctx, fc.Args["kind"].(ConnectionKind))
+		},
+		nil,
+		ec.marshalNOAuthStart2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_startConnectionOAuth(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "authorizeUrl":
+				return ec.fieldContext_OAuthStart_authorizeUrl(ctx, field)
+			case "state":
+				return ec.fieldContext_OAuthStart_state(ctx, field)
+			case "mode":
+				return ec.fieldContext_OAuthStart_mode(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type OAuthStart", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_startConnectionOAuth_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_completeConnectionOAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_completeConnectionOAuth,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CompleteConnectionOAuth(ctx, fc.Args["code"].(string), fc.Args["state"].(string))
+		},
+		nil,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_completeConnectionOAuth(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "kind":
+				return ec.fieldContext_Connection_kind(ctx, field)
+			case "status":
+				return ec.fieldContext_Connection_status(ctx, field)
+			case "account":
+				return ec.fieldContext_Connection_account(ctx, field)
+			case "tokenHint":
+				return ec.fieldContext_Connection_tokenHint(ctx, field)
+			case "note":
+				return ec.fieldContext_Connection_note(ctx, field)
+			case "authMethod":
+				return ec.fieldContext_Connection_authMethod(ctx, field)
+			case "scopes":
+				return ec.fieldContext_Connection_scopes(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_completeConnectionOAuth_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5025,6 +5285,10 @@ func (ec *executionContext) fieldContext_Mutation_disconnectProvider(ctx context
 				return ec.fieldContext_Connection_tokenHint(ctx, field)
 			case "note":
 				return ec.fieldContext_Connection_note(ctx, field)
+			case "authMethod":
+				return ec.fieldContext_Connection_authMethod(ctx, field)
+			case "scopes":
+				return ec.fieldContext_Connection_scopes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -5237,6 +5501,93 @@ func (ec *executionContext) fieldContext_Mutation_deleteMe(ctx context.Context, 
 	if fc.Args, err = ec.field_Mutation_deleteMe_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OAuthStart_authorizeUrl(ctx context.Context, field graphql.CollectedField, obj *OAuthStart) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_OAuthStart_authorizeUrl,
+		func(ctx context.Context) (any, error) {
+			return obj.AuthorizeURL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_OAuthStart_authorizeUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OAuthStart",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OAuthStart_state(ctx context.Context, field graphql.CollectedField, obj *OAuthStart) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_OAuthStart_state,
+		func(ctx context.Context) (any, error) {
+			return obj.State, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_OAuthStart_state(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OAuthStart",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _OAuthStart_mode(ctx context.Context, field graphql.CollectedField, obj *OAuthStart) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_OAuthStart_mode,
+		func(ctx context.Context) (any, error) {
+			return obj.Mode, nil
+		},
+		nil,
+		ec.marshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_OAuthStart_mode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "OAuthStart",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type OAuthMode does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -6302,6 +6653,10 @@ func (ec *executionContext) fieldContext_Query_connections(_ context.Context, fi
 				return ec.fieldContext_Connection_tokenHint(ctx, field)
 			case "note":
 				return ec.fieldContext_Connection_note(ctx, field)
+			case "authMethod":
+				return ec.fieldContext_Connection_authMethod(ctx, field)
+			case "scopes":
+				return ec.fieldContext_Connection_scopes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -8197,6 +8552,16 @@ func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "authMethod":
+			out.Values[i] = ec._Connection_authMethod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "scopes":
+			out.Values[i] = ec._Connection_scopes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9236,6 +9601,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "startConnectionOAuth":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_startConnectionOAuth(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completeConnectionOAuth":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_completeConnectionOAuth(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "disconnectProvider":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_disconnectProvider(ctx, field)
@@ -9268,6 +9647,55 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteMe(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var oAuthStartImplementors = []string{"OAuthStart"}
+
+func (ec *executionContext) _OAuthStart(ctx context.Context, sel ast.SelectionSet, obj *OAuthStart) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oAuthStartImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OAuthStart")
+		case "authorizeUrl":
+			out.Values[i] = ec._OAuthStart_authorizeUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "state":
+			out.Values[i] = ec._OAuthStart_state(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "mode":
+			out.Values[i] = ec._OAuthStart_mode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -10372,6 +10800,16 @@ func (ec *executionContext) marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋ
 	return ec._Connection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, v any) (ConnectionAuth, error) {
+	var res ConnectionAuth
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNConnectionAuth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionAuth(ctx context.Context, sel ast.SelectionSet, v ConnectionAuth) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind(ctx context.Context, v any) (ConnectionKind, error) {
 	var res ConnectionKind
 	err := res.UnmarshalGQL(v)
@@ -10940,6 +11378,30 @@ func (ec *executionContext) marshalNMailMessage2ᚖgithubᚗcomᚋicerdeᚋapi�
 	return ec._MailMessage(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode(ctx context.Context, v any) (OAuthMode, error) {
+	var res OAuthMode
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNOAuthMode2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthMode(ctx context.Context, sel ast.SelectionSet, v OAuthMode) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNOAuthStart2githubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v OAuthStart) graphql.Marshaler {
+	return ec._OAuthStart(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOAuthStart2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐOAuthStart(ctx context.Context, sel ast.SelectionSet, v *OAuthStart) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._OAuthStart(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNProject2githubᚗcomᚋicerdeᚋapiᚋgraphᚐProject(ctx context.Context, sel ast.SelectionSet, v Project) graphql.Marshaler {
 	return ec._Project(ctx, sel, &v)
 }
@@ -11140,6 +11602,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNTotpSetup2githubᚗcomᚋicerdeᚋapiᚋgraphᚐTotpSetup(ctx context.Context, sel ast.SelectionSet, v TotpSetup) graphql.Marshaler {

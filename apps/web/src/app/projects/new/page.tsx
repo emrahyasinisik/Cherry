@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { AppShell } from "@/components/app-shell";
+import { ProviderMark } from "@/components/provider-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -182,7 +183,12 @@ export default function NewProjectPage() {
                     !enabled ? "opacity-50" : "",
                   )}
                 >
-                  {backendTargetLabel(item)}
+                  <span className="flex items-center gap-2">
+                    {item === "LOCAL" ? null : (
+                      <ProviderMark kind={item} className="size-4 shrink-0" />
+                    )}
+                    {backendTargetLabel(item)}
+                  </span>
                   <span className="mt-1 block text-[11px] text-muted-foreground">
                     {enabled ? (item === "LOCAL" ? "localhost 47000–47999" : "bağlı") : "bağlı değil"}
                   </span>

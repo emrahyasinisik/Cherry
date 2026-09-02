@@ -82,15 +82,14 @@ Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yal
 
 ## 7. Bağlantılar / Connections
 
-Plugin menüsü. Kişi kendi token’ını yapıştırır; İçerde host olmaz. Boş token bağlı değildir.
-
-Plugin menüsü. Kişi kendi hesaplarını bağlar; İçerde host olmaz.
+Plugin menüsü. Kartlarda sağlayıcı logosu. Birincil yol **OAuth 2.0 izin ekranı** (“İçerde hesabına erişmek istiyor”). Token yapıştırma gelişmiş yedek. İçerde host olmaz. Boş / iptal bağlı değildir.
 
 ```mermaid
 flowchart TB
   List[baglanti_listesi] --> Empty[empty_henuz_yok]
-  List --> Row[ad_durum_hesap]
-  Row --> OAuth[bagla_veya_kopar]
+  List --> Row[logo_ad_durum]
+  Row --> OAuth[oauth_izin_ekrani]
+  OAuth --> Callback[code_exchange]
 ```
 
 Kartlar (ilk set): Supabase, Cloudflare, GitHub, Vercel, Render. Boş: “Hesap bağla”. Hata: yetki yok / token yok — yeşil tik yok.

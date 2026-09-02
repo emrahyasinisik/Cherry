@@ -41,7 +41,7 @@ npm run dev:web
 
 Gerçek e-posta için `.env.example` → `SMTP_*` (Gmail uygulama şifresi) **veya** `RESEND_API_KEY`. Ayrıntı: [docs/email-verification.md](docs/email-verification.md).
 
-UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya gittiyse kartta görünmez; gitmediyse geliştirme kutusu. Güvenlik ekranı: cihaz, oturum, TOTP, kutu.
+UI: http://127.0.0.1:43147 — **Hesap oluştur** (şifre ≥ 8). Kod e-postaya gittiyse kartta görünmez; gitmediyse geliştirme kutusu. Güvenlik ekranı: cihaz, oturum, TOTP, kutu. **Bağlantılar** = OAuth 2.0 izin ekranı (logolar + “hesabına erişmek istiyor”). GitHub client id yoksa yerel onay; varsa github.com.
 
 ## Dilim durumu / Slice status
 

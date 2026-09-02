@@ -20,7 +20,9 @@ flowchart TB
   Home --> Security[Guvenlik_cihaz_oturum]
   Home --> Org[Org_uyeler]
   Home --> LLMAdmin[LLM_yonetici]
+  Home --> Connections[Baglantilar_OAuth]
   Home --> Privacy[KVKK_sil_export]
+  Connections --> Consent[Izin_ekrani]
 ```
 
 ## Durumlar / States

@@ -17,13 +17,13 @@ User notes below are not the current slice. Do not attach speculative providers.
 
 ### 2. Bağlantılar menüsü / Connections menu
 
-**TR:** Kişi backend’i istediği platforma koyabilmeli (Supabase, Cloudflare, benzeri). GitHub, Vercel, Render da bağlanmalı. Sidebar **Bağlantılar**. **Kodda: menü + token bağlama + GitHub push.** OAuth yok.
+**TR:** Kişi backend’i istediği platforma koyabilmeli (Supabase, Cloudflare, benzeri). GitHub, Vercel, Render da bağlanmalı. Sidebar **Bağlantılar**. **Kodda: logolar + OAuth 2.0 izin ekranı + token yedek + GitHub push.**
 
-**EN:** Person attaches their own backends. **In code: menu + token connect + GitHub push.** No OAuth.
+**EN:** Person attaches their own backends. **In code: provider marks + OAuth 2.0 consent + token fallback + GitHub push.**
 
 İçerde hâlâ barındırmaz. Ayrıntı: [connections.md](connections.md).
 
-Sıra: dilim 7 → 8 Colab. Bağlantılar menüsü duruyor (token; OAuth sonra).
+Sıra: dilim 7 → 8 Colab. Bağlantılar: OAuth 2.0 izin ekranı duruyor.
 
 ## Bitti / Done
 

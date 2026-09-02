@@ -2,13 +2,24 @@
 
 **Kural:** [.cursor/rules/20-connections.mdc](../.cursor/rules/20-connections.mdc)
 
-**TR:** Kişi, ürettiği uygulamanın backend’inin **nerede** duracağını seçer. İçerde barındırmaz. Hesaplar **Bağlantılar** (eklenti) menüsünden kişinin kendisine aittir.
+**TR:** Kişi, ürettiği uygulamanın backend’inin **nerede** duracağını seçer. İçerde barındırmaz. Hesaplar **Bağlantılar** menüsünden, **OAuth 2.0** izin ekranı ile bağlanır.
 
-**EN:** The person chooses **where** the generated app’s backend lives. Icerde does not host it. Accounts under **Connections** (plugins) belong to the person.
+**EN:** The person chooses **where** the generated app’s backend lives. Icerde does not host it. Accounts under **Connections** are bound with **OAuth 2.0** consent.
 
-Bu dilim **kodlandı** (sidebar + sayfa + token kaydı + GitHub push). OAuth yok; kişi kendi token’ını yapıştırır. Sahte bağlı yok.
+## Sistemin adı / What this is called
 
-This slice **is coded** (sidebar + page + token store + GitHub push). No OAuth; the person pastes their token. No fake connected state.
+Kullanıcının tarif ettiği akış:
+
+1. Uygulamada **Bağlan** (Connect with GitHub / Supabase / …)
+2. Tarayıcı **sağlayıcının sitesine** (veya onun izin ekranına) gider
+3. “**İçerde hesabına erişmek istiyor**” — yetkilendir / iptal
+4. Geri dönüş (callback) ile bağlantı kurulur
+
+Bunun adı **OAuth 2.0**, özel olarak **Authorization Code** akışı. Ekran **consent / izin / onay ekranı**.
+
+GitHub OAuth uygulaması (`ICERDE_GITHUB_CLIENT_ID`) varsa gerçek `github.com/login/oauth/authorize` açılır. Yoksa İçerde **yerel izin ekranı** gösterir — aynı onay; sessiz “bağlandı” yok. İptal = bağlı değil.
+
+Token yapıştırma gelişmiş yedek yoldur (Cloudflare API token, PAT, …).
 
 ## İki backend kuralı durur / Two-backend rule still holds
 
@@ -45,13 +56,22 @@ flowchart TB
 
 ## Menü / Menu
 
-Sidebar: **Bağlantılar** (plugin / connections). Organizasyon’un altında, LLM’den önce.
+Sidebar: **Bağlantılar**. Kartlarda sağlayıcı logosu. Birincil düğme OAuth’u başlatır.
 
-Kişi oradan kendi bağlantılarını yapar. Proje oluştururken veya stüdyoda “backend hedefi” bu listeden seçilir.
+```mermaid
+sequenceDiagram
+  participant UI as Icerde
+  participant API as GraphQL
+  participant Consent as Izin_ekrani
+  UI->>API: startConnectionOAuth
+  API-->>UI: authorizeUrl
+  UI->>Consent: redirect
+  Consent->>API: decision allow_or_deny
+  API-->>UI: code + state
+  UI->>API: completeConnectionOAuth
+```
 
 ## Backend hedefleri / Backend targets
-
-Kişi “backend hangi platformda olsun” der. Örnek ilk set (kapalı liste değil; arayüz eklenti gibi büyür):
 
 | Hedef | Ne işe yarar |
 | --- | --- |
@@ -70,17 +90,18 @@ Bağlı değilse hedef seçilemez; ajan uydurma URL yazmaz.
 | **Vercel** | Kişi hesabına frontend (veya seçilen parça) deploy — İçerde host değil. |
 | **Render** | Kişi hesabına backend/servis deploy — İçerde host değil. |
 
-GitHub push: `frontend/` + `backend/` + `maestro/` + README — seçilen dil. **`preview/*.html` zip/git teslimine girmez.**
+GitHub push: gerçek `git push`. Yerel OAuth grant’i (client id yokken) GitHub’a push **etmez** — hata görünür. `ICERDE_GITHUB_CLIENT_ID` + secret veya PAT gerekir.
 
 ## Sırlar / Secrets
 
 - Token’lar Interior sohbete ve LLM’e düz gitmez; KVKK redact.
-- Secret’ı Cursor MCP’sine veya İçerde platform Mongo’suna “ürün sırrı” diye gömme.
-- Bağlantı kopuk / yetki yok → hata; sessiz başarı yok.
+- OAuth state 10 dakika, tek kullanımlık.
+- GraphQL `tokenHint` (son 4) döner; token dönmez.
 
 ## Yapılmayacak / Do not
 
 - İçerde’nin kendi GraphQL’ine Supabase/Cloudflare karıştırma.
 - Müşteri uygulamasını İçerde bulutunda host etme.
 - AgentMail, SMS, Figma’yı bu menüye alma.
+- İzin vermeden “bağlı” gösterme.
 - Dilim 7–8’i (işçi B, Colab) bu iş için erteleme — sıra [build-order.md](build-order.md).

@@ -204,13 +204,50 @@ func mapConnection(row store.Connection) (*Connection, error) {
 	if err != nil {
 		return nil, err
 	}
+	auth, err := mapConnectionAuth(row.AuthMethod, row.Status)
+	if err != nil {
+		return nil, err
+	}
+	scopes := row.Scopes
+	if scopes == nil {
+		scopes = []string{}
+	}
 	return &Connection{
-		Kind:      kind,
-		Status:    status,
-		Account:   row.Account,
-		TokenHint: row.TokenHint,
-		Note:      row.Note,
+		Kind:       kind,
+		Status:     status,
+		Account:    row.Account,
+		TokenHint:  row.TokenHint,
+		Note:       row.Note,
+		AuthMethod: auth,
+		Scopes:     scopes,
 	}, nil
+}
+
+func mapConnectionAuth(method store.ConnectionAuth, status store.ConnectionStatus) (ConnectionAuth, error) {
+	switch method {
+	case store.AuthOAuth:
+		return ConnectionAuthOauth, nil
+	case store.AuthToken:
+		return ConnectionAuthToken, nil
+	case store.AuthNone, "":
+		if status == store.ConnConnected {
+			return ConnectionAuthToken, nil
+		}
+		return ConnectionAuthNone, nil
+	default:
+		return "", fmt.Errorf("unhandled connection auth: %s", method)
+	}
+}
+
+func mapOAuthMode(mode string) (OAuthMode, error) {
+	switch mode {
+	case "CONSENT":
+		return OAuthModeConsent, nil
+	case "PROVIDER":
+		return OAuthModeProvider, nil
+	default:
+		return "", fmt.Errorf("unhandled oauth mode: %s", mode)
+	}
 }
 
 func mapProjectStack(stack store.ProjectStack) (ProjectStack, error) {

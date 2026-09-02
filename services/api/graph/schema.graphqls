@@ -44,6 +44,8 @@ type Mutation {
   deactivateProject(id: ID!): Project!
   runMaestro(projectId: ID!): Project!
   connectProvider(kind: ConnectionKind!, account: String!, token: String!): Connection!
+  startConnectionOAuth(kind: ConnectionKind!): OAuthStart!
+  completeConnectionOAuth(code: String!, state: String!): Connection!
   disconnectProvider(kind: ConnectionKind!): Connection!
   pushProjectGithub(projectId: ID!, repo: String!): GitPushResult!
   setActiveVersion(id: ID!): LlmAdmin!
@@ -136,12 +138,31 @@ enum ConnectionStatus {
   FAILED
 }
 
+enum ConnectionAuth {
+  NONE
+  OAUTH
+  TOKEN
+}
+
+enum OAuthMode {
+  CONSENT
+  PROVIDER
+}
+
+type OAuthStart {
+  authorizeUrl: String!
+  state: String!
+  mode: OAuthMode!
+}
+
 type Connection {
   kind: ConnectionKind!
   status: ConnectionStatus!
   account: String!
   tokenHint: String!
   note: String!
+  authMethod: ConnectionAuth!
+  scopes: [String!]!
 }
 
 type GitPushResult {

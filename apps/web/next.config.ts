@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
         source: "/export/:id",
         destination: "http://127.0.0.1:43148/export/:id",
       },
+      {
+        source: "/oauth/decision",
+        destination: "http://127.0.0.1:43148/oauth/decision",
+      },
+      {
+        source: "/oauth/provider/callback",
+        destination: "http://127.0.0.1:43148/oauth/provider/callback",
+      },
     ];
   },
 };

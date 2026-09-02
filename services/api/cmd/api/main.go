@@ -99,11 +99,22 @@ func main() {
 		log.Printf("maestro missing — flows SKIPPED without a device")
 	}
 	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
+	apiOrigin := "http://" + addr
+	if strings.HasPrefix(addr, ":") {
+		apiOrigin = "http://127.0.0.1" + addr
+	}
+	connectSvc := &connect.Service{
+		Store:     memory,
+		Git:       connect.CLIGit{},
+		WebOrigin: webOrigin,
+		APIOrigin: apiOrigin,
+		Clients:   connect.LoadClientsFromEnv(),
+	}
 	resolver := &graph.Resolver{
 		Auth:    authSvc,
 		Factory: fact,
 		LLM:     llmSvc,
-		Connect: &connect.Service{Store: memory, Git: connect.CLIGit{}},
+		Connect: connectSvc,
 	}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
@@ -122,7 +133,7 @@ func main() {
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"ok":       true,
 			"store":    status,
-			"version":  "0.6.0-local",
+			"version":  "0.6.1-local",
 			"mail":     mail.Channel(),
 			"gdpr":     true,
 			"llm":      llmSvc.Completer.Channel(),
@@ -151,6 +162,8 @@ func main() {
 		w.Header().Set("Content-Disposition", `attachment; filename="icerde.zip"`)
 		http.ServeFile(w, r, path)
 	})
+	mux.HandleFunc("/oauth/decision", connectSvc.HandleDecision)
+	mux.HandleFunc("/oauth/provider/callback", connectSvc.HandleProviderCallback)
 
 	handlerWithCORS := cors.New(cors.Options{
 		AllowedOrigins:   []string{webOrigin, "http://localhost:43147", "http://127.0.0.1:43147"},

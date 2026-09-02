@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/icerde/api/internal/store"
@@ -21,8 +22,13 @@ type GitPusher interface {
 }
 
 type Service struct {
-	Store store.Store
-	Git   GitPusher
+	Store     store.Store
+	Git       GitPusher
+	WebOrigin string
+	APIOrigin string
+	Clients   map[store.ConnectionKind]OAuthClient
+	HTTP      HTTPDoer
+	pending   *sync.Map
 }
 
 func (s *Service) Catalog(ctx context.Context, userID string) ([]store.Connection, error) {
@@ -38,14 +44,19 @@ func (s *Service) Catalog(ctx context.Context, userID string) ([]store.Connectio
 	for _, kind := range kinds() {
 		if conn, ok := byKind[kind]; ok {
 			conn.Token = ""
+			if len(conn.Scopes) == 0 {
+				conn.Scopes = catalogScopes(kind)
+			}
 			out = append(out, conn)
 			continue
 		}
 		out = append(out, store.Connection{
-			Kind:    kind,
-			Status:  store.ConnDisconnected,
-			Note:    catalogNote(kind),
-			Account: "",
+			Kind:       kind,
+			Status:     store.ConnDisconnected,
+			Note:       catalogNote(kind),
+			Account:    "",
+			AuthMethod: store.AuthNone,
+			Scopes:     catalogScopes(kind),
 		})
 	}
 	return out, nil
@@ -66,14 +77,16 @@ func (s *Service) Connect(ctx context.Context, userID, kindRaw, account, token s
 	}
 	now := time.Now().UTC()
 	conn := store.Connection{
-		UserID:    userID,
-		Kind:      kind,
-		Status:    store.ConnConnected,
-		Account:   account,
-		Token:     token,
-		TokenHint: hint(token),
-		Note:      "Anahtar bu makinede duruyor. İçerde barındırmaz. Token GraphQL’e dönmez.",
-		UpdatedAt: now,
+		UserID:     userID,
+		Kind:       kind,
+		Status:     store.ConnConnected,
+		Account:    account,
+		Token:      token,
+		TokenHint:  hint(token),
+		Note:       "Anahtar bu makinede duruyor. İçerde barındırmaz. Token GraphQL’e dönmez.",
+		AuthMethod: store.AuthToken,
+		Scopes:     catalogScopes(kind),
+		UpdatedAt:  now,
 	}
 	existing, err := s.Store.GetConnection(ctx, userID, kind)
 	if err == nil {
@@ -96,9 +109,11 @@ func (s *Service) Disconnect(ctx context.Context, userID, kindRaw string) (store
 		return store.Connection{}, err
 	}
 	return store.Connection{
-		Kind:   kind,
-		Status: store.ConnDisconnected,
-		Note:   catalogNote(kind),
+		Kind:       kind,
+		Status:     store.ConnDisconnected,
+		Note:       catalogNote(kind),
+		AuthMethod: store.AuthNone,
+		Scopes:     catalogScopes(kind),
 	}, nil
 }
 
@@ -126,6 +141,12 @@ func (s *Service) PushGitHub(ctx context.Context, userID, projectRoot, repo stri
 	conn, err := s.Require(ctx, userID, store.KindGithub)
 	if err != nil {
 		return PushResult{}, err
+	}
+	if strings.HasPrefix(conn.Token, grantPrefix) {
+		return PushResult{
+			OK:   false,
+			Note: "Yerel OAuth izni GitHub’a push etmez. GitHub OAuth uygulaması (ICERDE_GITHUB_CLIENT_ID) veya PAT gerekir.",
+		}, nil
 	}
 	if s.Git == nil {
 		return PushResult{OK: false, Note: "Git bağlı değil."}, nil
@@ -159,15 +180,15 @@ func parseKind(raw string) (store.ConnectionKind, error) {
 func catalogNote(kind store.ConnectionKind) string {
 	switch kind {
 	case store.KindSupabase:
-		return "Kişinin Supabase projesi. Müşteri backend hedefi olabilir. İçerde host değil."
+		return "OAuth 2.0. Kişinin Supabase projesi. Müşteri backend hedefi olabilir. İçerde host değil."
 	case store.KindCloudflare:
-		return "Workers / D1 / R2. Kişinin hesabı."
+		return "OAuth 2.0. Workers / D1 / R2. Kişinin hesabı."
 	case store.KindGithub:
-		return "Geliştirilen projeyi kişinin reposuna push."
+		return "OAuth 2.0. Geliştirilen projeyi kişinin reposuna push."
 	case store.KindVercel:
-		return "Kişinin Vercel hesabına frontend deploy. İçerde host değil."
+		return "OAuth 2.0. Kişinin Vercel hesabına frontend deploy. İçerde host değil."
 	case store.KindRender:
-		return "Kişinin Render hesabına servis. İçerde host değil."
+		return "OAuth 2.0. Kişinin Render hesabına servis. İçerde host değil."
 	default:
 		return ""
 	}

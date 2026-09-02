@@ -15,7 +15,8 @@ alwaysApply: false
 - Backend target is chosen by the person (local, Supabase, Cloudflare, similar plugins). OpenCode writes the generated `backend/` for that target.
 - Never mix Icerde Go GraphQL + MongoDB with the customer backend, even when the customer backend is Supabase or Cloudflare.
 - GitHub: the person can push the developed project to their repo. Vercel and Render are the person’s deploys, not Icerde hosting.
-- Token paste is the v1 connect path. Empty token is not connected. Do not fake OAuth success.
+- Token paste is the advanced fallback. Primary connect is **OAuth 2.0** (authorization code + consent screen). Empty token is not connected. Do not fake OAuth success.
+- When GitHub/Vercel/Supabase client ids are unset, Icerde shows a local consent page that still requires explicit Allow/Deny. That is not a silent connect.
 - Zip/git handoff is the chosen mobile stack’s **language** and Clean Architecture (`frontend/`) plus that backend — not `preview/` HTML.
 - Do not fake a connected provider. Missing OAuth/token → explicit error.
 - Do not send connection secrets to the LLM unredacted. Token is memory-only; GraphQL returns tokenHint only.

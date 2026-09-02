@@ -241,6 +241,51 @@ func (r *mutationResolver) ConnectProvider(ctx context.Context, kind ConnectionK
 	return out, nil
 }
 
+// StartConnectionOAuth is the resolver for the startConnectionOAuth field.
+func (r *mutationResolver) StartConnectionOAuth(ctx context.Context, kind ConnectionKind) (*OAuthStart, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	start, err := r.Connect.StartOAuth(ctx, user.ID, user.Email, string(kind))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	mode, err := mapOAuthMode(start.Mode)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return &OAuthStart{
+		AuthorizeURL: start.AuthorizeURL,
+		State:        start.State,
+		Mode:         mode,
+	}, nil
+}
+
+// CompleteConnectionOAuth is the resolver for the completeConnectionOAuth field.
+func (r *mutationResolver) CompleteConnectionOAuth(ctx context.Context, code string, state string) (*Connection, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	row, err := r.Connect.CompleteOAuth(ctx, user.ID, code, state)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := mapConnection(row)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
+}
+
+// DisconnectProvider is the resolver for the disconnectProvider field.
 func (r *mutationResolver) DisconnectProvider(ctx context.Context, kind ConnectionKind) (*Connection, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {
@@ -260,6 +305,7 @@ func (r *mutationResolver) DisconnectProvider(ctx context.Context, kind Connecti
 	return out, nil
 }
 
+// PushProjectGithub is the resolver for the pushProjectGithub field.
 func (r *mutationResolver) PushProjectGithub(ctx context.Context, projectID string, repo string) (*GitPushResult, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {

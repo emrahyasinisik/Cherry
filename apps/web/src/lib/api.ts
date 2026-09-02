@@ -319,12 +319,17 @@ export function stackSourceHint(stack: ProjectStack): string {
   }
 }
 
+export type ConnectionAuth = "NONE" | "OAUTH" | "TOKEN";
+export type OAuthMode = "CONSENT" | "PROVIDER";
+
 export type Connection = {
   kind: ConnectionKind;
   status: ConnectionStatus;
   account: string;
   tokenHint: string;
   note: string;
+  authMethod: ConnectionAuth;
+  scopes: string[];
 };
 
 export function connectionKindLabel(kind: ConnectionKind): string {
@@ -373,6 +378,34 @@ export function backendTargetLabel(target: BackendTarget): string {
       return "Render";
     default: {
       const exhaustive: never = target;
+      return exhaustive;
+    }
+  }
+}
+
+export function connectionAuthLabel(method: ConnectionAuth): string {
+  switch (method) {
+    case "NONE":
+      return "";
+    case "OAUTH":
+      return "OAuth 2.0";
+    case "TOKEN":
+      return "Token";
+    default: {
+      const exhaustive: never = method;
+      return exhaustive;
+    }
+  }
+}
+
+export function oauthModeLabel(mode: OAuthMode): string {
+  switch (mode) {
+    case "CONSENT":
+      return "İzin ekranı";
+    case "PROVIDER":
+      return "Sağlayıcı";
+    default: {
+      const exhaustive: never = mode;
       return exhaustive;
     }
   }

@@ -10,11 +10,13 @@ import (
 )
 
 type Connection struct {
-	Kind      ConnectionKind   `json:"kind"`
-	Status    ConnectionStatus `json:"status"`
-	Account   string           `json:"account"`
-	TokenHint string           `json:"tokenHint"`
-	Note      string           `json:"note"`
+	Kind       ConnectionKind   `json:"kind"`
+	Status     ConnectionStatus `json:"status"`
+	Account    string           `json:"account"`
+	TokenHint  string           `json:"tokenHint"`
+	Note       string           `json:"note"`
+	AuthMethod ConnectionAuth   `json:"authMethod"`
+	Scopes     []string         `json:"scopes"`
 }
 
 type DesignScreen struct {
@@ -137,6 +139,12 @@ type MailMessage struct {
 }
 
 type Mutation struct {
+}
+
+type OAuthStart struct {
+	AuthorizeURL string    `json:"authorizeUrl"`
+	State        string    `json:"state"`
+	Mode         OAuthMode `json:"mode"`
 }
 
 type Project struct {
@@ -354,6 +362,63 @@ func (e *ChatRole) UnmarshalJSON(b []byte) error {
 }
 
 func (e ChatRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ConnectionAuth string
+
+const (
+	ConnectionAuthNone  ConnectionAuth = "NONE"
+	ConnectionAuthOauth ConnectionAuth = "OAUTH"
+	ConnectionAuthToken ConnectionAuth = "TOKEN"
+)
+
+var AllConnectionAuth = []ConnectionAuth{
+	ConnectionAuthNone,
+	ConnectionAuthOauth,
+	ConnectionAuthToken,
+}
+
+func (e ConnectionAuth) IsValid() bool {
+	switch e {
+	case ConnectionAuthNone, ConnectionAuthOauth, ConnectionAuthToken:
+		return true
+	}
+	return false
+}
+
+func (e ConnectionAuth) String() string {
+	return string(e)
+}
+
+func (e *ConnectionAuth) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ConnectionAuth(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ConnectionAuth", str)
+	}
+	return nil
+}
+
+func (e ConnectionAuth) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ConnectionAuth) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ConnectionAuth) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -586,6 +651,61 @@ func (e *MaestroResult) UnmarshalJSON(b []byte) error {
 }
 
 func (e MaestroResult) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type OAuthMode string
+
+const (
+	OAuthModeConsent  OAuthMode = "CONSENT"
+	OAuthModeProvider OAuthMode = "PROVIDER"
+)
+
+var AllOAuthMode = []OAuthMode{
+	OAuthModeConsent,
+	OAuthModeProvider,
+}
+
+func (e OAuthMode) IsValid() bool {
+	switch e {
+	case OAuthModeConsent, OAuthModeProvider:
+		return true
+	}
+	return false
+}
+
+func (e OAuthMode) String() string {
+	return string(e)
+}
+
+func (e *OAuthMode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OAuthMode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OAuthMode", str)
+	}
+	return nil
+}
+
+func (e OAuthMode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OAuthMode) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OAuthMode) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
