@@ -31,7 +31,7 @@ func TestPipelineWritesTreeAndSkipsMaestro(t *testing.T) {
 	svc.MaestroRun = skipMaestro{}
 	svc.Activator = &fakeActivate{}
 
-	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestSendMessageContinuesHeadlessOpenCode(t *testing.T) {
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
 	fake := &opencode.Fake{}
 	svc.OpenCode = fake
-	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestPipelineWithoutOpenCodeKeepsScaffold(t *testing.T) {
 		t.Fatal(err)
 	}
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
-	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func TestOpenCodePromptRedactsEmail(t *testing.T) {
 	svc.LLM = &llm.Service{Store: mem, Completer: llm.MockCompleter{}}
 	fake := &opencode.Fake{}
 	svc.OpenCode = fake
-	project, err := svc.Create(ctx, "u1", "Kahve", "ada@icerde.dev için sipariş kuyruğu uygulaması.", "EXPO")
+	project, err := svc.Create(ctx, "u1", "Kahve", "ada@icerde.dev için sipariş kuyruğu uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,6 +213,17 @@ func TestStacksExhaustive(t *testing.T) {
 			t.Fatalf("source %s: %v", stack, err)
 		}
 	}
+	for _, target := range []string{"LOCAL", "SUPABASE", "CLOUDFLARE", "RENDER"} {
+		if _, err := parseBackendTarget(target); err != nil {
+			t.Fatalf("backend %s: %v", target, err)
+		}
+		if _, err := backendLabel(store.BackendTarget(target)); err != nil {
+			t.Fatalf("backend label %s: %v", target, err)
+		}
+	}
+	if _, err := parseBackendTarget("AWS"); err == nil {
+		t.Fatal("expected backend validation")
+	}
 	if _, err := parseStack("UNITY"); err == nil {
 		t.Fatal("expected validation")
 	}
@@ -224,7 +235,7 @@ func TestForeignProjectHidden(t *testing.T) {
 	svc.StepDelay = 0
 	svc.AutoRun = false
 	ctx := context.Background()
-	project, err := svc.Create(ctx, "owner", "Uygulama", "Kısa bir brif metni burada.", "FLUTTER")
+	project, err := svc.Create(ctx, "owner", "Uygulama", "Kısa bir brif metni burada.", "FLUTTER", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -260,7 +271,7 @@ func TestActivateAndRunMaestroNeverPassWithoutDevice(t *testing.T) {
 	act := &fakeActivate{}
 	svc.Activator = act
 	svc.MaestroRun = skipMaestro{}
-	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO")
+	project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", "EXPO", "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -329,7 +340,7 @@ func TestHandoffZipIsStackSourceNotHTML(t *testing.T) {
 			fake := &opencode.Fake{}
 			svc.OpenCode = fake
 			svc.MaestroRun = skipMaestro{}
-			project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", tc.stack)
+			project, err := svc.Create(ctx, "u1", "Kahve sipariş", "Mahalle kahvesi için sipariş ve kuyruk uygulaması.", tc.stack, "")
 			if err != nil {
 				t.Fatal(err)
 			}

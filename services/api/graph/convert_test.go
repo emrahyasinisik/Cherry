@@ -93,4 +93,34 @@ func TestMapProjectEnumsExhaustive(t *testing.T) {
 	if _, err := mapActivateStatus(activate.Status("X")); err == nil {
 		t.Fatal("expected activate error")
 	}
+	for _, target := range []store.BackendTarget{
+		store.TargetLocal, store.TargetSupabase, store.TargetCloudflare, store.TargetRender, "",
+	} {
+		if _, err := mapBackendTarget(target); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapBackendTarget(store.BackendTarget("X")); err == nil {
+		t.Fatal("expected backend error")
+	}
+	for _, kind := range []store.ConnectionKind{
+		store.KindSupabase, store.KindCloudflare, store.KindGithub, store.KindVercel, store.KindRender,
+	} {
+		if _, err := mapConnectionKind(kind); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapConnectionKind(store.ConnectionKind("X")); err == nil {
+		t.Fatal("expected kind error")
+	}
+	for _, status := range []store.ConnectionStatus{
+		store.ConnDisconnected, store.ConnConnected, store.ConnFailed,
+	} {
+		if _, err := mapConnectionStatus(status); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := mapConnectionStatus(store.ConnectionStatus("X")); err == nil {
+		t.Fatal("expected conn status error")
+	}
 }

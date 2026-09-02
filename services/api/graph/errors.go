@@ -2,7 +2,9 @@ package graph
 
 import (
 	"errors"
+	"strings"
 
+	"github.com/icerde/api/internal/connect"
 	"github.com/icerde/api/internal/store"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -12,6 +14,10 @@ const apiVersion = "0.6.0-local"
 func gqlErr(err error) error {
 	switch {
 	case errors.Is(err, store.ErrValidation):
+		_, after, ok := strings.Cut(err.Error(), ": ")
+		if ok && after != "" && !strings.HasPrefix(after, "yığın") {
+			return &gqlerror.Error{Message: after}
+		}
 		return &gqlerror.Error{Message: "E-posta geçerli olmalı, şifre en az 8 karakter."}
 	case errors.Is(err, store.ErrInvalidCredentials):
 		return &gqlerror.Error{Message: "Bilgiler geçersiz."}
@@ -33,6 +39,8 @@ func gqlErr(err error) error {
 		return &gqlerror.Error{Message: "Oturum gerekli."}
 	case errors.Is(err, store.ErrNotFound):
 		return &gqlerror.Error{Message: "Kayıt bulunamadı."}
+	case errors.Is(err, connect.ErrConnect):
+		return &gqlerror.Error{Message: strings.TrimPrefix(err.Error(), "bağlantı: ")}
 	default:
 		return &gqlerror.Error{Message: "İşlem yapılamadı."}
 	}

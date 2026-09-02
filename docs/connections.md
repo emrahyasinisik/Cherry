@@ -6,9 +6,9 @@
 
 **EN:** The person chooses **where** the generated app’s backend lives. Icerde does not host it. Accounts under **Connections** (plugins) belong to the person.
 
-Bu dilim henüz kodlanmadı. Karar kaydı; spekülatif MCP bağlama yok.
+Bu dilim **kodlandı** (sidebar + sayfa + token kaydı + GitHub push). OAuth yok; kişi kendi token’ını yapıştırır. Sahte bağlı yok.
 
-This slice is not coded yet. Decision record; do not attach speculative MCPs.
+This slice **is coded** (sidebar + page + token store + GitHub push). No OAuth; the person pastes their token. No fake connected state.
 
 ## İki backend kuralı durur / Two-backend rule still holds
 

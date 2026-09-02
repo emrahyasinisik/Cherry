@@ -21,7 +21,7 @@ flowchart TB
 ```
 
 - Sidebar 220px, collapse 64px (ikon). Mobil tab bar yok.
-- Nav (hedef): Projeler, Ajan, Maestro, Güvenlik, Organizasyon, **Bağlantılar**, LLM, Gizlilik. Bağlantılar henüz kapalı eklenti yuvası; sahte “bağlı” gösterme.
+- Nav (hedef): Projeler, Ajan, Maestro, Güvenlik, Organizasyon, **Bağlantılar**, LLM, Gizlilik.
 - Titlebar: wordmark + proje adı + **LLM A | B** (sağ) — iki kapasite işçisi; meşgul/boş, kod vs test değil.
 - Statusbar: oturum, cihaz, GDPR, OpenCode/Maestro sidecar, yerel URL.
 
@@ -80,7 +80,9 @@ Referans: [design/icerde-llm-admin.png](design/icerde-llm-admin.png)
 
 Cihaz tablosu + oturum listesi + iptal. X’e benzer sakin liste; kırmızı yalnızca iptal.
 
-## 7. Bağlantılar / Connections (henüz yok)
+## 7. Bağlantılar / Connections
+
+Plugin menüsü. Kişi kendi token’ını yapıştırır; İçerde host olmaz. Boş token bağlı değildir.
 
 Plugin menüsü. Kişi kendi hesaplarını bağlar; İçerde host olmaz.
 

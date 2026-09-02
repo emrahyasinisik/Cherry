@@ -46,16 +46,29 @@ func treeFiles(project store.Project, label, kind string) ([]fileSpec, error) {
 	name := strings.TrimSpace(project.Name)
 	brief := strings.TrimSpace(project.Brief)
 	slug := slugify(name)
+	be := project.Backend
+	if be == "" {
+		be = store.TargetLocal
+	}
+	beLabel, err := backendLabel(be)
+	if err != nil {
+		return nil, err
+	}
 	out := []fileSpec{
 		{
 			rel:  "README.md",
 			kind: "readme",
-			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\nMimari: Clean Architecture (domain / data / presentation).\n\nİçerde bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git — seçilen dil, HTML değil.\n",
+			body: "# " + name + "\n\n" + brief + "\n\nYığın: " + label + " (`" + kind + "`).\nMimari: Clean Architecture (domain / data / presentation).\nBackend hedefi: " + beLabel + ".\n\nİçerde bu klasörü yazar; barındırma yoktur. Teslim: bu dizin / zip / git — seçilen dil, HTML değil.\n",
 		},
 		{
 			rel:  "backend/README.md",
 			kind: "backend",
-			body: "# Müşteri API\n\nBu, İçerde GraphQL’i değil üretilen uygulamanın backend’idir.\nYerel aktif localhost’ta ayağa kaldırır (47000–47999).\n",
+			body: "# Müşteri API\n\nBu, İçerde GraphQL’i değil üretilen uygulamanın backend’idir.\nHedef: " + beLabel + ".\nYerel aktif localhost’ta ayağa kaldırır (47000–47999).\n",
+		},
+		{
+			rel:  "backend/TARGET.md",
+			kind: "backend",
+			body: "# Backend hedefi\n\n" + beLabel + " (`" + string(be) + "`).\n\nToken zip’e yazılmaz. Kişinin Bağlantılar hesabı. İçerde host değil.\n",
 		},
 		{
 			rel:  "backend/main.go",

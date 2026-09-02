@@ -14,6 +14,9 @@ import {
   PROJECT_FIELDS,
   stackLabel,
   stackSourceHint,
+  backendTargetLabel,
+  type BackendTarget,
+  type Connection,
   type Project,
   type ProjectStack,
   type User,
@@ -29,6 +32,8 @@ export default function NewProjectPage() {
   const [name, setName] = useState("");
   const [brief, setBrief] = useState("");
   const [stack, setStack] = useState<ProjectStack>("EXPO");
+  const [backend, setBackend] = useState<BackendTarget>("LOCAL");
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -38,8 +43,11 @@ export default function NewProjectPage() {
       return;
     }
     const timer = window.setTimeout(() => {
-      void graphql<{ me: User | null }>(
-        `query Me { me { id email workspaceKind totpEnabled } }`,
+      void graphql<{ me: User | null; connections: Connection[] }>(
+        `query Me {
+          me { id email workspaceKind totpEnabled }
+          connections { kind status account note }
+        }`,
       )
         .then((data) => {
           if (!data.me) {
@@ -47,6 +55,7 @@ export default function NewProjectPage() {
             return;
           }
           setUser(data.me);
+          setConnections(data.connections);
         })
         .catch((err: unknown) => {
           setError(err instanceof Error ? err.message : "Yüklenemedi.");
@@ -67,12 +76,12 @@ export default function NewProjectPage() {
     setPending(true);
     try {
       const data = await graphql<{ createProject: Project }>(
-        `mutation Create($name: String!, $brief: String!, $stack: ProjectStack!) {
-          createProject(name: $name, brief: $brief, stack: $stack) {
+        `mutation Create($name: String!, $brief: String!, $stack: ProjectStack!, $backendTarget: BackendTarget) {
+          createProject(name: $name, brief: $brief, stack: $stack, backendTarget: $backendTarget) {
             ${PROJECT_FIELDS}
           }
         }`,
-        { name: name.trim(), brief: brief.trim(), stack },
+        { name: name.trim(), brief: brief.trim(), stack, backendTarget: backend },
       );
       setLastProjectId(data.createProject.id);
       router.push(`/projects/${data.createProject.id}`);
@@ -147,6 +156,39 @@ export default function NewProjectPage() {
                 <span className="mt-1 block text-[11px] text-muted-foreground">{stackSourceHint(item)}</span>
               </button>
             ))}
+          </div>
+        </fieldset>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-medium">Backend hedefi</legend>
+          <p className="text-muted-foreground">
+            İçerde host değil. Cloud için önce Bağlantılar’dan hesap bağla.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {(["LOCAL", "SUPABASE", "CLOUDFLARE", "RENDER"] as const).map((item) => {
+              const enabled =
+                item === "LOCAL" ||
+                connections.some((conn) => conn.kind === item && conn.status === "CONNECTED");
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  disabled={!enabled}
+                  onClick={() => setBackend(item)}
+                  className={cn(
+                    "rounded-[10px] border px-3 py-2 text-left text-[13px] transition-colors",
+                    backend === item
+                      ? "border-primary bg-primary/10 text-foreground"
+                      : "border-border text-muted-foreground hover:bg-muted/40",
+                    !enabled ? "opacity-50" : "",
+                  )}
+                >
+                  {backendTargetLabel(item)}
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                    {enabled ? (item === "LOCAL" ? "localhost 47000–47999" : "bağlı") : "bağlı değil"}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </fieldset>
         {error ? (

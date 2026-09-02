@@ -13,6 +13,7 @@ type Query {
   llmStatus: LlmStatus!
   mcpReadFile(relativePath: String!): String!
   exportMe: ExportBundle!
+  connections: [Connection!]!
 }
 
 type Mutation {
@@ -37,11 +38,14 @@ type Mutation {
   revokeSession(id: ID!): Boolean!
   revokeDevice(id: ID!): Boolean!
   logout: Boolean!
-  createProject(name: String!, brief: String!, stack: ProjectStack!): Project!
+  createProject(name: String!, brief: String!, stack: ProjectStack!, backendTarget: BackendTarget = LOCAL): Project!
   sendProjectMessage(projectId: ID!, body: String!): Project!
   activateProject(id: ID!): Project!
   deactivateProject(id: ID!): Project!
   runMaestro(projectId: ID!): Project!
+  connectProvider(kind: ConnectionKind!, account: String!, token: String!): Connection!
+  disconnectProvider(kind: ConnectionKind!): Connection!
+  pushProjectGithub(projectId: ID!, repo: String!): GitPushResult!
   setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
   deleteMe(wipeProjects: Boolean!): Boolean!
@@ -97,6 +101,7 @@ type Project {
   stack: ProjectStack!
   status: ProjectStatus!
   rootPath: String!
+  backendTarget: BackendTarget!
   createdAt: String!
   logs: [JobLog!]!
   files: [ProjectFile!]!
@@ -108,6 +113,40 @@ enum ProjectStack {
   EXPO
   FLUTTER
   NATIVE
+}
+
+enum BackendTarget {
+  LOCAL
+  SUPABASE
+  CLOUDFLARE
+  RENDER
+}
+
+enum ConnectionKind {
+  SUPABASE
+  CLOUDFLARE
+  GITHUB
+  VERCEL
+  RENDER
+}
+
+enum ConnectionStatus {
+  DISCONNECTED
+  CONNECTED
+  FAILED
+}
+
+type Connection {
+  kind: ConnectionKind!
+  status: ConnectionStatus!
+  account: String!
+  tokenHint: String!
+  note: String!
+}
+
+type GitPushResult {
+  ok: Boolean!
+  note: String!
 }
 
 enum ProjectStatus {

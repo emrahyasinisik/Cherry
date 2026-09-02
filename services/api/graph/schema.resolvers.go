@@ -156,12 +156,16 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 }
 
 // CreateProject is the resolver for the createProject field.
-func (r *mutationResolver) CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error) {
+func (r *mutationResolver) CreateProject(ctx context.Context, name string, brief string, stack ProjectStack, backendTarget *BackendTarget) (*Project, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	row, err := r.Factory.Create(ctx, user.ID, name, brief, string(stack))
+	backend := ""
+	if backendTarget != nil {
+		backend = string(*backendTarget)
+	}
+	row, err := r.Factory.Create(ctx, user.ID, name, brief, string(stack), backend)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
@@ -215,6 +219,64 @@ func (r *mutationResolver) RunMaestro(ctx context.Context, projectID string) (*P
 		return nil, gqlErr(err)
 	}
 	return r.projectPayload(ctx, user.ID, projectID, true)
+}
+
+// ConnectProvider is the resolver for the connectProvider field.
+func (r *mutationResolver) ConnectProvider(ctx context.Context, kind ConnectionKind, account string, token string) (*Connection, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	row, err := r.Connect.Connect(ctx, user.ID, string(kind), account, token)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := mapConnection(row)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
+}
+
+func (r *mutationResolver) DisconnectProvider(ctx context.Context, kind ConnectionKind) (*Connection, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	row, err := r.Connect.Disconnect(ctx, user.ID, string(kind))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out, err := mapConnection(row)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return out, nil
+}
+
+func (r *mutationResolver) PushProjectGithub(ctx context.Context, projectID string, repo string) (*GitPushResult, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	project, err := r.Factory.Get(ctx, user.ID, projectID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	res, err := r.Connect.PushGitHub(ctx, user.ID, project.RootPath, repo)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	return &GitPushResult{Ok: res.OK, Note: res.Note}, nil
 }
 
 // SetActiveVersion is the resolver for the setActiveVersion field.
@@ -469,6 +531,30 @@ func (r *queryResolver) ExportMe(ctx context.Context) (*ExportBundle, error) {
 		return nil, gqlErr(err)
 	}
 	return &ExportBundle{JSON: string(payload)}, nil
+}
+
+// Connections is the resolver for the connections field.
+func (r *queryResolver) Connections(ctx context.Context) ([]*Connection, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Connect == nil {
+		return nil, gqlErr(store.ErrNotFound)
+	}
+	rows, err := r.Connect.Catalog(ctx, user.ID)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	out := make([]*Connection, 0, len(rows))
+	for _, row := range rows {
+		item, err := mapConnection(row)
+		if err != nil {
+			return nil, gqlErr(err)
+		}
+		out = append(out, item)
+	}
+	return out, nil
 }
 
 // Mutation returns MutationResolver implementation.

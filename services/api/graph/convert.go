@@ -131,14 +131,85 @@ func mapProjectMeta(row store.Project) (*Project, error) {
 	if err != nil {
 		return nil, err
 	}
+	backend, err := mapBackendTarget(row.Backend)
+	if err != nil {
+		return nil, err
+	}
 	return &Project{
-		ID:        row.ID,
-		Name:      row.Name,
-		Brief:     row.Brief,
-		Stack:     stack,
+		ID:            row.ID,
+		Name:          row.Name,
+		Brief:         row.Brief,
+		Stack:         stack,
+		Status:        status,
+		RootPath:      row.RootPath,
+		BackendTarget: backend,
+		CreatedAt:     row.CreatedAt.UTC().Format(time.RFC3339),
+	}, nil
+}
+
+func mapBackendTarget(target store.BackendTarget) (BackendTarget, error) {
+	if target == "" {
+		target = store.TargetLocal
+	}
+	switch target {
+	case store.TargetLocal:
+		return BackendTargetLocal, nil
+	case store.TargetSupabase:
+		return BackendTargetSupabase, nil
+	case store.TargetCloudflare:
+		return BackendTargetCloudflare, nil
+	case store.TargetRender:
+		return BackendTargetRender, nil
+	default:
+		return "", fmt.Errorf("unhandled backend target: %s", target)
+	}
+}
+
+func mapConnectionKind(kind store.ConnectionKind) (ConnectionKind, error) {
+	switch kind {
+	case store.KindSupabase:
+		return ConnectionKindSupabase, nil
+	case store.KindCloudflare:
+		return ConnectionKindCloudflare, nil
+	case store.KindGithub:
+		return ConnectionKindGithub, nil
+	case store.KindVercel:
+		return ConnectionKindVercel, nil
+	case store.KindRender:
+		return ConnectionKindRender, nil
+	default:
+		return "", fmt.Errorf("unhandled connection kind: %s", kind)
+	}
+}
+
+func mapConnectionStatus(status store.ConnectionStatus) (ConnectionStatus, error) {
+	switch status {
+	case store.ConnDisconnected:
+		return ConnectionStatusDisconnected, nil
+	case store.ConnConnected:
+		return ConnectionStatusConnected, nil
+	case store.ConnFailed:
+		return ConnectionStatusFailed, nil
+	default:
+		return "", fmt.Errorf("unhandled connection status: %s", status)
+	}
+}
+
+func mapConnection(row store.Connection) (*Connection, error) {
+	kind, err := mapConnectionKind(row.Kind)
+	if err != nil {
+		return nil, err
+	}
+	status, err := mapConnectionStatus(row.Status)
+	if err != nil {
+		return nil, err
+	}
+	return &Connection{
+		Kind:      kind,
 		Status:    status,
-		RootPath:  row.RootPath,
-		CreatedAt: row.CreatedAt.UTC().Format(time.RFC3339),
+		Account:   row.Account,
+		TokenHint: row.TokenHint,
+		Note:      row.Note,
 	}, nil
 }
 

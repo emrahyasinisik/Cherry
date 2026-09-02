@@ -2,9 +2,38 @@ package factory
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/icerde/api/internal/store"
 )
+
+func parseBackendTarget(raw string) (store.BackendTarget, error) {
+	if strings.TrimSpace(raw) == "" {
+		return store.TargetLocal, nil
+	}
+	target := store.BackendTarget(raw)
+	switch target {
+	case store.TargetLocal, store.TargetSupabase, store.TargetCloudflare, store.TargetRender:
+		return target, nil
+	default:
+		return "", fmt.Errorf("%w: backend %s", store.ErrValidation, raw)
+	}
+}
+
+func backendLabel(target store.BackendTarget) (string, error) {
+	switch target {
+	case store.TargetLocal:
+		return "Yerel API", nil
+	case store.TargetSupabase:
+		return "Supabase", nil
+	case store.TargetCloudflare:
+		return "Cloudflare", nil
+	case store.TargetRender:
+		return "Render", nil
+	default:
+		return "", fmt.Errorf("unhandled backend: %s", target)
+	}
+}
 
 func parseStack(raw string) (store.ProjectStack, error) {
 	switch store.ProjectStack(raw) {

@@ -46,6 +46,14 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Connection struct {
+		Account   func(childComplexity int) int
+		Kind      func(childComplexity int) int
+		Note      func(childComplexity int) int
+		Status    func(childComplexity int) int
+		TokenHint func(childComplexity int) int
+	}
+
 	DesignScreen struct {
 		HTML func(childComplexity int) int
 		ID   func(childComplexity int) int
@@ -62,6 +70,11 @@ type ComplexityRoot struct {
 
 	ExportBundle struct {
 		JSON func(childComplexity int) int
+	}
+
+	GitPushResult struct {
+		Note func(childComplexity int) int
+		Ok   func(childComplexity int) int
 	}
 
 	Health struct {
@@ -163,13 +176,16 @@ type ComplexityRoot struct {
 	Mutation struct {
 		ActivateProject    func(childComplexity int, id string) int
 		ConfirmTotp        func(childComplexity int, code string) int
-		CreateProject      func(childComplexity int, name string, brief string, stack ProjectStack) int
+		ConnectProvider    func(childComplexity int, kind ConnectionKind, account string, token string) int
+		CreateProject      func(childComplexity int, name string, brief string, stack ProjectStack, backendTarget *BackendTarget) int
 		DeactivateProject  func(childComplexity int, id string) int
 		DeleteMe           func(childComplexity int, wipeProjects bool) int
 		DisableTotp        func(childComplexity int, code string) int
+		DisconnectProvider func(childComplexity int, kind ConnectionKind) int
 		EnableTotp         func(childComplexity int) int
 		Login              func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
 		Logout             func(childComplexity int) int
+		PushProjectGithub  func(childComplexity int, projectID string, repo string) int
 		Register           func(childComplexity int, email string, password string, deviceFingerprint string, deviceLabel string) int
 		RevokeDevice       func(childComplexity int, id string) int
 		RevokeSession      func(childComplexity int, id string) int
@@ -183,17 +199,18 @@ type ComplexityRoot struct {
 	}
 
 	Project struct {
-		Activate  func(childComplexity int) int
-		Brief     func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		Files     func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Logs      func(childComplexity int) int
-		Maestro   func(childComplexity int) int
-		Name      func(childComplexity int) int
-		RootPath  func(childComplexity int) int
-		Stack     func(childComplexity int) int
-		Status    func(childComplexity int) int
+		Activate      func(childComplexity int) int
+		BackendTarget func(childComplexity int) int
+		Brief         func(childComplexity int) int
+		CreatedAt     func(childComplexity int) int
+		Files         func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Logs          func(childComplexity int) int
+		Maestro       func(childComplexity int) int
+		Name          func(childComplexity int) int
+		RootPath      func(childComplexity int) int
+		Stack         func(childComplexity int) int
+		Status        func(childComplexity int) int
 	}
 
 	ProjectFile struct {
@@ -203,6 +220,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		ChallengeMailbox func(childComplexity int, challengeID string) int
+		Connections      func(childComplexity int) int
 		Devices          func(childComplexity int) int
 		ExportMe         func(childComplexity int) int
 		Health           func(childComplexity int) int
@@ -249,11 +267,14 @@ type MutationResolver interface {
 	RevokeSession(ctx context.Context, id string) (bool, error)
 	RevokeDevice(ctx context.Context, id string) (bool, error)
 	Logout(ctx context.Context) (bool, error)
-	CreateProject(ctx context.Context, name string, brief string, stack ProjectStack) (*Project, error)
+	CreateProject(ctx context.Context, name string, brief string, stack ProjectStack, backendTarget *BackendTarget) (*Project, error)
 	SendProjectMessage(ctx context.Context, projectID string, body string) (*Project, error)
 	ActivateProject(ctx context.Context, id string) (*Project, error)
 	DeactivateProject(ctx context.Context, id string) (*Project, error)
 	RunMaestro(ctx context.Context, projectID string) (*Project, error)
+	ConnectProvider(ctx context.Context, kind ConnectionKind, account string, token string) (*Connection, error)
+	DisconnectProvider(ctx context.Context, kind ConnectionKind) (*Connection, error)
+	PushProjectGithub(ctx context.Context, projectID string, repo string) (*GitPushResult, error)
 	SetActiveVersion(ctx context.Context, id string) (*LlmAdmin, error)
 	SetMcpRoot(ctx context.Context, path string) (*LlmAdmin, error)
 	DeleteMe(ctx context.Context, wipeProjects bool) (bool, error)
@@ -272,6 +293,7 @@ type QueryResolver interface {
 	LlmStatus(ctx context.Context) (*LlmStatus, error)
 	McpReadFile(ctx context.Context, relativePath string) (string, error)
 	ExportMe(ctx context.Context) (*ExportBundle, error)
+	Connections(ctx context.Context) ([]*Connection, error)
 }
 
 type executableSchema struct {
@@ -292,6 +314,37 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Connection.account":
+		if e.complexity.Connection.Account == nil {
+			break
+		}
+
+		return e.complexity.Connection.Account(childComplexity), true
+	case "Connection.kind":
+		if e.complexity.Connection.Kind == nil {
+			break
+		}
+
+		return e.complexity.Connection.Kind(childComplexity), true
+	case "Connection.note":
+		if e.complexity.Connection.Note == nil {
+			break
+		}
+
+		return e.complexity.Connection.Note(childComplexity), true
+	case "Connection.status":
+		if e.complexity.Connection.Status == nil {
+			break
+		}
+
+		return e.complexity.Connection.Status(childComplexity), true
+	case "Connection.tokenHint":
+		if e.complexity.Connection.TokenHint == nil {
+			break
+		}
+
+		return e.complexity.Connection.TokenHint(childComplexity), true
 
 	case "DesignScreen.html":
 		if e.complexity.DesignScreen.HTML == nil {
@@ -349,6 +402,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ExportBundle.JSON(childComplexity), true
+
+	case "GitPushResult.note":
+		if e.complexity.GitPushResult.Note == nil {
+			break
+		}
+
+		return e.complexity.GitPushResult.Note(childComplexity), true
+	case "GitPushResult.ok":
+		if e.complexity.GitPushResult.Ok == nil {
+			break
+		}
+
+		return e.complexity.GitPushResult.Ok(childComplexity), true
 
 	case "Health.gdpr":
 		if e.complexity.Health.Gdpr == nil {
@@ -744,6 +810,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.ConfirmTotp(childComplexity, args["code"].(string)), true
+	case "Mutation.connectProvider":
+		if e.complexity.Mutation.ConnectProvider == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_connectProvider_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConnectProvider(childComplexity, args["kind"].(ConnectionKind), args["account"].(string), args["token"].(string)), true
 	case "Mutation.createProject":
 		if e.complexity.Mutation.CreateProject == nil {
 			break
@@ -754,7 +831,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateProject(childComplexity, args["name"].(string), args["brief"].(string), args["stack"].(ProjectStack)), true
+		return e.complexity.Mutation.CreateProject(childComplexity, args["name"].(string), args["brief"].(string), args["stack"].(ProjectStack), args["backendTarget"].(*BackendTarget)), true
 	case "Mutation.deactivateProject":
 		if e.complexity.Mutation.DeactivateProject == nil {
 			break
@@ -788,6 +865,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DisableTotp(childComplexity, args["code"].(string)), true
+	case "Mutation.disconnectProvider":
+		if e.complexity.Mutation.DisconnectProvider == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_disconnectProvider_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DisconnectProvider(childComplexity, args["kind"].(ConnectionKind)), true
 	case "Mutation.enableTotp":
 		if e.complexity.Mutation.EnableTotp == nil {
 			break
@@ -811,6 +899,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Logout(childComplexity), true
+	case "Mutation.pushProjectGithub":
+		if e.complexity.Mutation.PushProjectGithub == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_pushProjectGithub_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.PushProjectGithub(childComplexity, args["projectId"].(string), args["repo"].(string)), true
 	case "Mutation.register":
 		if e.complexity.Mutation.Register == nil {
 			break
@@ -928,6 +1027,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Project.Activate(childComplexity), true
+	case "Project.backendTarget":
+		if e.complexity.Project.BackendTarget == nil {
+			break
+		}
+
+		return e.complexity.Project.BackendTarget(childComplexity), true
 	case "Project.brief":
 		if e.complexity.Project.Brief == nil {
 			break
@@ -1013,6 +1118,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.ChallengeMailbox(childComplexity, args["challengeId"].(string)), true
+	case "Query.connections":
+		if e.complexity.Query.Connections == nil {
+			break
+		}
+
+		return e.complexity.Query.Connections(childComplexity), true
 	case "Query.devices":
 		if e.complexity.Query.Devices == nil {
 			break
@@ -1309,6 +1420,27 @@ func (ec *executionContext) field_Mutation_confirmTotp_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_connectProvider_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	if err != nil {
+		return nil, err
+	}
+	args["kind"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "account", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["account"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "token", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["token"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createProject_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1327,6 +1459,11 @@ func (ec *executionContext) field_Mutation_createProject_args(ctx context.Contex
 		return nil, err
 	}
 	args["stack"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "backendTarget", ec.unmarshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget)
+	if err != nil {
+		return nil, err
+	}
+	args["backendTarget"] = arg3
 	return args, nil
 }
 
@@ -1363,6 +1500,17 @@ func (ec *executionContext) field_Mutation_disableTotp_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_disconnectProvider_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind", ec.unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind)
+	if err != nil {
+		return nil, err
+	}
+	args["kind"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1386,6 +1534,22 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["deviceLabel"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_pushProjectGithub_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "projectId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["projectId"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "repo", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["repo"] = arg1
 	return args, nil
 }
 
@@ -1651,6 +1815,151 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Connection_kind(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_kind,
+		func(ctx context.Context) (any, error) {
+			return obj.Kind, nil
+		},
+		nil,
+		ec.marshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_kind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ConnectionKind does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_status(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ConnectionStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_account(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_account,
+		func(ctx context.Context) (any, error) {
+			return obj.Account, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_account(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_tokenHint(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_tokenHint,
+		func(ctx context.Context) (any, error) {
+			return obj.TokenHint, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_tokenHint(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_note(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _DesignScreen_id(ctx context.Context, field graphql.CollectedField, obj *DesignScreen) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1902,6 +2211,64 @@ func (ec *executionContext) _ExportBundle_json(ctx context.Context, field graphq
 func (ec *executionContext) fieldContext_ExportBundle_json(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ExportBundle",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GitPushResult_ok(ctx context.Context, field graphql.CollectedField, obj *GitPushResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GitPushResult_ok,
+		func(ctx context.Context) (any, error) {
+			return obj.Ok, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GitPushResult_ok(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GitPushResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GitPushResult_note(ctx context.Context, field graphql.CollectedField, obj *GitPushResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GitPushResult_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GitPushResult_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GitPushResult",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4243,7 +4610,7 @@ func (ec *executionContext) _Mutation_createProject(ctx context.Context, field g
 		ec.fieldContext_Mutation_createProject,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateProject(ctx, fc.Args["name"].(string), fc.Args["brief"].(string), fc.Args["stack"].(ProjectStack))
+			return ec.resolvers.Mutation().CreateProject(ctx, fc.Args["name"].(string), fc.Args["brief"].(string), fc.Args["stack"].(ProjectStack), fc.Args["backendTarget"].(*BackendTarget))
 		},
 		nil,
 		ec.marshalNProject2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐProject,
@@ -4272,6 +4639,8 @@ func (ec *executionContext) fieldContext_Mutation_createProject(ctx context.Cont
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -4337,6 +4706,8 @@ func (ec *executionContext) fieldContext_Mutation_sendProjectMessage(ctx context
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -4402,6 +4773,8 @@ func (ec *executionContext) fieldContext_Mutation_activateProject(ctx context.Co
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -4467,6 +4840,8 @@ func (ec *executionContext) fieldContext_Mutation_deactivateProject(ctx context.
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -4532,6 +4907,8 @@ func (ec *executionContext) fieldContext_Mutation_runMaestro(ctx context.Context
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -4554,6 +4931,159 @@ func (ec *executionContext) fieldContext_Mutation_runMaestro(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_runMaestro_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_connectProvider(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_connectProvider,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ConnectProvider(ctx, fc.Args["kind"].(ConnectionKind), fc.Args["account"].(string), fc.Args["token"].(string))
+		},
+		nil,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_connectProvider(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "kind":
+				return ec.fieldContext_Connection_kind(ctx, field)
+			case "status":
+				return ec.fieldContext_Connection_status(ctx, field)
+			case "account":
+				return ec.fieldContext_Connection_account(ctx, field)
+			case "tokenHint":
+				return ec.fieldContext_Connection_tokenHint(ctx, field)
+			case "note":
+				return ec.fieldContext_Connection_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_connectProvider_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_disconnectProvider(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_disconnectProvider,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DisconnectProvider(ctx, fc.Args["kind"].(ConnectionKind))
+		},
+		nil,
+		ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_disconnectProvider(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "kind":
+				return ec.fieldContext_Connection_kind(ctx, field)
+			case "status":
+				return ec.fieldContext_Connection_status(ctx, field)
+			case "account":
+				return ec.fieldContext_Connection_account(ctx, field)
+			case "tokenHint":
+				return ec.fieldContext_Connection_tokenHint(ctx, field)
+			case "note":
+				return ec.fieldContext_Connection_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_disconnectProvider_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_pushProjectGithub(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_pushProjectGithub,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().PushProjectGithub(ctx, fc.Args["projectId"].(string), fc.Args["repo"].(string))
+		},
+		nil,
+		ec.marshalNGitPushResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_pushProjectGithub(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ok":
+				return ec.fieldContext_GitPushResult_ok(ctx, field)
+			case "note":
+				return ec.fieldContext_GitPushResult_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GitPushResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_pushProjectGithub_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4880,6 +5410,35 @@ func (ec *executionContext) fieldContext_Project_rootPath(_ context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Project_backendTarget(ctx context.Context, field graphql.CollectedField, obj *Project) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Project_backendTarget,
+		func(ctx context.Context) (any, error) {
+			return obj.BackendTarget, nil
+		},
+		nil,
+		ec.marshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Project_backendTarget(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Project",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BackendTarget does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5242,6 +5801,8 @@ func (ec *executionContext) fieldContext_Query_projects(_ context.Context, field
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -5296,6 +5857,8 @@ func (ec *executionContext) fieldContext_Query_project(ctx context.Context, fiel
 				return ec.fieldContext_Project_status(ctx, field)
 			case "rootPath":
 				return ec.fieldContext_Project_rootPath(ctx, field)
+			case "backendTarget":
+				return ec.fieldContext_Project_backendTarget(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Project_createdAt(ctx, field)
 			case "logs":
@@ -5700,6 +6263,47 @@ func (ec *executionContext) fieldContext_Query_exportMe(_ context.Context, field
 				return ec.fieldContext_ExportBundle_json(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ExportBundle", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_connections(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_connections,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Connections(ctx)
+		},
+		nil,
+		ec.marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_connections(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "kind":
+				return ec.fieldContext_Connection_kind(ctx, field)
+			case "status":
+				return ec.fieldContext_Connection_status(ctx, field)
+			case "account":
+				return ec.fieldContext_Connection_account(ctx, field)
+			case "tokenHint":
+				return ec.fieldContext_Connection_tokenHint(ctx, field)
+			case "note":
+				return ec.fieldContext_Connection_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
 	}
 	return fc, nil
@@ -7557,6 +8161,65 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** object.gotpl ****************************
 
+var connectionImplementors = []string{"Connection"}
+
+func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSet, obj *Connection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, connectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Connection")
+		case "kind":
+			out.Values[i] = ec._Connection_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Connection_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "account":
+			out.Values[i] = ec._Connection_account(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tokenHint":
+			out.Values[i] = ec._Connection_tokenHint(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._Connection_note(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var designScreenImplementors = []string{"DesignScreen"}
 
 func (ec *executionContext) _DesignScreen(ctx context.Context, sel ast.SelectionSet, obj *DesignScreen) graphql.Marshaler {
@@ -7678,6 +8341,50 @@ func (ec *executionContext) _ExportBundle(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("ExportBundle")
 		case "json":
 			out.Values[i] = ec._ExportBundle_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var gitPushResultImplementors = []string{"GitPushResult"}
+
+func (ec *executionContext) _GitPushResult(ctx context.Context, sel ast.SelectionSet, obj *GitPushResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, gitPushResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GitPushResult")
+		case "ok":
+			out.Values[i] = ec._GitPushResult_ok(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._GitPushResult_note(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -8522,6 +9229,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "connectProvider":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_connectProvider(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "disconnectProvider":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_disconnectProvider(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pushProjectGithub":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_pushProjectGithub(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "setActiveVersion":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_setActiveVersion(ctx, field)
@@ -8604,6 +9332,11 @@ func (ec *executionContext) _Project(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "rootPath":
 			out.Values[i] = ec._Project_rootPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "backendTarget":
+			out.Values[i] = ec._Project_backendTarget(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -8983,6 +9716,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_exportMe(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "connections":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_connections(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -9523,6 +10278,16 @@ func (ec *executionContext) marshalNActivateStatus2githubᚗcomᚋicerdeᚋapi�
 	return v
 }
 
+func (ec *executionContext) unmarshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (BackendTarget, error) {
+	var res BackendTarget
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNBackendTarget2githubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v BackendTarget) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -9546,6 +10311,84 @@ func (ec *executionContext) unmarshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgra
 }
 
 func (ec *executionContext) marshalNChatRole2githubᚗcomᚋicerdeᚋapiᚋgraphᚐChatRole(ctx context.Context, sel ast.SelectionSet, v ChatRole) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNConnection2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v Connection) graphql.Marshaler {
+	return ec._Connection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNConnection2ᚕᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*Connection) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNConnection2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐConnection(ctx context.Context, sel ast.SelectionSet, v *Connection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Connection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind(ctx context.Context, v any) (ConnectionKind, error) {
+	var res ConnectionKind
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNConnectionKind2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionKind(ctx context.Context, sel ast.SelectionSet, v ConnectionKind) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, v any) (ConnectionStatus, error) {
+	var res ConnectionStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNConnectionStatus2githubᚗcomᚋicerdeᚋapiᚋgraphᚐConnectionStatus(ctx context.Context, sel ast.SelectionSet, v ConnectionStatus) graphql.Marshaler {
 	return v
 }
 
@@ -9669,6 +10512,20 @@ func (ec *executionContext) marshalNExportBundle2ᚖgithubᚗcomᚋicerdeᚋapi�
 		return graphql.Null
 	}
 	return ec._ExportBundle(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNGitPushResult2githubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v GitPushResult) graphql.Marshaler {
+	return ec._GitPushResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGitPushResult2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐGitPushResult(ctx context.Context, sel ast.SelectionSet, v *GitPushResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GitPushResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNHealth2githubᚗcomᚋicerdeᚋapiᚋgraphᚐHealth(ctx context.Context, sel ast.SelectionSet, v Health) graphql.Marshaler {
@@ -10570,6 +11427,22 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, v any) (*BackendTarget, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(BackendTarget)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOBackendTarget2ᚖgithubᚗcomᚋicerdeᚋapiᚋgraphᚐBackendTarget(ctx context.Context, sel ast.SelectionSet, v *BackendTarget) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {

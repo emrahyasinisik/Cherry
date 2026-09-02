@@ -16,6 +16,7 @@ import {
   projectStatusLabel,
   stackLabel,
   stackSourceHint,
+  backendTargetLabel,
   type ActivateStatus,
   type ChatRole,
   type JobLog,
@@ -189,7 +190,7 @@ export default function StudioPage() {
           <h1 className="text-base font-medium">{project.name}</h1>
           <p className="text-muted-foreground">{project.brief}</p>
           <p className="font-mono text-[11px] text-muted-foreground">
-            {stackLabel(project.stack)} · {stackSourceHint(project.stack)} · {projectStatusLabel(project.status)}
+            {stackLabel(project.stack)} · {stackSourceHint(project.stack)} · {backendTargetLabel(project.backendTarget)} · {projectStatusLabel(project.status)}
           </p>
           <p className="text-muted-foreground">
             Teslim bu dilin kaynağıdır (Clean Architecture). HTML maket yalnızca Maestro ekranında; zip’e girmez.
@@ -197,6 +198,9 @@ export default function StudioPage() {
           <p className="break-all font-mono text-[11px] text-muted-foreground">{project.rootPath}</p>
           <Button type="button" variant="outline" onClick={() => router.push(`/projects/${id}/maestro`)}>
             Maestro ekranını aç
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.push("/connections")}>
+            Bağlantılar
           </Button>
           {project.status === "READY" ? (
             <Button

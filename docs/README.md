@@ -53,7 +53,7 @@ flowchart TB
 7. [mobile-factory.md](mobile-factory.md) + [opencode.md](opencode.md) + [local-activate.md](local-activate.md) + [maestro.md](maestro.md)
 8. [llmops.md](llmops.md) + [gdpr-kvkk.md](gdpr-kvkk.md)
 9. [integrations.md](integrations.md) — MCP / CLI
-10. [connections.md](connections.md) — müşteri Bağlantılar (Supabase, GitHub, …); henüz kod yok
+10. [connections.md](connections.md) — müşteri Bağlantılar (Supabase, GitHub, …)
 
 ## Bölüm tablosu / Section table
 

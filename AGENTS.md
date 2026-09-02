@@ -20,7 +20,7 @@ Before writing code, read that section’s **rule and document**. If the documen
   - Platform API: Go GraphQL + MongoDB (Icerde)
   - Generated customer backend: files on disk, activated locally for tests only
 - Customer delivery is **files** (folder / zip / git). **No hosting** in v1. Zip is the chosen stack’s **language** and Clean Architecture (Expo TS, Flutter Dart, SwiftUI) — never `preview/` HTML.
-- Mobile stack of the generated app is **chosen by the user** (Expo, Flutter, SwiftUI). Backend **target** will also be chosen by the user (local / Supabase / Cloudflare / plugins) via **Bağlantılar** — see [docs/connections.md](docs/connections.md). Not built yet.
+- Mobile stack of the generated app is **chosen by the user** (Expo, Flutter, SwiftUI). Backend **target** is chosen via **Bağlantılar** (local / Supabase / Cloudflare / Render). GitHub push lives on that page.
 - Security is **X-inspired**: password, 6-digit new-device code, TOTP, trusted devices, session revoke. **No SMS. No phone identity.** One active session per user.
 - Every LLM call goes through the **KVKK/GDPR layer**.
 - Two LLMs: **A and B are the same kind of worker**. They exist for **concurrent load** (e.g. 10 people at once), not for splitting job types (codegen vs test). The router assigns a free worker; if both are busy, jobs queue. Version pointer still changes subsequent answers on that worker.

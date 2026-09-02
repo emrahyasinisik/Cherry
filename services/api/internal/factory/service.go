@@ -52,7 +52,7 @@ func New(st store.Store, root string) *Service {
 	return &Service{Store: st, Root: root, StepDelay: 380 * time.Millisecond, AutoRun: true, reports: map[string]maestro.Report{}}
 }
 
-func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw string) (store.Project, error) {
+func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw, backendRaw string) (store.Project, error) {
 	name = strings.TrimSpace(name)
 	brief = strings.TrimSpace(brief)
 	if name == "" || len(brief) < 8 {
@@ -61,6 +61,17 @@ func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw stri
 	stack, err := parseStack(stackRaw)
 	if err != nil {
 		return store.Project{}, err
+	}
+	backend, err := parseBackendTarget(backendRaw)
+	if err != nil {
+		return store.Project{}, err
+	}
+	if backend != store.TargetLocal {
+		kind := store.ConnectionKind(backend)
+		conn, err := s.Store.GetConnection(ctx, userID, kind)
+		if err != nil || conn.Status != store.ConnConnected {
+			return store.Project{}, fmt.Errorf("%w: %s bağlı değil. Bağlantılar menüsünden ekle.", store.ErrValidation, backend)
+		}
 	}
 	now := time.Now().UTC()
 	id := store.NewID()
@@ -72,6 +83,7 @@ func (s *Service) Create(ctx context.Context, userID, name, brief, stackRaw stri
 		Stack:     stack,
 		Status:    store.StatusQueued,
 		RootPath:  filepath.Join(s.Root, userID, id),
+		Backend:   backend,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -362,10 +374,15 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 	if err != nil {
 		return err
 	}
+	beLabel, err := backendLabel(project.Backend)
+	if err != nil {
+		beLabel = "Yerel API"
+	}
 	prompt := strings.Join([]string{
 		"İçerde müşteri uygulamasını bu dizinde yaz. Kök dışına çıkma.",
 		"Yığın: " + label,
 		rule,
+		"Backend hedefi: " + beLabel + ". Token’ı koda gömme.",
 		"Ad: " + nameSafe,
 		"Brif: " + briefSafe,
 		"Asıl klasörler: frontend/ (seçilen dil, Clean Architecture), backend/, maestro/.",

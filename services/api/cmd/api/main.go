@@ -19,6 +19,7 @@ import (
 	"github.com/icerde/api/graph"
 	"github.com/icerde/api/internal/activate"
 	"github.com/icerde/api/internal/auth"
+	"github.com/icerde/api/internal/connect"
 	"github.com/icerde/api/internal/factory"
 	"github.com/icerde/api/internal/llm"
 	"github.com/icerde/api/internal/maestro"
@@ -98,7 +99,12 @@ func main() {
 		log.Printf("maestro missing — flows SKIPPED without a device")
 	}
 	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
-	resolver := &graph.Resolver{Auth: authSvc, Factory: fact, LLM: llmSvc}
+	resolver := &graph.Resolver{
+		Auth:    authSvc,
+		Factory: fact,
+		LLM:     llmSvc,
+		Connect: &connect.Service{Store: memory, Git: connect.CLIGit{}},
+	}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

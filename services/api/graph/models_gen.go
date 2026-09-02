@@ -9,6 +9,14 @@ import (
 	"strconv"
 )
 
+type Connection struct {
+	Kind      ConnectionKind   `json:"kind"`
+	Status    ConnectionStatus `json:"status"`
+	Account   string           `json:"account"`
+	TokenHint string           `json:"tokenHint"`
+	Note      string           `json:"note"`
+}
+
 type DesignScreen struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -25,6 +33,11 @@ type Device struct {
 
 type ExportBundle struct {
 	JSON string `json:"json"`
+}
+
+type GitPushResult struct {
+	Ok   bool   `json:"ok"`
+	Note string `json:"note"`
 }
 
 type Health struct {
@@ -127,17 +140,18 @@ type Mutation struct {
 }
 
 type Project struct {
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
-	Brief     string         `json:"brief"`
-	Stack     ProjectStack   `json:"stack"`
-	Status    ProjectStatus  `json:"status"`
-	RootPath  string         `json:"rootPath"`
-	CreatedAt string         `json:"createdAt"`
-	Logs      []*JobLog      `json:"logs"`
-	Files     []*ProjectFile `json:"files"`
-	Maestro   *MaestroStudio `json:"maestro"`
-	Activate  *LocalActivate `json:"activate"`
+	ID            string         `json:"id"`
+	Name          string         `json:"name"`
+	Brief         string         `json:"brief"`
+	Stack         ProjectStack   `json:"stack"`
+	Status        ProjectStatus  `json:"status"`
+	RootPath      string         `json:"rootPath"`
+	BackendTarget BackendTarget  `json:"backendTarget"`
+	CreatedAt     string         `json:"createdAt"`
+	Logs          []*JobLog      `json:"logs"`
+	Files         []*ProjectFile `json:"files"`
+	Maestro       *MaestroStudio `json:"maestro"`
+	Activate      *LocalActivate `json:"activate"`
 }
 
 type ProjectFile struct {
@@ -229,6 +243,65 @@ func (e ActivateStatus) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type BackendTarget string
+
+const (
+	BackendTargetLocal      BackendTarget = "LOCAL"
+	BackendTargetSupabase   BackendTarget = "SUPABASE"
+	BackendTargetCloudflare BackendTarget = "CLOUDFLARE"
+	BackendTargetRender     BackendTarget = "RENDER"
+)
+
+var AllBackendTarget = []BackendTarget{
+	BackendTargetLocal,
+	BackendTargetSupabase,
+	BackendTargetCloudflare,
+	BackendTargetRender,
+}
+
+func (e BackendTarget) IsValid() bool {
+	switch e {
+	case BackendTargetLocal, BackendTargetSupabase, BackendTargetCloudflare, BackendTargetRender:
+		return true
+	}
+	return false
+}
+
+func (e BackendTarget) String() string {
+	return string(e)
+}
+
+func (e *BackendTarget) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BackendTarget(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BackendTarget", str)
+	}
+	return nil
+}
+
+func (e BackendTarget) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BackendTarget) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BackendTarget) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type ChatRole string
 
 const (
@@ -281,6 +354,124 @@ func (e *ChatRole) UnmarshalJSON(b []byte) error {
 }
 
 func (e ChatRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ConnectionKind string
+
+const (
+	ConnectionKindSupabase   ConnectionKind = "SUPABASE"
+	ConnectionKindCloudflare ConnectionKind = "CLOUDFLARE"
+	ConnectionKindGithub     ConnectionKind = "GITHUB"
+	ConnectionKindVercel     ConnectionKind = "VERCEL"
+	ConnectionKindRender     ConnectionKind = "RENDER"
+)
+
+var AllConnectionKind = []ConnectionKind{
+	ConnectionKindSupabase,
+	ConnectionKindCloudflare,
+	ConnectionKindGithub,
+	ConnectionKindVercel,
+	ConnectionKindRender,
+}
+
+func (e ConnectionKind) IsValid() bool {
+	switch e {
+	case ConnectionKindSupabase, ConnectionKindCloudflare, ConnectionKindGithub, ConnectionKindVercel, ConnectionKindRender:
+		return true
+	}
+	return false
+}
+
+func (e ConnectionKind) String() string {
+	return string(e)
+}
+
+func (e *ConnectionKind) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ConnectionKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ConnectionKind", str)
+	}
+	return nil
+}
+
+func (e ConnectionKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ConnectionKind) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ConnectionKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ConnectionStatus string
+
+const (
+	ConnectionStatusDisconnected ConnectionStatus = "DISCONNECTED"
+	ConnectionStatusConnected    ConnectionStatus = "CONNECTED"
+	ConnectionStatusFailed       ConnectionStatus = "FAILED"
+)
+
+var AllConnectionStatus = []ConnectionStatus{
+	ConnectionStatusDisconnected,
+	ConnectionStatusConnected,
+	ConnectionStatusFailed,
+}
+
+func (e ConnectionStatus) IsValid() bool {
+	switch e {
+	case ConnectionStatusDisconnected, ConnectionStatusConnected, ConnectionStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ConnectionStatus) String() string {
+	return string(e)
+}
+
+func (e *ConnectionStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ConnectionStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ConnectionStatus", str)
+	}
+	return nil
+}
+
+func (e ConnectionStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ConnectionStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ConnectionStatus) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

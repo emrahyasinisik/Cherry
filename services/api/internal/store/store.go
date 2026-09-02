@@ -71,6 +71,45 @@ const (
 	MaestroFailed  MaestroResult = "FAILED"
 )
 
+type ConnectionKind string
+
+const (
+	KindSupabase   ConnectionKind = "SUPABASE"
+	KindCloudflare ConnectionKind = "CLOUDFLARE"
+	KindGithub     ConnectionKind = "GITHUB"
+	KindVercel     ConnectionKind = "VERCEL"
+	KindRender     ConnectionKind = "RENDER"
+)
+
+type ConnectionStatus string
+
+const (
+	ConnDisconnected ConnectionStatus = "DISCONNECTED"
+	ConnConnected    ConnectionStatus = "CONNECTED"
+	ConnFailed       ConnectionStatus = "FAILED"
+)
+
+type BackendTarget string
+
+const (
+	TargetLocal      BackendTarget = "LOCAL"
+	TargetSupabase   BackendTarget = "SUPABASE"
+	TargetCloudflare BackendTarget = "CLOUDFLARE"
+	TargetRender     BackendTarget = "RENDER"
+)
+
+type Connection struct {
+	ID        string
+	UserID    string
+	Kind      ConnectionKind
+	Status    ConnectionStatus
+	Account   string
+	Token     string
+	TokenHint string
+	Note      string
+	UpdatedAt time.Time
+}
+
 type Project struct {
 	ID        string
 	UserID    string
@@ -79,6 +118,7 @@ type Project struct {
 	Stack     ProjectStack
 	Status    ProjectStatus
 	RootPath  string
+	Backend   BackendTarget
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -179,6 +219,11 @@ type Store interface {
 	UpdateProject(ctx context.Context, project Project) error
 	AppendLog(ctx context.Context, log JobLog) error
 	ListLogs(ctx context.Context, projectID string) ([]JobLog, error)
+
+	GetConnection(ctx context.Context, userID string, kind ConnectionKind) (*Connection, error)
+	UpsertConnection(ctx context.Context, conn Connection) (Connection, error)
+	DeleteConnection(ctx context.Context, userID string, kind ConnectionKind) error
+	ListConnections(ctx context.Context, userID string) ([]Connection, error)
 
 	PutLlmVersion(ctx context.Context, version LlmVersion) error
 	ListLlmVersions(ctx context.Context, slot LlmSlot) ([]LlmVersion, error)

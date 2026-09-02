@@ -47,14 +47,14 @@ Geliştirirken (İçerde’yi biz yazarken):
 
 | Ne | Durum | Ne işe yarar |
 | --- | --- | --- |
-| **GitHub MCP** | İsteğe bağlı | Biz İçerde’yi geliştirirken. Müşterinin GitHub push’u [connections.md](connections.md) — henüz yok. |
+| **GitHub MCP** | İsteğe bağlı | Biz İçerde’yi geliştirirken. Müşteri push’u in-app Bağlantılar. |
 | **Maestro MCP** | Geliştirici makinede | Flow’ları sen elle denersin. Ürün host’unun yerine geçmez. |
 
 Örnek: [../.cursor/mcp.json.example](../.cursor/mcp.json.example) → kopyala `.cursor/mcp.json` (secret koyma, git’e atma).
 
 **E-posta / 6 haneli kod için MCP bağlama.** Birinci parti: [email-verification.md](email-verification.md).
 
-## 3. Müşteri bağlantıları (ürün içi, henüz yok) / In-app customer connections (not built)
+## 3. Müşteri bağlantıları (ürün içi) / In-app customer connections
 
 Bu **Cursor MCP’si değildir.** Kişi İçerde’de **Bağlantılar** menüsünden kendi hesaplarını bağlar: Supabase, Cloudflare, GitHub, Vercel, Render.
 

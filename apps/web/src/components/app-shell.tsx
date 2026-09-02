@@ -9,6 +9,7 @@ import {
   Smartphone,
   Shield,
   Building2,
+  Cable,
   Cpu,
   Scale,
 } from "lucide-react";
@@ -73,6 +74,7 @@ export function AppShell({
     { href: maestroHref, label: "Maestro", icon: Smartphone, enabled: true },
     { href: "/security", label: "Güvenlik", icon: Shield, enabled: true },
     { href: "/projects", label: "Organizasyon", icon: Building2, enabled: false },
+    { href: "/connections", label: "Bağlantılar", icon: Cable, enabled: true },
     { href: "/llm", label: "LLM", icon: Cpu, enabled: true },
     { href: "/privacy", label: "Gizlilik", icon: Scale, enabled: true },
   ];
@@ -200,6 +202,9 @@ function sidecarChip(name: string, source: string | null): string {
 }
 
 function headerTitle(pathname: string): string {
+  if (pathname.startsWith("/connections")) {
+    return "Bağlantılar";
+  }
   if (pathname.startsWith("/llm")) {
     return "LLM yönetici";
   }
@@ -235,6 +240,8 @@ function navActive(pathname: string, label: string, href: string): boolean {
       return pathname.startsWith("/llm");
     case "Gizlilik":
       return pathname.startsWith("/privacy");
+    case "Bağlantılar":
+      return pathname.startsWith("/connections");
     default:
       return pathname.startsWith(href);
   }

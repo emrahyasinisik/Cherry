@@ -16,6 +16,7 @@ type Memory struct {
 	mail       map[string]Mail
 	projects   map[string]Project
 	logs       map[string][]JobLog
+	conns      map[string]Connection
 	versions   map[string]LlmVersion
 	audits     []AuditEvent
 	llmState   LlmState
@@ -31,6 +32,7 @@ func NewMemory() *Memory {
 		mail:       make(map[string]Mail),
 		projects:   make(map[string]Project),
 		logs:       make(map[string][]JobLog),
+		conns:      make(map[string]Connection),
 		versions:   make(map[string]LlmVersion),
 		audits:     make([]AuditEvent, 0),
 	}
@@ -356,6 +358,50 @@ func (m *Memory) ListLogs(_ context.Context, projectID string) ([]JobLog, error)
 	return out, nil
 }
 
+func connKey(userID string, kind ConnectionKind) string {
+	return userID + ":" + string(kind)
+}
+
+func (m *Memory) GetConnection(_ context.Context, userID string, kind ConnectionKind) (*Connection, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	conn, ok := m.conns[connKey(userID, kind)]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	copy := conn
+	return &copy, nil
+}
+
+func (m *Memory) UpsertConnection(_ context.Context, conn Connection) (Connection, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if conn.ID == "" {
+		conn.ID = NewID()
+	}
+	m.conns[connKey(conn.UserID, conn.Kind)] = conn
+	return conn, nil
+}
+
+func (m *Memory) DeleteConnection(_ context.Context, userID string, kind ConnectionKind) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.conns, connKey(userID, kind))
+	return nil
+}
+
+func (m *Memory) ListConnections(_ context.Context, userID string) ([]Connection, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	out := make([]Connection, 0)
+	for _, conn := range m.conns {
+		if conn.UserID == userID {
+			out = append(out, conn)
+		}
+	}
+	return out, nil
+}
+
 func (m *Memory) PutLlmVersion(_ context.Context, version LlmVersion) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -446,6 +492,11 @@ func (m *Memory) DeleteUserData(_ context.Context, userID string, wipeProjects b
 	for id, mail := range m.mail {
 		if mail.UserID == userID {
 			delete(m.mail, id)
+		}
+	}
+	for key, conn := range m.conns {
+		if conn.UserID == userID {
+			delete(m.conns, key)
 		}
 	}
 	for id, challenge := range m.challenges {

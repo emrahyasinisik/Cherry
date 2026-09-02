@@ -13,7 +13,7 @@ alwaysApply: false
 - **Required runtime:** Maestro CLI via `curl -fsSL "https://get.maestro.mobile.dev" | bash` then `maestro mcp` inside Icerde’s Electron MCP host and inside OpenCode. OpenCode CLI is the writer. Java 17+, Node, Go, Docker, emulator on the user’s machine.
 - **Connect in this Cursor project:** GitHub MCP if git handoff is used. Maestro in Cursor is optional for the developer, not a substitute for the in-app host.
 - **Mail and 6-digit codes are first-party.** Do not connect AgentMail or any inbox SaaS. See [docs/email-verification.md](docs/email-verification.md).
-- **In-app Connections** (Supabase, Cloudflare, GitHub, Vercel, Render) are the person’s accounts, not Cursor MCPs. See [docs/connections.md](docs/connections.md). Not built yet. Do not mix them into the Icerde platform API.
+- **In-app Connections** (Supabase, Cloudflare, GitHub, Vercel, Render) are the person’s accounts, not Cursor MCPs. See [docs/connections.md](docs/connections.md). Token paste in v1. Do not mix them into the Icerde platform API.
 - **Do not connect:** Figma/Canva, SMS providers, extra filesystem/shell MCPs, MongoDB MCP as a requirement.
 - Never commit real `.cursor/mcp.json` with secrets. Use the `.example` files.
 - Colab is not an MCP. Do not fake a Colab MCP. Fine-tune is two notebooks (workers A and B), parallel as two sessions, **16GB GPU each**. One card does not host both.

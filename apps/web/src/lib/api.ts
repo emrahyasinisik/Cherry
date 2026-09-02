@@ -30,6 +30,7 @@ export type Project = {
   stack: ProjectStack;
   status: ProjectStatus;
   rootPath: string;
+  backendTarget: BackendTarget;
   createdAt: string;
   logs: JobLog[];
   files: ProjectFile[];
@@ -38,6 +39,9 @@ export type Project = {
 };
 
 export type ProjectStack = "EXPO" | "FLUTTER" | "NATIVE";
+export type BackendTarget = "LOCAL" | "SUPABASE" | "CLOUDFLARE" | "RENDER";
+export type ConnectionKind = "SUPABASE" | "CLOUDFLARE" | "GITHUB" | "VERCEL" | "RENDER";
+export type ConnectionStatus = "DISCONNECTED" | "CONNECTED" | "FAILED";
 export type ProjectStatus = "QUEUED" | "WRITING" | "TESTING" | "READY" | "FAILED";
 export type MaestroResult = "SKIPPED" | "PASSED" | "FAILED";
 export type ActivateStatus = "IDLE" | "STARTING" | "RUNNING" | "STOPPING" | "FAILED";
@@ -85,7 +89,7 @@ export type LocalActivate = {
 };
 
 export const PROJECT_FIELDS = `
-  id name brief stack status rootPath createdAt
+  id name brief stack backendTarget status rootPath createdAt
   logs { at message role }
   files { path kind }
   maestro {
@@ -310,6 +314,84 @@ export function stackSourceHint(stack: ProjectStack): string {
       return "Swift 6 · iOS 18 · Clean Architecture";
     default: {
       const exhaustive: never = stack;
+      return exhaustive;
+    }
+  }
+}
+
+export type Connection = {
+  kind: ConnectionKind;
+  status: ConnectionStatus;
+  account: string;
+  tokenHint: string;
+  note: string;
+};
+
+export function connectionKindLabel(kind: ConnectionKind): string {
+  switch (kind) {
+    case "SUPABASE":
+      return "Supabase";
+    case "CLOUDFLARE":
+      return "Cloudflare";
+    case "GITHUB":
+      return "GitHub";
+    case "VERCEL":
+      return "Vercel";
+    case "RENDER":
+      return "Render";
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
+}
+
+export function connectionStatusLabel(status: ConnectionStatus): string {
+  switch (status) {
+    case "DISCONNECTED":
+      return "Bağlı değil";
+    case "CONNECTED":
+      return "Bağlı";
+    case "FAILED":
+      return "Hata";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
+export function backendTargetLabel(target: BackendTarget): string {
+  switch (target) {
+    case "LOCAL":
+      return "Yerel API";
+    case "SUPABASE":
+      return "Supabase";
+    case "CLOUDFLARE":
+      return "Cloudflare";
+    case "RENDER":
+      return "Render";
+    default: {
+      const exhaustive: never = target;
+      return exhaustive;
+    }
+  }
+}
+
+export function connectionTokenHint(kind: ConnectionKind): string {
+  switch (kind) {
+    case "SUPABASE":
+      return "Service role veya anon key";
+    case "CLOUDFLARE":
+      return "API token";
+    case "GITHUB":
+      return "repo kapsamlı PAT";
+    case "VERCEL":
+      return "Deploy token";
+    case "RENDER":
+      return "API key";
+    default: {
+      const exhaustive: never = kind;
       return exhaustive;
     }
   }
