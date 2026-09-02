@@ -37,7 +37,7 @@ Fine-tune için gerçek brif + üretilen kod + test log’u gerekir. Onlar kabuk
 5. **OpenCode** — stub yazıcı yerine gerçek kod motoru.
 6. **Yerel aktif + Maestro** — backend localhost, `maestro mcp`, skip-if-no-device.
 7. **LLM B + kuyruk** — ikinci kapasite işçisi; boş olan alır, ikisi de meşgulse kuyruk. Kod/test ayrımı yok. Versiyon pointer’ı sonraki cevapları değiştirir.
-8. **Colab fine-tune** — izler birikince.
+8. **Colab fine-tune** — izler birikince. İki notebook (A/B), paralel iki oturum, her biri 16GB GPU. Aynı tarif; tek kartta iki iş yok.
 
 Şimdi yapılacak bir sonraki iş: **5 — OpenCode**. Dilim 4 LLM A + GDPR kodda.
 

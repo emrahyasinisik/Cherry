@@ -64,7 +64,7 @@ Geliştirirken (İçerde’yi biz yazarken):
 | MongoDB MCP | Platform Docker ile konuşur; şart değil. |
 | SMS / Twilio | Güvenlik modeli SMS yasak. |
 
-Colab **MCP değil**: Google hesabı + notebook export. Cursor’a bağlanmaz.
+Colab **MCP değil**: Google hesabı + iki notebook export (işçi A/B). Her oturum **16GB GPU**. Cursor’a bağlanmaz. Tek kartta iki notebook varsayma.
 
 ## Kurulum sırası / Install order (senin makinen)
 

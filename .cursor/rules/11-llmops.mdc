@@ -14,5 +14,7 @@ alwaysApply: false
 - Versions are immutable records. “Active” is a pointer per worker. Changing the pointer changes **subsequent** completions on that worker. In-flight jobs finish on the old assignment (default).
 - MCP read-file is how models read generated source. Admin can change the allowed root.
 - Fine-tune via Colab export/import. Colab is not 24/7 production inference.
+- Two notebooks, one per worker (A and B), may run **in parallel as two Colab sessions**. Each session is budgeted at **16GB GPU** (T4-class). Do not assume one 16GB card hosts both notebooks. Same recipe so A and B stay interchangeable for load.
+- Notebooks must fit 16GB: LoRA/QLoRA, not full-weight large models. Do not ship Colab notebooks until slice 8 (traces exist).
 - Admin UI must show occupancy (idle/busy/queued), not fake role labels. A switch with no effect on later answers is a bug.
 - Read [docs/llmops.md](docs/llmops.md).

@@ -68,3 +68,26 @@ flowchart LR
 ## Colab
 
 Export training pack → Colab → checkpoint back → new immutable `llmVersion` → admin marks active. Colab is not the production server.
+
+**Karar / Decision:** İki notebook, iki işçi. Aynı anda çalışabilir — **iki ayrı Colab oturumu**, her biri **16GB GPU** (T4 sınıfı). Tek 16GB kartta iki notebook yok.
+
+Two notebooks, two workers. Parallel means **two Colab runtimes**, each with a **16GB GPU** budget (T4-class). One 16GB card does not host both.
+
+```mermaid
+flowchart LR
+  Pack[training_pack] --> NbA[notebook_A_16GB]
+  Pack --> NbB[notebook_B_16GB]
+  NbA --> CkA[checkpoint_A]
+  NbB --> CkB[checkpoint_B]
+  CkA --> VerA[llmVersion_worker_A]
+  CkB --> VerB[llmVersion_worker_B]
+```
+
+| Sabit / Invariant | Neden / Why |
+| --- | --- |
+| Aynı tarif (LoRA/QLoRA), aynı veri paketi | A ve B yük paylaşır; farklı iş uzmanı değiller |
+| 16GB / oturum | Colab T4 bütçesi; tam ağırlık büyük model yok |
+| İki oturum = iki GPU hakkı | Paralel fine-tune; tek kartı bölme |
+| Colab üretim inferansı değil | Stüdyo işçileri İçerde’de çalışır |
+
+Dilim 8. Brif + üretilen kod + Maestro izi birikmeden notebook yazma.
