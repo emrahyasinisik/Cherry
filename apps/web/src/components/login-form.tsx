@@ -327,16 +327,17 @@ export function LoginForm() {
       <Button type="submit" size="lg" className="h-10 w-full" disabled={pending}>
         {pending ? "Gönderiliyor…" : mode === "register" ? "Hesap oluştur" : "Giriş yap"}
       </Button>
-      <button
+      <Button
         type="button"
-        className="text-center text-muted-foreground underline-offset-4 hover:underline"
+        variant="ghost"
+        className="h-9 w-full text-muted-foreground"
         onClick={() => {
           setMode(mode === "login" ? "register" : "login");
           setError(null);
         }}
       >
         {mode === "login" ? "Hesabın yok mu? Oluştur" : "Zaten hesabın var mı? Giriş yap"}
-      </button>
+      </Button>
     </form>
   );
 }
