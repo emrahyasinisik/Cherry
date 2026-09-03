@@ -71,6 +71,28 @@ func (r *Runner) RunDir(ctx context.Context, maestroDir, localURL string) Report
 	}
 	devices := r.Devices(ctx)
 	bin, haveCLI := r.Probe()
+	if !haveCLI {
+		report.DeviceStatus = "no_cli"
+		report.Note = "Maestro CLI yok. SKIPPED — passed uydurulmaz."
+		for _, path := range entries {
+			name := strings.TrimSuffix(filepath.Base(path), ".yaml")
+			note := "Maestro CLI yok. SKIPPED — sahte geçiş yok."
+			if len(devices) == 0 {
+				note = "Maestro CLI yok; cihaz da yok. SKIPPED — sahte geçiş yok."
+			} else {
+				note = "Cihaz görüldü ama Maestro CLI yok. SKIPPED — passed uydurulmaz."
+			}
+			if localURL != "" {
+				note += " Yerel API: " + localURL
+			}
+			report.Flows = append(report.Flows, FlowResult{
+				ID:     name,
+				Result: store.MaestroSkipped,
+				Note:   note,
+			})
+		}
+		return report
+	}
 	if len(devices) == 0 {
 		report.DeviceStatus = "none"
 		for _, path := range entries {
@@ -78,9 +100,6 @@ func (r *Runner) RunDir(ctx context.Context, maestroDir, localURL string) Report
 			note := "Emülatör yok. SKIPPED — geçti sayılmaz."
 			if localURL != "" {
 				note += " Yerel API: " + localURL
-			}
-			if !haveCLI {
-				note = "Maestro sidecar yok; cihaz da yok. SKIPPED — sahte geçiş yok."
 			}
 			report.Flows = append(report.Flows, FlowResult{
 				ID:     name,
@@ -92,18 +111,6 @@ func (r *Runner) RunDir(ctx context.Context, maestroDir, localURL string) Report
 	}
 	report.DeviceStatus = "device"
 	report.Note = "Cihaz var."
-	if !haveCLI {
-		for _, path := range entries {
-			name := strings.TrimSuffix(filepath.Base(path), ".yaml")
-			report.Flows = append(report.Flows, FlowResult{
-				ID:     name,
-				Result: store.MaestroSkipped,
-				Note:   "Cihaz görüldü ama Maestro CLI yok. SKIPPED — passed uydurulmaz.",
-			})
-		}
-		report.Note = "Maestro CLI yok."
-		return report
-	}
 	for _, path := range entries {
 		name := strings.TrimSuffix(filepath.Base(path), ".yaml")
 		res, note := r.testFile(ctx, bin, path)

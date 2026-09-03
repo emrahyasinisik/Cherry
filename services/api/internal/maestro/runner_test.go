@@ -19,7 +19,7 @@ func TestRunDirSkipsWithoutDevice(t *testing.T) {
 	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
 	t.Setenv("PATH", "/nonexistent")
 	report := r.RunDir(context.Background(), dir, "http://127.0.0.1:47001")
-	if report.DeviceStatus != "none" || len(report.Flows) != 1 {
+	if report.DeviceStatus != "no_cli" || len(report.Flows) != 1 {
 		t.Fatalf("%+v", report)
 	}
 	if report.Flows[0].Result != store.MaestroSkipped {
@@ -27,6 +27,26 @@ func TestRunDirSkipsWithoutDevice(t *testing.T) {
 	}
 	if report.Flows[0].Result == store.MaestroPassed {
 		t.Fatal("never pass without a device")
+	}
+}
+
+func TestRunDirSkipsWithoutDeviceWhenCLIPresent(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "login.yaml"), []byte("appId: x\n---\n- launchApp\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	bin := filepath.Join(t.TempDir(), "maestro")
+	if err := os.WriteFile(bin, []byte("#!/bin/sh\necho ok\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	r := &Runner{Bin: bin, Timeout: 0}
+	t.Setenv("PATH", "/nonexistent")
+	report := r.RunDir(context.Background(), dir, "")
+	if report.DeviceStatus != "none" {
+		t.Fatalf("want none (CLI ok, no device), got %+v", report)
+	}
+	if report.Flows[0].Result != store.MaestroSkipped {
+		t.Fatalf("must skip, got %s", report.Flows[0].Result)
 	}
 }
 

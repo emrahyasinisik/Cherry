@@ -119,6 +119,47 @@ func TestAbsDir(t *testing.T) {
 	}
 }
 
+func TestCLIMissingKeyFailsHonestly(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "opencode")
+	if err := os.WriteFile(bin, []byte("#!/bin/sh\necho should-not-run\nexit 0\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("CHERRY_OPENCODE_BIN", bin)
+	t.Setenv("CHERRY_LLM_API_KEY", "")
+	t.Setenv("CHERRY_LLM_BASE_URL", "")
+	t.Setenv("OPENAI_API_KEY", "")
+	cli := NewCLI()
+	res, err := cli.Run(context.Background(), Request{Dir: t.TempDir(), Prompt: "x"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Status != StatusFailed {
+		t.Fatalf("status %s", res.Status)
+	}
+	if !strings.Contains(res.Err, "model anahtarı yok") {
+		t.Fatalf("err %q", res.Err)
+	}
+}
+
+func TestWriteConfigWithBaseURL(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
+	if err := WriteConfig(dir, Endpoint{BaseURL: "https://cherry.visevent.com/v1", Model: "Qwen/Qwen2.5-1.5B-Instruct"}); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(dir, "opencode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	if !strings.Contains(text, "cherry.visevent.com/v1") {
+		t.Fatalf("%s", text)
+	}
+	if !strings.Contains(text, "openai/") {
+		t.Fatalf("model provider prefix missing: %s", text)
+	}
+}
+
 func TestFailErrPrefersOpenCodeLine(t *testing.T) {
 	raw := "\x1b[91m\x1b[1mError: \x1b[0mFailed to change directory to ../../var/projects/x\n"
 	got := failErr(fmt.Errorf("exit status 1"), raw)

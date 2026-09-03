@@ -166,6 +166,69 @@ export function useHome(title: string, subtitle: string): HomeState {
   return state;
 }
 `},
+		{rel: "frontend/src/presentation/screens/login-screen.tsx", kind: "frontend", body: `import { Pressable, Text, TextInput, View } from "react-native";
+import { router } from "expo-router";
+
+type Props = {
+  appName: string;
+};
+
+export function LoginScreen({ appName }: Props) {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", padding: 24, gap: 12, backgroundColor: "#0E1114" }}>
+      <Text style={{ fontSize: 12, letterSpacing: 1, color: "#8B939C" }}>{appName}</Text>
+      <Text style={{ fontSize: 22, fontWeight: "600", color: "#E8E4DC" }}>Giriş</Text>
+      <Text style={{ color: "#8B939C" }}>E-posta ve şifre ile içeri. SMS yok.</Text>
+      <TextInput
+        accessibilityLabel="E-posta"
+        placeholder="e-posta"
+        placeholderTextColor="#8B939C"
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={{
+          borderWidth: 1,
+          borderColor: "#2A323A",
+          borderRadius: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          color: "#E8E4DC",
+          backgroundColor: "#161B20",
+        }}
+      />
+      <TextInput
+        accessibilityLabel="Şifre"
+        placeholder="şifre"
+        placeholderTextColor="#8B939C"
+        secureTextEntry
+        style={{
+          borderWidth: 1,
+          borderColor: "#2A323A",
+          borderRadius: 8,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
+          color: "#E8E4DC",
+          backgroundColor: "#161B20",
+        }}
+      />
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => {
+          router.replace("/home");
+        }}
+        style={{
+          marginTop: 8,
+          backgroundColor: "#C4A574",
+          borderRadius: 8,
+          paddingVertical: 12,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#0E1114", fontWeight: "600" }}>Devam</Text>
+      </Pressable>
+    </View>
+  );
+}
+`},
 		{rel: "frontend/src/presentation/screens/home-screen.tsx", kind: "frontend", body: `import { ActivityIndicator, Text, View } from "react-native";
 
 import { useHome } from "../hooks/use-home";
@@ -180,23 +243,24 @@ export function HomeScreen({ title, subtitle }: Props) {
 
   if (state.status === "loading") {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: 24 }}>
-        <ActivityIndicator />
+      <View style={{ flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#0E1114" }}>
+        <ActivityIndicator color="#C4A574" />
       </View>
     );
   }
   if (state.status === "error") {
     return (
-      <View style={{ flex: 1, justifyContent: "center", padding: 24 }}>
-        <Text>{state.message}</Text>
+      <View style={{ flex: 1, justifyContent: "center", padding: 24, backgroundColor: "#0E1114" }}>
+        <Text style={{ color: "#E8E4DC" }}>{state.message}</Text>
       </View>
     );
   }
   const item = state.items[0];
   return (
-    <View style={{ flex: 1, justifyContent: "center", padding: 24, gap: 8 }}>
-      <Text style={{ fontSize: 22, fontWeight: "600" }}>{item?.title ?? title}</Text>
-      <Text>{item?.subtitle ?? subtitle}</Text>
+    <View style={{ flex: 1, justifyContent: "center", padding: 24, gap: 8, backgroundColor: "#0E1114" }}>
+      <Text style={{ fontSize: 22, fontWeight: "600", color: "#E8E4DC" }}>{item?.title ?? title}</Text>
+      <Text style={{ color: "#8B939C" }}>{item?.subtitle ?? subtitle}</Text>
+      <Text style={{ marginTop: 12, color: "#8B939C" }}>Bugünkü siparişler burada. Henüz kayıt yok.</Text>
     </View>
   );
 }
@@ -207,9 +271,15 @@ export default function RootLayout() {
   return <Stack screenOptions={{ headerShown: false }} />;
 }
 `},
-		{rel: "frontend/app/index.tsx", kind: "frontend", body: `import { HomeScreen } from "../src/presentation/screens/home-screen";
+		{rel: "frontend/app/index.tsx", kind: "frontend", body: `import { LoginScreen } from "../src/presentation/screens/login-screen";
 
 export default function Index() {
+  return <LoginScreen appName={` + title + `} />;
+}
+`},
+		{rel: "frontend/app/home.tsx", kind: "frontend", body: `import { HomeScreen } from "../src/presentation/screens/home-screen";
+
+export default function HomeRoute() {
   return (
     <HomeScreen title={` + title + `} subtitle={` + desc + `} />
   );

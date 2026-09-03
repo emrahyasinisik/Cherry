@@ -146,8 +146,9 @@ flowchart LR
 2. Notebook hücre 9: Token varsa named tunnel (`run --token`); yoksa quick tunnel. Named: `CHERRY_COLAB_PUBLIC_URL` yazdırılır. Quick: log’dan `trycloudflare.com` URL parse edilir.
 3. Notebook hücre 10: Oturumu canlı tutar (60s döngü).
 4. Cherry stüdyoda: LLM yönetici → Colab inferans → URL'yi yapıştır. `setColabInferenceUrl` mutation'ı çağrılır (sabit veya trycloudflare — kısıtlama yok).
-5. Cherry completer, `colab-tunnel` kanalıyla istekleri tünele yönlendirir. GDPR katmanı hâlâ aktif (redact → complete → scan → audit).
-6. Sağlık kontrolü 30 saniyede bir `/v1/models` endpoint'ini yoklar. Yanıt gelmezse durum `DISCONNECTED` olur ve varsayılan completer kullanılır.
+5. Cherry completer, `colab-tunnel` kanalıyla istekleri tünele yönlendirir. GDPR katmanı hâlâ aktif (redact → complete → scan → audit). OpenCode aynı URL’yi `OPENAI_BASE_URL` / `opencode.json` ile alır.
+6. Sağlık kontrolü 30 saniyede bir `/models` endpoint’ini yoklar (8s timeout, 3 deneme). Yanıt gelmezse durum `DISCONNECTED` olur ve varsayılan completer kullanılır. Tunnel `Complete` çağrıları 90s HTTP timeout kullanır.
+7. LLM yönetici UI’da **Colab inferans** alanı `setColabInferenceUrl` çağırır — curl gerekmez.
 
 **Not:** Stüdyo ↔ Colab **paket/adapter** köprüsü hâlâ quick tunnel kullanabilir (`startColabBridge`). Named tunnel öncelikle **Colab → public inferans** içindir.
 

@@ -108,29 +108,47 @@ func screenHTML(app, title, lead, detail, variant string) string {
 	if variant == "home" {
 		accent = "#6F9E7A"
 	}
+	cta := "Devam"
+	emptyHint := ""
+	switch variant {
+	case "login":
+		emptyHint = `<p class="hint">E-posta · şifre — SMS yok</p>`
+	case "home":
+		emptyHint = `<p class="hint">Bugünkü siparişler burada durur. Henüz kayıt yok.</p>`
+		cta = "Menüye bak"
+	default:
+		emptyHint = `<p class="hint">İçerik bekleniyor.</p>`
+	}
 	return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><style>
 body{margin:0;background:#0E1114;color:#E8E4DC;font-family:ui-sans-serif,system-ui,sans-serif}
-.phone{padding:28px 20px;min-height:100vh;box-sizing:border-box}
+.phone{padding:28px 20px;min-height:100vh;box-sizing:border-box;background:radial-gradient(120% 80% at 10% 0%,#161B20 0%,#0E1114 55%)}
 .mark{font-size:11px;letter-spacing:.08em;color:#8B939C;margin:0 0 20px}
-h1{font-size:22px;font-weight:500;margin:0 0 8px}
+h1{font-size:22px;font-weight:500;margin:0 0 8px;color:#E8E4DC}
 p{font-size:13px;line-height:1.45;color:#8B939C;margin:0 0 16px}
+.hint{font-size:12px;color:#8B939C;margin:8px 0 16px}
 .cta{display:block;background:` + accent + `;color:#0E1114;border:0;border-radius:8px;padding:10px 14px;font-size:13px;width:100%}
-.field{height:36px;border:1px solid #2A323A;border-radius:8px;margin:0 0 8px;background:#161B20}
+.field{height:36px;border:1px solid #2A323A;border-radius:8px;margin:0 0 8px;background:#161B20;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#8B939C}
+.card{border:1px dashed #2A323A;border-radius:10px;padding:14px;margin:0 0 16px;background:#12161A}
 </style></head><body><div class="phone">
 <p class="mark">` + html.EscapeString(app) + `</p>
 <h1>` + html.EscapeString(title) + `</h1>
 <p>` + html.EscapeString(lead) + `</p>
 ` + fieldsFor(variant) + `
+` + emptyHint + `
 <p>` + html.EscapeString(clip(detail, 180)) + `</p>
-<button class="cta">Devam</button>
+<button class="cta">` + html.EscapeString(cta) + `</button>
 </div></body></html>`
 }
 
 func fieldsFor(variant string) string {
-	if variant != "login" {
-		return `<div class="field"></div><div class="field"></div>`
+	switch variant {
+	case "login":
+		return `<div class="field">e-posta</div><div class="field">şifre</div>`
+	case "home":
+		return `<div class="card"><p class="hint" style="margin:0">Boş tezgâh — ilk sipariş gelince liste dolar.</p></div>`
+	default:
+		return `<div class="field"></div>`
 	}
-	return `<div class="field"></div><div class="field"></div>`
 }
 
 func clip(s string, n int) string {
@@ -144,8 +162,15 @@ func clip(s string, n int) string {
 func slugify(name string) string {
 	var b strings.Builder
 	lastDash := true
-	for _, r := range strings.ToLower(name) {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+	for _, r := range name {
+		r = asciiFold(r)
+		if r >= 'A' && r <= 'Z' {
+			r = r - 'A' + 'a'
+		} else {
+			r = unicode.ToLower(r)
+			r = asciiFold(r)
+		}
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
 			b.WriteRune(r)
 			lastDash = false
 			continue
@@ -160,6 +185,32 @@ func slugify(name string) string {
 		return "uygulama"
 	}
 	return out
+}
+
+// asciiFold maps Turkish and common Latin letters to ASCII for Expo slug / appId.
+func asciiFold(r rune) rune {
+	switch r {
+	case 'ı', 'İ', 'I', 'ì', 'í', 'î', 'ï':
+		return 'i'
+	case 'ğ', 'Ğ':
+		return 'g'
+	case 'ü', 'Ü', 'ù', 'ú', 'û':
+		return 'u'
+	case 'ş', 'Ş', 'š', 'Š':
+		return 's'
+	case 'ö', 'Ö', 'ò', 'ó', 'ô':
+		return 'o'
+	case 'ç', 'Ç':
+		return 'c'
+	case 'ä', 'Ä', 'à', 'á', 'â', 'ã':
+		return 'a'
+	case 'é', 'è', 'ê', 'ë', 'É':
+		return 'e'
+	case 'ñ', 'Ñ':
+		return 'n'
+	default:
+		return r
+	}
 }
 
 func zipProject(root, dest string) error {

@@ -18,9 +18,11 @@ func TestFrontendCleanArchTrees(t *testing.T) {
 				"frontend/ARCHITECTURE.md",
 				"frontend/src/domain/entities/item.ts",
 				"frontend/src/data/repositories/item-repository-impl.ts",
+				"frontend/src/presentation/screens/login-screen.tsx",
 				"frontend/src/presentation/screens/home-screen.tsx",
 				"frontend/src/app/composition.ts",
 				"frontend/app/index.tsx",
+				"frontend/app/home.tsx",
 			},
 		},
 		{
@@ -67,6 +69,16 @@ func TestFrontendCleanArchTrees(t *testing.T) {
 			arch := seen["frontend/ARCHITECTURE.md"]
 			if !strings.Contains(arch, "Clean Architecture") {
 				t.Fatalf("ARCHITECTURE.md: %s", arch)
+			}
+			if tc.stack == store.StackExpo {
+				login := seen["frontend/src/presentation/screens/login-screen.tsx"]
+				if !strings.Contains(login, "Giriş") || !strings.Contains(login, "Devam") {
+					t.Fatalf("login screen must assert Giriş/Devam for Maestro: %s", login)
+				}
+				index := seen["frontend/app/index.tsx"]
+				if !strings.Contains(index, "LoginScreen") {
+					t.Fatalf("index must open login: %s", index)
+				}
 			}
 		})
 	}

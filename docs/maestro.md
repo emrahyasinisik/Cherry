@@ -52,6 +52,11 @@ Maestro **Cherry GraphQL’e değil**, yerelde aktif müşteri API’sine konuş
 ## Kurallar / Rules
 
 - YAML under `maestro/` ships with zip/git.
-- No emulator / no CLI: status `SKIPPED`, never `PASSED`.
+- No emulator → `deviceStatus: none`, flows `SKIPPED`, never `PASSED`.
+- No Maestro CLI → `deviceStatus: no_cli` (even if a device is visible), flows `SKIPPED`. UI labels distinguish CLI missing vs device missing.
 - Bound repair attempts (suggested max 3 per flow) then fail the job.
 - Maestro talks to the **locally activated** customer API, not Cherry GraphQL.
+
+Stüdyo metni: CLI yok → “Maestro CLI yok…”; cihaz yok → “Cihaz yok…”. `SKIPPED` etiketi yalnızca “Atlandı” — neden notta.
+
+Studio copy: CLI missing vs device missing are separate. Result label is just “Atlandı”; the note carries why.

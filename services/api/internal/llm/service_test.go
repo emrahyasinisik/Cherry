@@ -36,12 +36,47 @@ func TestCompleteRedactsAndAudits(t *testing.T) {
 	if !strings.Contains(out.Text, "v1.0") {
 		t.Fatalf("version in output: %s", out.Text)
 	}
+	if out.Channel != "mock" {
+		t.Fatalf("channel %s", out.Channel)
+	}
 	events, err := mem.ListAudit(ctx, "u1")
 	if err != nil || len(events) != 1 {
 		t.Fatalf("audit %v %#v", err, events)
 	}
 	if strings.Contains(events[0].PromptPreview, "ada@cherry.dev") {
 		t.Fatalf("audit leaked %s", events[0].PromptPreview)
+	}
+}
+
+func TestEffectiveChannelPrefersColabTunnel(t *testing.T) {
+	mem := store.NewMemory()
+	ctx := context.Background()
+	if err := Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc := &Service{Store: mem, Completer: MockCompleter{}}
+	svc.SetColabInferenceURL("https://example.invalid/v1")
+	svc.colabMu.Lock()
+	if svc.colabStopHealth != nil {
+		close(svc.colabStopHealth)
+		svc.colabStopHealth = nil
+	}
+	svc.colabInferenceURL = "https://example.invalid/v1"
+	svc.colabStatus = ColabInferenceConnected
+	svc.colabMu.Unlock()
+	snap, err := svc.Snapshot(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snap.Channel != "colab-tunnel" {
+		t.Fatalf("channel %s", snap.Channel)
+	}
+	base, key := svc.OpenCodeEndpoint()
+	if base != "https://example.invalid/v1" {
+		t.Fatalf("base %s", base)
+	}
+	if key != "cherry-colab" {
+		t.Fatalf("key %s", key)
 	}
 }
 

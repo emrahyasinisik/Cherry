@@ -12,6 +12,7 @@ import {
   activateStatusLabel,
   getToken,
   graphql,
+  maestroDeviceLabel,
   maestroResultLabel,
   projectStatusLabel,
   stackLabel,
@@ -292,9 +293,7 @@ export default function StudioPage() {
           {project.maestro.ready ? (
             <>
               <p className="text-muted-foreground">
-                {project.maestro.deviceStatus === "device"
-                  ? "Cihaz görüldü. Koşu gerçek sonuç yazar; PASSED uydurulmaz."
-                  : "Cihaz yok. Koşu SKIPPED olur — geçti sayılmaz."}
+                {maestroDeviceLabel(project.maestro.deviceStatus)}
               </p>
               {project.maestro.flows[0] ? (
                 <p className="font-mono text-[11px] text-muted-foreground">

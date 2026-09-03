@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -219,7 +220,7 @@ func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResul
 		Text:    safe,
 		Version: version,
 		Slot:    slot,
-		Channel: s.Completer.Channel(),
+		Channel: comp.Channel(),
 		InputN:  inCounts.Total(),
 		OutputN: outCounts.Total(),
 		AuditID: event.ID,
@@ -312,19 +313,35 @@ func (s *Service) ColabInferenceState() (string, ColabInferenceStatus) {
 }
 
 func (s *Service) healthLoop(baseURL string, stop chan struct{}) {
-	check := func() bool {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	client := &http.Client{Timeout: 8 * time.Second}
+	checkOnce := func() bool {
+		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 		defer cancel()
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/models", nil)
 		if err != nil {
 			return false
 		}
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := client.Do(req)
 		if err != nil {
 			return false
 		}
 		resp.Body.Close()
 		return resp.StatusCode < 300
+	}
+	check := func() bool {
+		for attempt := 0; attempt < 3; attempt++ {
+			if checkOnce() {
+				return true
+			}
+			if attempt < 2 {
+				select {
+				case <-stop:
+					return false
+				case <-time.After(time.Duration(attempt+1) * 400 * time.Millisecond):
+				}
+			}
+		}
+		return false
 	}
 
 	ok := check()
@@ -368,9 +385,31 @@ func (s *Service) effectiveCompleter() Completer {
 	s.colabMu.Unlock()
 
 	if url != "" && status == ColabInferenceConnected {
-		return ColabTunnelCompleter{BaseURL: url}
+		return ColabTunnelCompleter{
+			BaseURL: url,
+			Client:  &http.Client{Timeout: 90 * time.Second},
+		}
 	}
 	return s.Completer
+}
+
+// OpenCodeEndpoint returns base URL + API key for the OpenCode CLI.
+// Prefers a connected Colab tunnel; otherwise CHERRY_LLM_BASE_URL / CHERRY_LLM_API_KEY.
+// Colab has no real key — a placeholder is forwarded so OpenCode still sends Authorization.
+func (s *Service) OpenCodeEndpoint() (baseURL, apiKey string) {
+	apiKey = strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
+	baseURL = strings.TrimSpace(os.Getenv("CHERRY_LLM_BASE_URL"))
+	s.colabMu.Lock()
+	url := s.colabInferenceURL
+	status := s.colabStatus
+	s.colabMu.Unlock()
+	if url != "" && status == ColabInferenceConnected {
+		baseURL = url
+		if apiKey == "" {
+			apiKey = "cherry-colab"
+		}
+	}
+	return baseURL, apiKey
 }
 
 func (s *Service) Status(ctx context.Context) (store.LlmVersion, string, error) {

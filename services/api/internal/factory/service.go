@@ -393,12 +393,16 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		"Plan:",
 		plan,
 	}, "\n")
-	res, err := s.OpenCode.Run(ctx, opencode.Request{
+	req := opencode.Request{
 		Dir:      project.RootPath,
 		Prompt:   prompt,
 		Title:    "cherry-" + project.ID,
 		Continue: false,
-	})
+	}
+	if s.LLM != nil {
+		req.BaseURL, req.APIKey = s.LLM.OpenCodeEndpoint()
+	}
+	res, err := s.OpenCode.Run(ctx, req)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
 		return writeErr
 	}
@@ -460,12 +464,16 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 		rule,
 		"Gerekirse frontend/, backend/, maestro/ güncelle. Clean Architecture katmanlarını bozma. HTML site yazma.",
 	}, "\n")
-	res, err := s.OpenCode.Run(ctx, opencode.Request{
+	ocReq := opencode.Request{
 		Dir:      project.RootPath,
 		Prompt:   prompt,
 		Title:    "cherry-" + project.ID,
 		Continue: true,
-	})
+	}
+	if s.LLM != nil {
+		ocReq.BaseURL, ocReq.APIKey = s.LLM.OpenCodeEndpoint()
+	}
+	res, err := s.OpenCode.Run(ctx, ocReq)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
 		_ = s.setStatus(ctx, project.ID, store.StatusFailed)
 		return store.Project{}, writeErr

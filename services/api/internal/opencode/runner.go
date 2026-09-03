@@ -43,6 +43,10 @@ type Request struct {
 	Title    string
 	Model    string
 	Continue bool
+	// BaseURL / APIKey override CHERRY_LLM_* for OpenCode model calls
+	// (e.g. connected Colab tunnel at https://cherry.visevent.com/v1).
+	BaseURL string
+	APIKey  string
 }
 
 type Result struct {
@@ -114,8 +118,28 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	if err != nil {
 		return Result{Status: StatusFailed, Bin: bin, Err: err.Error()}, err
 	}
-	if err := WriteConfig(dir); err != nil {
+	ep := Endpoint{
+		BaseURL: firstNonEmpty(req.BaseURL, os.Getenv("CHERRY_LLM_BASE_URL")),
+		APIKey:  firstNonEmpty(req.APIKey, os.Getenv("CHERRY_LLM_API_KEY"), os.Getenv("OPENAI_API_KEY")),
+		Model:   firstNonEmpty(req.Model, os.Getenv("CHERRY_OPENCODE_MODEL"), os.Getenv("CHERRY_LLM_MODEL")),
+	}
+	if strings.TrimSpace(ep.APIKey) == "" && strings.TrimSpace(ep.BaseURL) != "" {
+		// OpenAI-compatible Colab tunnel: no real key; placeholder so Authorization is sent.
+		ep.APIKey = "cherry-colab"
+	}
+	if err := WriteConfig(dir, ep); err != nil {
 		return Result{Status: StatusFailed, Bin: bin, Err: err.Error()}, err
+	}
+	if strings.TrimSpace(ep.APIKey) == "" {
+		res := Result{
+			Status: StatusFailed,
+			Bin:    bin,
+			Err:    "model anahtarı yok — CHERRY_LLM_API_KEY veya Colab inferans URL gerekli; sahte yazım yok",
+		}
+		if c.Require {
+			return res, fmt.Errorf("opencode: %s", res.Err)
+		}
+		return res, nil
 	}
 	timeout := c.Timeout
 	if timeout <= 0 {
@@ -127,13 +151,16 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	if req.Continue {
 		args = append(args, "--continue")
 	}
-	if model := strings.TrimSpace(firstNonEmpty(req.Model, os.Getenv("CHERRY_OPENCODE_MODEL"), os.Getenv("CHERRY_LLM_MODEL"))); model != "" {
+	if model := strings.TrimSpace(ep.Model); model != "" {
+		if !strings.HasPrefix(model, "openai/") {
+			model = "openai/" + model
+		}
 		args = append(args, "--model", model)
 	}
 	cmd := exec.CommandContext(runCtx, bin, args...)
 	cmd.Dir = dir
 	cmd.Stdin = strings.NewReader(req.Prompt)
-	cmd.Env = withLLMKey(os.Environ())
+	cmd.Env = withLLMEnv(os.Environ(), ep)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
@@ -238,15 +265,34 @@ func firstNonEmpty(values ...string) string {
 	return ""
 }
 
-func withLLMKey(env []string) []string {
-	key := strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
+func withLLMEnv(env []string, ep Endpoint) []string {
+	key := strings.TrimSpace(ep.APIKey)
 	if key == "" {
-		return env
+		key = strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
 	}
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		env = append(env, "OPENAI_API_KEY="+key)
+	base := strings.TrimRight(strings.TrimSpace(ep.BaseURL), "/")
+	if base == "" {
+		base = strings.TrimRight(strings.TrimSpace(os.Getenv("CHERRY_LLM_BASE_URL")), "/")
+	}
+	env = upsertEnv(env, "OPENAI_API_KEY", key)
+	if base != "" {
+		env = upsertEnv(env, "OPENAI_BASE_URL", base)
 	}
 	return env
+}
+
+func upsertEnv(env []string, key, value string) []string {
+	if strings.TrimSpace(value) == "" {
+		return env
+	}
+	prefix := key + "="
+	for i, item := range env {
+		if strings.HasPrefix(item, prefix) {
+			env[i] = prefix + value
+			return env
+		}
+	}
+	return append(env, prefix+value)
 }
 
 func envTruthy(key string) bool {

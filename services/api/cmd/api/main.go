@@ -141,13 +141,19 @@ func main() {
 		if mongoOK {
 			status = "memory+mongo-ping"
 		}
+		llmChannel := "none"
+		if snap, err := llmSvc.Snapshot(r.Context()); err == nil {
+			llmChannel = snap.Channel
+		} else {
+			llmChannel = llmSvc.Completer.Channel()
+		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"ok":       true,
-			"store":    status,
-			"version":  "0.8.0-local",
-			"mail":     mail.Channel(),
-			"gdpr":     true,
-			"llm":      llmSvc.Completer.Channel(),
+			"ok":          true,
+			"store":       status,
+			"version":     "0.8.0-local",
+			"mail":        mail.Channel(),
+			"gdpr":        true,
+			"llm":         llmChannel,
 			"opencode":    sidecarStatus("opencode"),
 			"maestro":     sidecarStatus("maestro"),
 			"cloudflared": sidecarStatus("cloudflared"),

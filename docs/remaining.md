@@ -44,7 +44,7 @@ User notes below are not the current slice.
 | 7 LLM B + kuyruk | A ve B aynı iş. Boş olan alır; ikisi meşgulse kuyruk. Versiyon pointer’ı sonraki cevabı değiştirir; in-flight eski pointer’da biter. |
 | 8 Colab fine-tune | `colab/cherry_worker_{a,b}.ipynb`, seed paket, `trainingPack` + `registerLlmVersion`. Colab MCP/üretim değil. |
 
-LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`.
+LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`. Bağlı Colab inferans (`setColabInferenceUrl`) → `colab-tunnel` (health `/llm` alanı da bunu gösterir). OpenCode CLI `vendor/bin` ( `./scripts/vendor-sidecars.sh` ).
 
 ## Kalan / Remaining
 

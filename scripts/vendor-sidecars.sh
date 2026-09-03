@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Vendor OpenCode (and Maestro if on PATH) into vendor/bin for the Icerde installer.
+# Vendor OpenCode (and Maestro if on PATH) into vendor/bin for the Cherry installer.
 # Binaries are gitignored. The customer never installs these CLIs separately.
 set -euo pipefail
 
@@ -87,7 +87,7 @@ PY
 if copy_from_path opencode || download_opencode; then
   true
 else
-  echo "opencode not vendored. Set ICERDE_OPENCODE_BIN or install https://opencode.ai"
+  echo "opencode not vendored. Set CHERRY_OPENCODE_BIN or install https://opencode.ai"
   echo "Customer still does not install OpenCode by hand — this script is the installer."
 fi
 
@@ -105,5 +105,5 @@ else
   echo "Missing binary → Colab bridge FAILED, no fake URL. Customer still does not install cloudflared by hand."
 fi
 
-echo "look order: ICERDE_*_BIN -> ICERDE_SIDECAR_DIR -> $dest -> PATH"
+echo "look order: CHERRY_*_BIN -> CHERRY_SIDECAR_DIR -> $dest -> PATH"
 ls -la "$dest"

@@ -210,6 +210,35 @@ export type ColabBridge = {
   note: string;
 };
 
+export type ColabInferenceStatus = "OFF" | "CONNECTED" | "DISCONNECTED" | "CHECKING";
+
+export type ColabInference = {
+  url: string;
+  status: ColabInferenceStatus;
+  note: string;
+};
+
+export const COLAB_INFERENCE_FIELDS = `
+  url status note
+`;
+
+export function colabInferenceStatusLabel(status: ColabInferenceStatus): string {
+  switch (status) {
+    case "OFF":
+      return "kapalı";
+    case "CONNECTED":
+      return "bağlı";
+    case "DISCONNECTED":
+      return "koptu";
+    case "CHECKING":
+      return "kontrol";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
 export const COLAB_BRIDGE_FIELDS = `
   status publicUrl localUrl token tokenHint cloudflared startedAt note
 `;
@@ -522,7 +551,7 @@ export function projectStatusLabel(status: ProjectStatus): string {
 export function maestroResultLabel(result: MaestroResult): string {
   switch (result) {
     case "SKIPPED":
-      return "Atlandı (cihaz yok)";
+      return "Atlandı";
     case "PASSED":
       return "Geçti";
     case "FAILED":
@@ -531,6 +560,19 @@ export function maestroResultLabel(result: MaestroResult): string {
       const exhaustive: never = result;
       return exhaustive;
     }
+  }
+}
+
+export function maestroDeviceLabel(deviceStatus: string): string {
+  switch (deviceStatus) {
+    case "device":
+      return "Cihaz görüldü. Koşu gerçek sonuç yazar; PASSED uydurulmaz.";
+    case "no_cli":
+      return "Maestro CLI yok. Koşu SKIPPED — cihaz olsa da CLI olmadan test yok.";
+    case "none":
+      return "Cihaz yok. Koşu SKIPPED olur — geçti sayılmaz.";
+    default:
+      return "Maestro durumu bilinmiyor. SKIPPED olabilir.";
   }
 }
 

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/cherry/api/internal/store"
 )
@@ -132,7 +133,7 @@ func (c ColabTunnelCompleter) Complete(ctx context.Context, version store.LlmVer
 	req.Header.Set("Content-Type", "application/json")
 	client := c.Client
 	if client == nil {
-		client = http.DefaultClient
+		client = &http.Client{Timeout: 90 * time.Second}
 	}
 	res, err := client.Do(req)
 	if err != nil {

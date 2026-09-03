@@ -10,6 +10,7 @@ import {
   activateStatusLabel,
   getToken,
   graphql,
+  maestroDeviceLabel,
   maestroResultLabel,
   projectStatusLabel,
   type MaestroFlow,
@@ -122,8 +123,9 @@ export default function MaestroPage() {
               <h1 className="text-base font-medium">Maestro</h1>
               <p className="text-muted-foreground">
                 {project.status === "TESTING" || project.status === "READY"
-                  ? "HTML maket stüdyo içindir, zip’e girmez. Asıl uygulama seçilen dil. Cihaz yoksa akış SKIPPED — sahte geçiş yok."
-                  : "Ajan yazınca tasarım ve testler burada durur."}
+                  ? "HTML maket stüdyo içindir, zip’e girmez. Asıl uygulama seçilen dil."
+                  : "Ajan yazınca tasarım ve testler burada durur."}{" "}
+                {maestroDeviceLabel(project.maestro.deviceStatus)}
               </p>
               {project.activate.url ? (
                 <p className="mt-1 font-mono text-[11px] text-muted-foreground">

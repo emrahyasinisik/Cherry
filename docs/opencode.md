@@ -35,10 +35,12 @@ The prompt is stdin; already redacted. Working directory is the customer folder 
 
 | Env | Anlam |
 | --- | --- |
-| `CHERRY_OPENCODE_BIN` | `opencode` yolu (boşsa PATH) |
+| `CHERRY_OPENCODE_BIN` | `opencode` yolu (boşsa `vendor/bin` → PATH) |
 | `CHERRY_OPENCODE_TIMEOUT_SEC` | tavan (varsayılan 480) |
 | `CHERRY_OPENCODE_REQUIRE=1` | CLI yoksa iş başarısız |
 | `CHERRY_LLM_API_KEY` | varsa `OPENAI_API_KEY` olarak OpenCode’a geçer |
+| `CHERRY_LLM_BASE_URL` | OpenAI uyumlu kök (Colab `https://…/v1` dahil); `opencode.json` `provider.openai.options.baseURL` + `OPENAI_BASE_URL` |
+| Colab inferans (bağlı) | `setColabInferenceUrl` → OpenCode aynı URL’yi kullanır; anahtar yoksa yer tutucu `cherry-colab` |
 
 **Kurulum / Install**
 
@@ -48,9 +50,9 @@ Müşteri yalnızca **Cherry** kurar. OpenCode ve Maestro `vendor/bin` (Electron
 ./scripts/vendor-sidecars.sh
 ```
 
-CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. CLI var, model anahtarı yoksa yazım düşer; yine sahte dosya yok. `CHERRY_LLM_API_KEY` → OpenCode `OPENAI_API_KEY`.
+CLI yoksa iskelet kalır; **sahte OpenCode yazımı yok**. CLI var, model anahtarı / Colab URL yoksa yazım düşer (açık hata); yine sahte dosya yok. `CHERRY_LLM_API_KEY` → OpenCode `OPENAI_API_KEY`. Bağlı Colab tüneli (`colab-tunnel`) hem LLM Complete hem OpenCode model çağrısı için tercih edilir.
 
-If the CLI is missing the scaffold stays. **No fake OpenCode write.** If the CLI is present but there is no model key, the run fails honestly.
+If the CLI is missing the scaffold stays. **No fake OpenCode write.** If the CLI is present but there is no model key (and no Colab inference URL), the run fails honestly.
 
 
 Geliştirici makinede şimdilik PATH’te `opencode` olabilir. Bu geçici; ürün deneyimi “OpenCode indir” değildir.

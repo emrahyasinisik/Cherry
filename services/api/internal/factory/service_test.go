@@ -245,8 +245,15 @@ func TestForeignProjectHidden(t *testing.T) {
 }
 
 func TestSlug(t *testing.T) {
-	if slugify("Kahve Sipariş!") != "kahve-sipari" && !strings.Contains(slugify("Kahve Sipariş"), "kahve") {
-		t.Fatalf("%q", slugify("Kahve Sipariş"))
+	got := slugify("Kahve Sipariş!")
+	if got != "kahve-siparis" {
+		t.Fatalf("got %q want kahve-siparis", got)
+	}
+	if slugify("Üğişçö") != "ugisco" {
+		t.Fatalf("%q", slugify("Üğişçö"))
+	}
+	if slugify("İstanbul Döner") != "istanbul-doner" {
+		t.Fatalf("%q", slugify("İstanbul Döner"))
 	}
 }
 

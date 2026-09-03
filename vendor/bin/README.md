@@ -13,6 +13,6 @@
 
 Kaynak etiketleri: `env` | `bundled` | `path` | `missing`.
 
-Yazmak için CLI yetmez; `CHERRY_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) gerekir. Anahtar yoksa CLI çalışır ama model çağrısı düşer — sahte yazım yok.
+Yazmak için CLI yetmez; `CHERRY_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) veya bağlı Colab inferans URL gerekir. Anahtar yoksa CLI bulunur ama model çağrısı düşer — sahte yazım yok. `CHERRY_LLM_BASE_URL` / Colab URL → `OPENAI_BASE_URL` + `opencode.json` provider.
 
-The CLI is not enough to write: `CHERRY_LLM_API_KEY` is forwarded as `OPENAI_API_KEY`. No key → no fake write.
+The CLI is not enough to write: `CHERRY_LLM_API_KEY` is forwarded as `OPENAI_API_KEY`, or a connected Colab inference URL is used. No key and no Colab URL → no fake write.

@@ -1,36 +1,88 @@
 package opencode
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cherry/api/internal/sidecar"
 )
 
-const configBare = `{
-  "$schema": "https://opencode.ai/config.json"
+type Endpoint struct {
+	BaseURL string
+	APIKey  string
+	Model   string
 }
-`
 
-func WriteConfig(dir string) error {
-	body := configBare
-	if hit, err := sidecar.Look("maestro"); err == nil {
-		body = fmt.Sprintf(`{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "maestro": {
-      "type": "local",
-      "command": [%q, "mcp"]
-    }
-  }
+func EndpointFromEnv() Endpoint {
+	return Endpoint{
+		BaseURL: strings.TrimSpace(os.Getenv("CHERRY_LLM_BASE_URL")),
+		APIKey:  strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY")),
+		Model:   strings.TrimSpace(firstNonEmpty(os.Getenv("CHERRY_OPENCODE_MODEL"), os.Getenv("CHERRY_LLM_MODEL"))),
+	}
 }
-`, hit.Path)
+
+func WriteConfig(dir string, ep ...Endpoint) error {
+	endpoint := EndpointFromEnv()
+	if len(ep) > 0 {
+		if strings.TrimSpace(ep[0].BaseURL) != "" {
+			endpoint.BaseURL = strings.TrimSpace(ep[0].BaseURL)
+		}
+		if strings.TrimSpace(ep[0].APIKey) != "" {
+			endpoint.APIKey = strings.TrimSpace(ep[0].APIKey)
+		}
+		if strings.TrimSpace(ep[0].Model) != "" {
+			endpoint.Model = strings.TrimSpace(ep[0].Model)
+		}
+	}
+	body, err := configJSON(endpoint)
+	if err != nil {
+		return err
 	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, "opencode.json"), []byte(body), 0o644)
+	return os.WriteFile(filepath.Join(dir, "opencode.json"), body, 0o644)
+}
+
+func configJSON(ep Endpoint) ([]byte, error) {
+	root := map[string]any{
+		"$schema": "https://opencode.ai/config.json",
+	}
+	base := strings.TrimRight(strings.TrimSpace(ep.BaseURL), "/")
+	if base != "" {
+		model := strings.TrimSpace(ep.Model)
+		if model == "" {
+			model = "gpt-4o-mini"
+		}
+		if !strings.HasPrefix(model, "openai/") {
+			model = "openai/" + model
+		}
+		root["model"] = model
+		root["provider"] = map[string]any{
+			"openai": map[string]any{
+				"options": map[string]any{
+					"baseURL": base,
+					"apiKey":  "{env:OPENAI_API_KEY}",
+				},
+			},
+		}
+	}
+	if hit, err := sidecar.Look("maestro"); err == nil {
+		root["mcp"] = map[string]any{
+			"maestro": map[string]any{
+				"type":    "local",
+				"command": []string{hit.Path, "mcp"},
+			},
+		}
+	}
+	raw, err := json.MarshalIndent(root, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("opencode config: %w", err)
+	}
+	return append(raw, '\n'), nil
 }
 
 func WriteAgents(dir, name, stack, brief, sourceRule string) error {

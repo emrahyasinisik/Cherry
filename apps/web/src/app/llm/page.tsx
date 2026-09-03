@@ -8,12 +8,15 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   COLAB_BRIDGE_FIELDS,
+  COLAB_INFERENCE_FIELDS,
   LLM_ADMIN_FIELDS,
   colabBridgeStatusLabel,
+  colabInferenceStatusLabel,
   getToken,
   graphql,
   llmOccupancyLabel,
   type ColabBridge,
+  type ColabInference,
   type LlmAdmin,
   type LlmSlotCard,
   type TrainingPack,
@@ -38,6 +41,8 @@ export default function LlmAdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [admin, setAdmin] = useState<LlmAdmin | null>(null);
   const [bridge, setBridge] = useState<ColabBridge | null>(null);
+  const [inference, setInference] = useState<ColabInference | null>(null);
+  const [inferenceUrl, setInferenceUrl] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [mcpRoot, setMcpRoot] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +55,17 @@ export default function LlmAdminPage() {
   const rooted = useRef(false);
 
   async function load() {
-    const data = await graphql<{ me: User | null; llmAdmin: LlmAdmin; colabBridge: ColabBridge }>(
+    const data = await graphql<{
+      me: User | null;
+      llmAdmin: LlmAdmin;
+      colabBridge: ColabBridge;
+      colabInference: ColabInference;
+    }>(
       `query LlmAdmin {
         me { id email workspaceKind totpEnabled }
         llmAdmin { ${LLM_ADMIN_FIELDS} }
         colabBridge { ${COLAB_BRIDGE_FIELDS} }
+        colabInference { ${COLAB_INFERENCE_FIELDS} }
       }`,
     );
     if (!data.me) {
@@ -64,8 +75,10 @@ export default function LlmAdminPage() {
     setUser(data.me);
     setAdmin(data.llmAdmin);
     setBridge(data.colabBridge);
+    setInference(data.colabInference);
     if (!rooted.current) {
       setMcpRoot(data.llmAdmin.mcpRoot);
+      setInferenceUrl(data.colabInference.url);
       rooted.current = true;
     }
   }
@@ -165,6 +178,18 @@ export default function LlmAdminPage() {
           onError={setError}
           onPending={setPending}
           onBridge={setBridge}
+        />
+        <ColabInferenceCard
+          inference={inference}
+          url={inferenceUrl}
+          pending={pending}
+          onUrl={setInferenceUrl}
+          onError={setError}
+          onPending={setPending}
+          onInference={(v) => {
+            setInference(v);
+            setInferenceUrl(v.url);
+          }}
         />
         <section className="flex flex-col gap-3 rounded-[10px] border border-border p-4">
           <h2 className="text-sm font-medium">Colab eğitim dosyaları</h2>
@@ -506,6 +531,96 @@ function ColabTunnelCard({
           </span>
         ) : null}
       </div>
+    </section>
+  );
+}
+
+function ColabInferenceCard({
+  inference,
+  url,
+  pending,
+  onUrl,
+  onError,
+  onPending,
+  onInference,
+}: {
+  inference: ColabInference | null;
+  url: string;
+  pending: boolean;
+  onUrl: (v: string) => void;
+  onError: (v: string | null) => void;
+  onPending: (v: boolean) => void;
+  onInference: (v: ColabInference) => void;
+}) {
+  const status = inference?.status ?? "OFF";
+  const connected = status === "CONNECTED";
+
+  function save() {
+    onPending(true);
+    onError(null);
+    void graphql<{ setColabInferenceUrl: ColabInference }>(
+      `mutation SetInfer($url: String!) {
+        setColabInferenceUrl(url: $url) { ${COLAB_INFERENCE_FIELDS} }
+      }`,
+      { url: url.trim() },
+    )
+      .then((d) => onInference(d.setColabInferenceUrl))
+      .catch((err: unknown) => {
+        onError(err instanceof Error ? err.message : "Inferans URL yazılamadı.");
+      })
+      .finally(() => onPending(false));
+  }
+
+  function clear() {
+    onUrl("");
+    onPending(true);
+    onError(null);
+    void graphql<{ setColabInferenceUrl: ColabInference }>(
+      `mutation ClearInfer {
+        setColabInferenceUrl(url: "") { ${COLAB_INFERENCE_FIELDS} }
+      }`,
+    )
+      .then((d) => onInference(d.setColabInferenceUrl))
+      .catch((err: unknown) => {
+        onError(err instanceof Error ? err.message : "Inferans kapatılamadı.");
+      })
+      .finally(() => onPending(false));
+  }
+
+  return (
+    <section
+      className={cn(
+        "flex flex-col gap-3 rounded-[10px] border p-4",
+        connected ? "border-primary" : "border-border",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium">Colab inferans</h2>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          {colabInferenceStatusLabel(status)}
+        </span>
+      </div>
+      <p className="text-muted-foreground">
+        Notebook geçici OpenAI uyumlu URL (örn. https://cherry.visevent.com/v1). curl gerekmez — yapıştır ve
+        kaydet. Bağlıyken LLM ve OpenCode bu kanala gider.
+      </p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input
+          value={url}
+          onChange={(event) => onUrl(event.target.value)}
+          placeholder="https://cherry.visevent.com/v1"
+          className="cherry-focus font-mono text-[12px]"
+        />
+        <Button type="button" variant="outline" disabled={pending} onClick={save}>
+          Kaydet
+        </Button>
+        <Button type="button" variant="ghost" disabled={pending || !inference?.url} onClick={clear}>
+          Kapat
+        </Button>
+      </div>
+      {inference?.note ? (
+        <p className="text-[11px] text-muted-foreground">{inference.note}</p>
+      ) : null}
     </section>
   );
 }
