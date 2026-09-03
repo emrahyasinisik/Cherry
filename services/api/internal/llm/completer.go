@@ -94,8 +94,10 @@ func (c HTTPCompleter) Complete(ctx context.Context, version store.LlmVersion, p
 	return parsed.Choices[0].Message.Content, nil
 }
 
-// ColabTunnelCompleter sends requests to a Colab inference tunnel (trycloudflare).
-// No API key — the Colab server is unauthenticated behind a quick tunnel.
+// ColabTunnelCompleter sends requests to a Colab inference tunnel
+// (named fixed hostname or trycloudflare quick tunnel).
+// No API key — the Colab server is unauthenticated behind the tunnel.
+// Cherry stores only the public HTTPS URL; the Cloudflare tunnel token stays in Colab.
 type ColabTunnelCompleter struct {
 	BaseURL string
 	Model   string

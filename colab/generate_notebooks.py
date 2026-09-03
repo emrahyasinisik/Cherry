@@ -347,41 +347,113 @@ print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")'''
         md(
             """## 9. Cloudflare tüneli / Cloudflare tunnel (inferans)
 
-Sunucuyu internete aç. Cherry stüdyoda bu URL’yi yapıştır. Colab kapanınca tünel kapanır — üretim inferansı değil."""
+**Öncelik / Prefer:** named tunnel (sabit alt alan + token). Token yoksa quick tunnel (`trycloudflare`).
+
+Token’ı Colab secret veya oturum değişkeni olarak ver — notebook’a, Drive’a, git’e yazma. Cherry yalnızca public HTTPS URL saklar; token stüdyo API’sine girmez.
+
+Colab kapanınca tünel kapanır — üretim inferansı değil."""
         ),
         py(
             r'''!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
 !dpkg -i cloudflared-linux-amd64.deb
 
-import subprocess, re, time as _time
+# Prefer named tunnel (fixed subdomain). Set token via Colab secret or paste once.
+# NEVER commit a real token.
+import os
+import subprocess
+import re
+import time as _time
 
-proc = subprocess.Popen(
-    ["cloudflared", "tunnel", "--url", "http://localhost:8000", "--no-autoupdate"],
-    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-)
+CLOUDFLARE_TUNNEL_TOKEN = os.environ.get("CLOUDFLARE_TUNNEL_TOKEN", "").strip()
+# Or set here for this session only (do not save to Drive with token in cleartext):
+# CLOUDFLARE_TUNNEL_TOKEN = ""
 
-url = ""
-deadline = _time.time() + 30
-for line in proc.stdout:
-    print(line, end="")
-    m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-    if m:
-        url = m.group()
-        break
-    if _time.time() > deadline:
-        break
+try:
+    from google.colab import userdata
+    if not CLOUDFLARE_TUNNEL_TOKEN:
+        CLOUDFLARE_TUNNEL_TOKEN = (userdata.get("CLOUDFLARE_TUNNEL_TOKEN") or "").strip()
+except Exception:
+    pass
 
-if url:
-    print(f"\n{'='*60}")
-    print(f"Cherry'de kullan / Use in Cherry:")
-    print(f"  CHERRY_LLM_BASE_URL={url}/v1")
-    print(f"{'='*60}")
-    print("LLM yönetici → Colab inferans bölümünde bu URL’yi yapıştır.")
-    print("Paste this URL in the LLM admin → Colab inference section.")
-    print("Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.")
+if CLOUDFLARE_TUNNEL_TOKEN:
+    # named tunnel — URL is the DNS hostname you configured in Zero Trust
+    # (public hostname must route to http://localhost:8000 in the tunnel config)
+    COLAB_PUBLIC_BASE = os.environ.get(
+        "CHERRY_COLAB_PUBLIC_URL", "https://YOUR_SUBDOMAIN.example.com"
+    ).rstrip("/")
+    # Optional session override (do not commit / save to Drive):
+    # COLAB_PUBLIC_BASE = "https://colab.yourdomain.com"
+
+    proc = subprocess.Popen(
+        [
+            "cloudflared",
+            "tunnel",
+            "--no-autoupdate",
+            "run",
+            "--token",
+            CLOUDFLARE_TUNNEL_TOKEN,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    # Drain a few startup lines without printing the token.
+    deadline = _time.time() + 8
+    while _time.time() < deadline:
+        line = proc.stdout.readline() if proc.stdout else ""
+        if not line:
+            break
+        print(line, end="")
+
+    print("=" * 60)
+    print("Named tunnel (sabit alt alan / fixed subdomain).")
+    print(f"Cherry URL: {COLAB_PUBLIC_BASE}/v1")
+    print()
+    print("TR: CHERRY_COLAB_PUBLIC_URL’yi Zero Trust’teki sabit hostname yap")
+    print("    (örn. https://colab.yourdomain.com). Bu URL’yi Cherry LLM")
+    print("    yöneticide Colab inferans alanına yapıştır (setColabInferenceUrl).")
+    print("EN: Set CHERRY_COLAB_PUBLIC_URL to the fixed hostname from Zero Trust")
+    print("    (e.g. https://colab.yourdomain.com). Paste that into Cherry LLM")
+    print("    admin → Colab inference (setColabInferenceUrl).")
+    print()
+    print("Güvenlik / Security: Token yalnızca Colab secret / env. Git’e,")
+    print("    notebook’a veya Drive’a yazma. Sohbette yapıştırdıysan")
+    print("    Zero Trust → Tunnels’te token’ı döndür (rotate).")
+    print("Token Cherry API sürecine girmez — yalnızca public HTTPS URL.")
+    print("=" * 60)
 else:
-    print("cloudflared tünel URL bulunamadı. Log’ları kontrol et.")
-    print("Tunnel URL not found. Check cloudflared logs above.")'''
+    # fallback: quick tunnel, parse trycloudflare.com URL from logs
+    print("CLOUDFLARE_TUNNEL_TOKEN yok — quick tunnel (trycloudflare) kullanılıyor.")
+    print("No token — falling back to quick tunnel (trycloudflare).")
+    proc = subprocess.Popen(
+        ["cloudflared", "tunnel", "--url", "http://localhost:8000", "--no-autoupdate"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+
+    url = ""
+    deadline = _time.time() + 30
+    for line in proc.stdout:
+        print(line, end="")
+        m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
+        if m:
+            url = m.group()
+            break
+        if _time.time() > deadline:
+            break
+
+    if url:
+        print(f"\n{'='*60}")
+        print(f"Cherry'de kullan / Use in Cherry:")
+        print(f"  {url}/v1")
+        print(f"{'='*60}")
+        print("LLM yönetici → Colab inferans bölümünde bu URL’yi yapıştır.")
+        print("Paste this URL in the LLM admin → Colab inference section.")
+        print("Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.")
+    else:
+        print("cloudflared tünel URL bulunamadı. Log’ları kontrol et.")
+        print("Tunnel URL not found. Check cloudflared logs above.")'''
         ),
         md(
             """## 10. Canlı tut / Keep alive
@@ -402,7 +474,7 @@ while True:
 1. Zip’i makineye indir.
 2. Cherry → LLM yönetici → **Colab sürümü kaydet** (işçi {worker}).
 3. Pointer’ı o sürüme al. In-flight işler eski pointer’da biter.
-4. İnferans tüneli açıksa stüdyoda URL’yi yapıştır — geçici, Colab kapanınca biter.
+4. İnferans tüneli açıksa sabit veya quick URL’yi stüdyoda yapıştır — geçici, Colab kapanınca biter.
 5. Colab’ı kapat. Üretim çağrıları stüdyo işçilerinde kalır."""
         ),
     ]

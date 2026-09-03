@@ -14,7 +14,8 @@ alwaysApply: false
 - Versions are immutable records. “Active” is a pointer per worker. Changing the pointer changes **subsequent** completions on that worker. In-flight jobs finish on the old assignment (default).
 - MCP read-file is how models read generated source. Admin can change the allowed root.
 - Fine-tune via Colab export/import. Colab is not 24/7 production inference.
-- Studio ↔ Colab handshake is a **Cloudflare quick tunnel** (`cloudflared`) on a dedicated loopback bridge port — not Connections Cloudflare Workers, not a Colab MCP, not production inference. Missing `cloudflared` → FAILED, no fake URL.
+- Studio ↔ Colab **pack/adapter** handshake is a **Cloudflare quick tunnel** (`cloudflared`) on a dedicated loopback bridge port — not Connections Cloudflare Workers, not a Colab MCP, not production inference. Missing `cloudflared` → FAILED, no fake URL.
+- Colab **temporary inference** prefers a **named** Cloudflare tunnel (`cloudflared tunnel run --token`, fixed subdomain via Zero Trust). Token is Colab secret/env only — never commit; Cherry stores only the public HTTPS URL (`setColabInferenceUrl`). No token → quick tunnel fallback. Rotate token if it appeared in chat.
 - Two notebooks, one per worker (A and B), may run **in parallel as two Colab sessions**. Each session is budgeted at **16GB GPU** (T4-class). Do not assume one 16GB card hosts both notebooks. Same recipe so A and B stay interchangeable for load.
 - Notebooks must fit 16GB: LoRA/QLoRA, not full-weight large models. Files live in `colab/` (`cherry_worker_a.ipynb`, `cherry_worker_b.ipynb`) plus a training pack (`cherry.training_pack.v1`). Studio LLM admin exports a GDPR-redacted pack and can register the returned adapter as an immutable version.
 - Admin UI must show occupancy (idle/busy/queued), not fake role labels. A switch with no effect on later answers is a bug.

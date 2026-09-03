@@ -106,23 +106,50 @@ JSONL satırı:
 
 Fine-tune sonrası model, aynı Colab oturumunda OpenAI uyumlu API olarak sunulabilir. Bu **geçici** bir çözümdür — Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.
 
+### Named tunnel vs quick tunnel
+
+| | Named tunnel (önerilen / preferred) | Quick tunnel (yedek / fallback) |
+| --- | --- | --- |
+| Komut | `cloudflared tunnel --no-autoupdate run --token …` | `cloudflared tunnel --url http://localhost:8000` |
+| URL | Sabit alt alan (Zero Trust DNS), örn. `https://colab.yourdomain.com` | Rastgele `https://xxx.trycloudflare.com` |
+| Token | Colab **secret** / env `CLOUDFLARE_TUNNEL_TOKEN` — **asla git’e yazma** | Yok |
+| Cherry | Yalnızca public HTTPS URL (`setColabInferenceUrl`) | Aynı — yalnızca URL |
+| Ne zaman | Sabit hostname istiyorsan | Token yoksa / hızlı deneme |
+
+**TR:** Token **yalnızca Colab içinde** çalışır. Cherry Go API’sine token koyma. Stüdyo yalnızca public URL saklar. Sohbette veya ekran görüntüsünde token göründüyse Zero Trust → Tunnels’te **döndür (rotate)**.
+
+**EN:** The tunnel token runs **inside Colab only**. Do not put it in the Cherry Go API process. The studio stores only the public HTTPS URL. If the token appeared in chat or a screenshot, **rotate** it in Zero Trust → Tunnels.
+
+### Named tunnel adımları / Steps
+
+1. Cloudflare Zero Trust → **Networks → Tunnels** → Create → named tunnel.
+2. Public hostname ekle (örn. `colab.yourdomain.com`) → service `http://localhost:8000` (Colab’deki FastAPI).
+3. DNS CNAME’i Cloudflare’in verdiği tunnel hedefine bağla.
+4. Token’ı kopyala → Colab **Secrets** adı `CLOUDFLARE_TUNNEL_TOKEN` (veya oturumda `os.environ` / hücre değişkeni). Notebook’a, Drive’a, `.env` örnek dosyasına gerçek değer yazma.
+5. İsteğe bağlı: `CHERRY_COLAB_PUBLIC_URL=https://colab.yourdomain.com` (Colab env veya hücre).
+6. Notebook hücre 9’u çalıştır. Yazdırılan sabit URL’yi Cherry LLM yönetici → Colab inferans’a yapıştır (`setColabInferenceUrl`).
+
+Placeholder’lar (gerçek değer değil): `.env.example` içinde yorum satırı olarak `CHERRY_COLAB_PUBLIC_URL` ve `CLOUDFLARE_TUNNEL_TOKEN`.
+
 ### Akış / Flow
 
 ```mermaid
 flowchart LR
   Train[Fine_tune_bitir] --> Serve[FastAPI_8000]
-  Serve --> CF[cloudflared_tunnel]
-  CF --> URL[trycloudflare_URL]
+  Serve --> CF[cloudflared_named_or_quick]
+  CF --> URL[fixed_or_trycloudflare_URL]
   URL --> Studio[Cherry_stüdyo]
   Studio --> Complete[/v1/chat/completions]
 ```
 
 1. Notebook hücre 8: Model `model.eval()` ile inferans moduna geçer. FastAPI + uvicorn `0.0.0.0:8000`'de dinler.
-2. Notebook hücre 9: `cloudflared tunnel --url http://localhost:8000` ile quick tunnel açılır. `https://xxx.trycloudflare.com` URL'si yazdırılır.
+2. Notebook hücre 9: Token varsa named tunnel (`run --token`); yoksa quick tunnel. Named: `CHERRY_COLAB_PUBLIC_URL` yazdırılır. Quick: log’dan `trycloudflare.com` URL parse edilir.
 3. Notebook hücre 10: Oturumu canlı tutar (60s döngü).
-4. Cherry stüdyoda: LLM yönetici → Colab inferans → URL'yi yapıştır. `setColabInferenceUrl` mutation'ı çağrılır.
+4. Cherry stüdyoda: LLM yönetici → Colab inferans → URL'yi yapıştır. `setColabInferenceUrl` mutation'ı çağrılır (sabit veya trycloudflare — kısıtlama yok).
 5. Cherry completer, `colab-tunnel` kanalıyla istekleri tünele yönlendirir. GDPR katmanı hâlâ aktif (redact → complete → scan → audit).
 6. Sağlık kontrolü 30 saniyede bir `/v1/models` endpoint'ini yoklar. Yanıt gelmezse durum `DISCONNECTED` olur ve varsayılan completer kullanılır.
+
+**Not:** Stüdyo ↔ Colab **paket/adapter** köprüsü hâlâ quick tunnel kullanabilir (`startColabBridge`). Named tunnel öncelikle **Colab → public inferans** içindir.
 
 ### Sabitler / Invariants
 
@@ -132,6 +159,7 @@ flowchart LR
 | Aynı 16GB T4, aynı QLoRA model | Tam ağırlık büyük model |
 | `colab-tunnel` kanal, GDPR aktif | GDPR'sız doğrudan çağrı |
 | Kullanıcı URL'yi elle yapıştırır | Otomatik keşif |
+| Token yalnızca Colab secret/env | Token’ı Cherry API veya git’e yazmak |
 | Bağlantı kopunca varsayılan endpoint | Yeniden bağlanma |
 
 ## GPU
