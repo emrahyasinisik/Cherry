@@ -94,4 +94,12 @@ Dilim 8: dosyalar `colab/`, stüdyodan paket indirme, checkpoint → `registerLl
 
 Slice 8: files in `colab/`, studio pack download, checkpoint → `registerLlmVersion`. Colab is not production inference.
 
+### Geçici inferans / Temporary inference
+
+Colab fine-tune sonrası aynı oturumda **geçici inferans sunucusu** olabilir. Notebook FastAPI + transformers ile `0.0.0.0:8000`'de OpenAI uyumlu API sunar. Inferans tüneli: **named** (`cloudflared tunnel run --token`, sabit alt alan) tercih; token yoksa **quick** (`trycloudflare`). Token yalnızca Colab secret/env — Cherry yalnızca public HTTPS URL saklar (`setColabInferenceUrl`). Completer `colab-tunnel` kanalını kullanır. GDPR katmanı aktif kalır. Sağlık kontrolü 30 saniyede bir yoklar; bağlantı kopunca varsayılan endpoint'e düşer. Token sohbette göründüyse Zero Trust’te döndür. **Bu üretim inferansı değil** — Colab oturumu kapanınca biter.
+
+Colab el sıkışması: LLM yönetici **Cloudflare quick tunnel** (`cloudflared`). Notebook token ile paketi çeker, adapter zip’i geri yollar. Bu Bağlantılar’daki Cloudflare Workers değildir. `cloudflared` yoksa tünel yok — sahte URL yok.
+
+Colab handshake: LLM admin **Cloudflare quick tunnel** (`cloudflared`). The notebook pulls the pack and posts the adapter zip with a bridge token. Not the Connections Cloudflare Workers target. Missing `cloudflared` → no tunnel, no fake URL.
+
 Adım adım: [colab.md](colab.md)

@@ -47,6 +47,8 @@ func envKeyFor(name string) string {
 		return "CHERRY_OPENCODE_BIN"
 	case "maestro":
 		return "CHERRY_MAESTRO_BIN"
+	case "cloudflared":
+		return "CHERRY_CLOUDFLARED_BIN"
 	default:
 		return ""
 	}

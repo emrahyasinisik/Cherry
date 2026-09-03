@@ -15,6 +15,8 @@ type Query {
   exportMe: ExportBundle!
   trainingPack: TrainingPack!
   connections: [Connection!]!
+  colabBridge: ColabBridge!
+  colabInference: ColabInference!
 }
 
 type Mutation {
@@ -52,6 +54,9 @@ type Mutation {
   setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
   registerLlmVersion(slot: String!, name: String!, note: String!, checkpointRef: String!): LlmAdmin!
+  startColabBridge: ColabBridge!
+  stopColabBridge: ColabBridge!
+  setColabInferenceUrl(url: String!): ColabInference!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
 
@@ -321,6 +326,25 @@ type TrainingPack {
   note: String!
 }
 
+enum ColabBridgeStatus {
+  IDLE
+  STARTING
+  RUNNING
+  STOPPING
+  FAILED
+}
+
+type ColabBridge {
+  status: ColabBridgeStatus!
+  publicUrl: String
+  localUrl: String
+  token: String
+  tokenHint: String!
+  cloudflared: String!
+  startedAt: String
+  note: String!
+}
+
 type LlmCompletion {
   at: String!
   purpose: String!
@@ -331,6 +355,19 @@ type LlmCompletion {
   outputRedactions: Int!
   promptPreview: String!
   outputPreview: String!
+}
+
+enum ColabInferenceStatus {
+  OFF
+  CONNECTED
+  DISCONNECTED
+  CHECKING
+}
+
+type ColabInference {
+  url: String!
+  status: ColabInferenceStatus!
+  note: String!
 }
 
 type ExportBundle {

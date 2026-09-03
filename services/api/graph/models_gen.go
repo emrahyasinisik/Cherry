@@ -9,6 +9,23 @@ import (
 	"strconv"
 )
 
+type ColabBridge struct {
+	Status      ColabBridgeStatus `json:"status"`
+	PublicURL   *string           `json:"publicUrl,omitempty"`
+	LocalURL    *string           `json:"localUrl,omitempty"`
+	Token       *string           `json:"token,omitempty"`
+	TokenHint   string            `json:"tokenHint"`
+	Cloudflared string            `json:"cloudflared"`
+	StartedAt   *string           `json:"startedAt,omitempty"`
+	Note        string            `json:"note"`
+}
+
+type ColabInference struct {
+	URL    string               `json:"url"`
+	Status ColabInferenceStatus `json:"status"`
+	Note   string               `json:"note"`
+}
+
 type Connection struct {
 	Kind       ConnectionKind   `json:"kind"`
 	Status     ConnectionStatus `json:"status"`
@@ -381,6 +398,126 @@ func (e *ChatRole) UnmarshalJSON(b []byte) error {
 }
 
 func (e ChatRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ColabBridgeStatus string
+
+const (
+	ColabBridgeStatusIdle     ColabBridgeStatus = "IDLE"
+	ColabBridgeStatusStarting ColabBridgeStatus = "STARTING"
+	ColabBridgeStatusRunning  ColabBridgeStatus = "RUNNING"
+	ColabBridgeStatusStopping ColabBridgeStatus = "STOPPING"
+	ColabBridgeStatusFailed   ColabBridgeStatus = "FAILED"
+)
+
+var AllColabBridgeStatus = []ColabBridgeStatus{
+	ColabBridgeStatusIdle,
+	ColabBridgeStatusStarting,
+	ColabBridgeStatusRunning,
+	ColabBridgeStatusStopping,
+	ColabBridgeStatusFailed,
+}
+
+func (e ColabBridgeStatus) IsValid() bool {
+	switch e {
+	case ColabBridgeStatusIdle, ColabBridgeStatusStarting, ColabBridgeStatusRunning, ColabBridgeStatusStopping, ColabBridgeStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ColabBridgeStatus) String() string {
+	return string(e)
+}
+
+func (e *ColabBridgeStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ColabBridgeStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ColabBridgeStatus", str)
+	}
+	return nil
+}
+
+func (e ColabBridgeStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ColabBridgeStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ColabBridgeStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ColabInferenceStatus string
+
+const (
+	ColabInferenceStatusOff          ColabInferenceStatus = "OFF"
+	ColabInferenceStatusConnected    ColabInferenceStatus = "CONNECTED"
+	ColabInferenceStatusDisconnected ColabInferenceStatus = "DISCONNECTED"
+	ColabInferenceStatusChecking     ColabInferenceStatus = "CHECKING"
+)
+
+var AllColabInferenceStatus = []ColabInferenceStatus{
+	ColabInferenceStatusOff,
+	ColabInferenceStatusConnected,
+	ColabInferenceStatusDisconnected,
+	ColabInferenceStatusChecking,
+}
+
+func (e ColabInferenceStatus) IsValid() bool {
+	switch e {
+	case ColabInferenceStatusOff, ColabInferenceStatusConnected, ColabInferenceStatusDisconnected, ColabInferenceStatusChecking:
+		return true
+	}
+	return false
+}
+
+func (e ColabInferenceStatus) String() string {
+	return string(e)
+}
+
+func (e *ColabInferenceStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ColabInferenceStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ColabInferenceStatus", str)
+	}
+	return nil
+}
+
+func (e ColabInferenceStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ColabInferenceStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ColabInferenceStatus) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

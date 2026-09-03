@@ -41,6 +41,22 @@ func TestLookBundledDir(t *testing.T) {
 	}
 }
 
+func TestLookCloudflaredEnv(t *testing.T) {
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "cloudflared")
+	if err := os.WriteFile(bin, []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("CHERRY_CLOUDFLARED_BIN", bin)
+	hit, err := Look("cloudflared")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if hit.Source != "env" || hit.Path != bin {
+		t.Fatalf("%+v", hit)
+	}
+}
+
 func TestLookMissing(t *testing.T) {
 	t.Setenv("CHERRY_OPENCODE_BIN", "")
 	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())

@@ -56,3 +56,5 @@ flowchart TB
 - `Privacy`: exportMe, deleteMe, audit (admin)
 
 Health: `GET /health`. GraphQL otherwise, plus `/export/:id` (zip), `/colab/*` (notebook + seed files), `/oauth/*`.
+
+Colab bridge (not customer Cloudflare): `colabBridge`, `startColabBridge`, `stopColabBridge`. HTTP only on `127.0.0.1:43149` — `GET /health`, token-gated `GET /pack.json`, `GET /pack.jsonl`, `POST /checkpoint`. `cloudflared` publishes that port. Do not tunnel the GraphQL listener.

@@ -3,7 +3,9 @@ package llm
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cherry/api/internal/gdpr"
@@ -15,10 +17,24 @@ type Completer interface {
 	Complete(ctx context.Context, version store.LlmVersion, prompt string) (string, error)
 }
 
+type ColabInferenceStatus string
+
+const (
+	ColabInferenceOff          ColabInferenceStatus = "OFF"
+	ColabInferenceConnected    ColabInferenceStatus = "CONNECTED"
+	ColabInferenceDisconnected ColabInferenceStatus = "DISCONNECTED"
+	ColabInferenceChecking     ColabInferenceStatus = "CHECKING"
+)
+
 type Service struct {
 	Store     store.Store
 	Completer Completer
 	q         *queue
+
+	colabMu          sync.Mutex
+	colabInferenceURL string
+	colabStatus      ColabInferenceStatus
+	colabStopHealth  chan struct{}
 }
 
 func (s *Service) ensureQueue() *queue {
@@ -161,7 +177,8 @@ type CompleteResult struct {
 }
 
 func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResult, error) {
-	if s.Completer == nil {
+	comp := s.effectiveCompleter()
+	if comp == nil {
 		return CompleteResult{}, fmt.Errorf("%w: completer yok", store.ErrLLMFailed)
 	}
 	slot, err := s.ensureQueue().acquire(ctx)
@@ -175,7 +192,7 @@ func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResul
 		return CompleteResult{}, err
 	}
 	redacted, inCounts := gdpr.Redact(in.Prompt)
-	raw, err := s.Completer.Complete(ctx, version, redacted)
+	raw, err := comp.Complete(ctx, version, redacted)
 	if err != nil {
 		return CompleteResult{}, fmt.Errorf("%w: %v", store.ErrLLMFailed, err)
 	}
@@ -188,7 +205,7 @@ func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResul
 		Slot:             slot,
 		VersionID:        version.ID,
 		VersionName:      version.Name,
-		Channel:          s.Completer.Channel(),
+		Channel:          comp.Channel(),
 		InputRedactions:  inCounts.Total(),
 		OutputRedactions: outCounts.Total(),
 		PromptPreview:    gdpr.Preview(redacted, 180),
@@ -243,8 +260,9 @@ func (s *Service) Snapshot(ctx context.Context) (StatusView, error) {
 		return StatusView{}, err
 	}
 	channel := "none"
-	if s.Completer != nil {
-		channel = s.Completer.Channel()
+	comp := s.effectiveCompleter()
+	if comp != nil {
+		channel = comp.Channel()
 	}
 	return StatusView{
 		Channel:  channel,
@@ -257,14 +275,113 @@ func (s *Service) Snapshot(ctx context.Context) (StatusView, error) {
 	}, nil
 }
 
+func (s *Service) SetColabInferenceURL(url string) {
+	url = strings.TrimSpace(url)
+	s.colabMu.Lock()
+	defer s.colabMu.Unlock()
+
+	if s.colabStopHealth != nil {
+		close(s.colabStopHealth)
+		s.colabStopHealth = nil
+	}
+
+	if url == "" {
+		s.colabInferenceURL = ""
+		s.colabStatus = ColabInferenceOff
+		return
+	}
+
+	s.colabInferenceURL = strings.TrimRight(url, "/")
+	s.colabStatus = ColabInferenceChecking
+
+	stop := make(chan struct{})
+	s.colabStopHealth = stop
+	go s.healthLoop(s.colabInferenceURL, stop)
+}
+
+func (s *Service) ColabInferenceURL() string {
+	s.colabMu.Lock()
+	defer s.colabMu.Unlock()
+	return s.colabInferenceURL
+}
+
+func (s *Service) ColabInferenceState() (string, ColabInferenceStatus) {
+	s.colabMu.Lock()
+	defer s.colabMu.Unlock()
+	return s.colabInferenceURL, s.colabStatus
+}
+
+func (s *Service) healthLoop(baseURL string, stop chan struct{}) {
+	check := func() bool {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseURL+"/models", nil)
+		if err != nil {
+			return false
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return false
+		}
+		resp.Body.Close()
+		return resp.StatusCode < 300
+	}
+
+	ok := check()
+	s.colabMu.Lock()
+	if s.colabInferenceURL == baseURL {
+		if ok {
+			s.colabStatus = ColabInferenceConnected
+		} else {
+			s.colabStatus = ColabInferenceDisconnected
+		}
+	}
+	s.colabMu.Unlock()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-stop:
+			return
+		case <-ticker.C:
+			ok := check()
+			s.colabMu.Lock()
+			if s.colabInferenceURL != baseURL {
+				s.colabMu.Unlock()
+				return
+			}
+			if ok {
+				s.colabStatus = ColabInferenceConnected
+			} else {
+				s.colabStatus = ColabInferenceDisconnected
+			}
+			s.colabMu.Unlock()
+		}
+	}
+}
+
+func (s *Service) effectiveCompleter() Completer {
+	s.colabMu.Lock()
+	url := s.colabInferenceURL
+	status := s.colabStatus
+	s.colabMu.Unlock()
+
+	if url != "" && status == ColabInferenceConnected {
+		return ColabTunnelCompleter{BaseURL: url}
+	}
+	return s.Completer
+}
+
 func (s *Service) Status(ctx context.Context) (store.LlmVersion, string, error) {
 	version, err := s.versionFor(ctx, store.SlotA)
 	if err != nil {
 		return store.LlmVersion{}, "", err
 	}
 	channel := "none"
-	if s.Completer != nil {
-		channel = s.Completer.Channel()
+	comp := s.effectiveCompleter()
+	if comp != nil {
+		channel = comp.Channel()
 	}
 	return version, channel, nil
 }

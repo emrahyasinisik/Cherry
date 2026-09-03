@@ -19,6 +19,7 @@ import (
 	"github.com/cherry/api/graph"
 	"github.com/cherry/api/internal/activate"
 	"github.com/cherry/api/internal/auth"
+	"github.com/cherry/api/internal/colabbridge"
 	"github.com/cherry/api/internal/connect"
 	"github.com/cherry/api/internal/factory"
 	"github.com/cherry/api/internal/llm"
@@ -98,7 +99,7 @@ func main() {
 	} else {
 		log.Printf("maestro missing — flows SKIPPED without a device")
 	}
-	log.Printf("projects root=%s llm=%s", projectsRoot, llmSvc.Completer.Channel())
+	log.Printf("projects root=%s llm=%s colab_bridge=%s cloudflared=%s", projectsRoot, llmSvc.Completer.Channel(), getenv("CHERRY_COLAB_BRIDGE_ADDR", "127.0.0.1:43149"), sidecarStatus("cloudflared"))
 	apiOrigin := "http://" + addr
 	if strings.HasPrefix(addr, ":") {
 		apiOrigin = "http://127.0.0.1" + addr
@@ -110,11 +111,21 @@ func main() {
 		APIOrigin: apiOrigin,
 		Clients:   connect.LoadClientsFromEnv(),
 	}
+	checkDir := filepath.Join(filepath.Dir(projectsRoot), "colab-checkpoints")
+	bridge := colabbridge.New(getenv("CHERRY_COLAB_BRIDGE_ADDR", "127.0.0.1:43149"), checkDir)
 	resolver := &graph.Resolver{
 		Auth:    authSvc,
 		Factory: fact,
 		LLM:     llmSvc,
 		Connect: connectSvc,
+		Bridge:  bridge,
+	}
+	bridge.Pack = func(ctx context.Context, userID string) (string, string, error) {
+		return resolver.PackBodies(ctx, userID)
+	}
+	bridge.Register = func(ctx context.Context, _ string, slot, name, note, checkpointRef string) error {
+		_, err := llmSvc.RegisterVersion(ctx, slot, name, note, checkpointRef)
+		return err
 	}
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.Options{})
@@ -137,8 +148,9 @@ func main() {
 			"mail":     mail.Channel(),
 			"gdpr":     true,
 			"llm":      llmSvc.Completer.Channel(),
-			"opencode": sidecarStatus("opencode"),
-			"maestro":  sidecarStatus("maestro"),
+			"opencode":    sidecarStatus("opencode"),
+			"maestro":     sidecarStatus("maestro"),
+			"cloudflared": sidecarStatus("cloudflared"),
 		})
 	})
 	mux.HandleFunc("/export/", func(w http.ResponseWriter, r *http.Request) {
