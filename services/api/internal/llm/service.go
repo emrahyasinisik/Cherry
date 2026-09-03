@@ -393,12 +393,14 @@ func (s *Service) effectiveCompleter() Completer {
 	return s.Completer
 }
 
-// OpenCodeEndpoint returns base URL + API key for the OpenCode CLI.
+// OpenCodeEndpoint returns base URL, API key, and model for the OpenCode CLI.
 // Prefers a connected Colab tunnel; otherwise CHERRY_LLM_BASE_URL / CHERRY_LLM_API_KEY.
 // Colab has no real key — a placeholder is forwarded so OpenCode still sends Authorization.
-func (s *Service) OpenCodeEndpoint() (baseURL, apiKey string) {
+// Model defaults to the notebook BASE_MODEL when Colab is connected (chat.completions only).
+func (s *Service) OpenCodeEndpoint() (baseURL, apiKey, model string) {
 	apiKey = strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
 	baseURL = strings.TrimSpace(os.Getenv("CHERRY_LLM_BASE_URL"))
+	model = strings.TrimSpace(firstNonEmptyEnv("CHERRY_OPENCODE_MODEL", "CHERRY_LLM_MODEL"))
 	s.colabMu.Lock()
 	url := s.colabInferenceURL
 	status := s.colabStatus
@@ -408,8 +410,20 @@ func (s *Service) OpenCodeEndpoint() (baseURL, apiKey string) {
 		if apiKey == "" {
 			apiKey = "cherry-colab"
 		}
+		if model == "" {
+			model = "Qwen/Qwen2.5-1.5B-Instruct"
+		}
 	}
-	return baseURL, apiKey
+	return baseURL, apiKey, model
+}
+
+func firstNonEmptyEnv(keys ...string) string {
+	for _, key := range keys {
+		if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func (s *Service) Status(ctx context.Context) (store.LlmVersion, string, error) {

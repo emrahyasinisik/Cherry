@@ -400,7 +400,7 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		Continue: false,
 	}
 	if s.LLM != nil {
-		req.BaseURL, req.APIKey = s.LLM.OpenCodeEndpoint()
+		req.BaseURL, req.APIKey, req.Model = s.LLM.OpenCodeEndpoint()
 	}
 	res, err := s.OpenCode.Run(ctx, req)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
@@ -471,7 +471,7 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 		Continue: true,
 	}
 	if s.LLM != nil {
-		ocReq.BaseURL, ocReq.APIKey = s.LLM.OpenCodeEndpoint()
+		ocReq.BaseURL, ocReq.APIKey, ocReq.Model = s.LLM.OpenCodeEndpoint()
 	}
 	res, err := s.OpenCode.Run(ctx, ocReq)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {

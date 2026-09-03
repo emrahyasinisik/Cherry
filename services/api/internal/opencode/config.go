@@ -10,6 +10,15 @@ import (
 	"github.com/cherry/api/internal/sidecar"
 )
 
+// CompatibleProviderID is the OpenCode provider id for OpenAI-compatible
+// endpoints (Colab FastAPI, local proxies). Built-in "openai" uses
+// @ai-sdk/openai which posts to /v1/responses — Colab only serves
+// /v1/chat/completions.
+const CompatibleProviderID = "cherry-colab"
+
+// DefaultColabModel matches the notebook BASE_MODEL / GET /v1/models id.
+const DefaultColabModel = "Qwen/Qwen2.5-1.5B-Instruct"
+
 type Endpoint struct {
 	BaseURL string
 	APIKey  string
@@ -53,19 +62,28 @@ func configJSON(ep Endpoint) ([]byte, error) {
 	}
 	base := strings.TrimRight(strings.TrimSpace(ep.BaseURL), "/")
 	if base != "" {
-		model := strings.TrimSpace(ep.Model)
-		if model == "" {
-			model = "gpt-4o-mini"
+		remoteModel := strings.TrimSpace(ep.Model)
+		if remoteModel == "" {
+			remoteModel = DefaultColabModel
 		}
-		if !strings.HasPrefix(model, "openai/") {
-			model = "openai/" + model
-		}
-		root["model"] = model
+		// Strip accidental provider prefixes from callers.
+		remoteModel = stripProviderPrefix(remoteModel)
+		localID := localModelID(remoteModel)
+		root["model"] = CompatibleProviderID + "/" + localID
 		root["provider"] = map[string]any{
-			"openai": map[string]any{
+			CompatibleProviderID: map[string]any{
+				"npm":  "@ai-sdk/openai-compatible",
+				"name": "Cherry Colab",
 				"options": map[string]any{
 					"baseURL": base,
 					"apiKey":  "{env:OPENAI_API_KEY}",
+				},
+				"models": map[string]any{
+					localID: map[string]any{
+						"name": displayModelName(remoteModel),
+						// Wire OpenCode local id → remote /v1/models id (may contain '/').
+						"id": remoteModel,
+					},
 				},
 			},
 		}
@@ -83,6 +101,51 @@ func configJSON(ep Endpoint) ([]byte, error) {
 		return nil, fmt.Errorf("opencode config: %w", err)
 	}
 	return append(raw, '\n'), nil
+}
+
+// CLIModel returns the provider/model string for `opencode run --model`.
+func CLIModel(ep Endpoint) string {
+	base := strings.TrimRight(strings.TrimSpace(ep.BaseURL), "/")
+	model := strings.TrimSpace(ep.Model)
+	if base != "" {
+		if model == "" {
+			model = DefaultColabModel
+		}
+		model = stripProviderPrefix(model)
+		return CompatibleProviderID + "/" + localModelID(model)
+	}
+	if model == "" {
+		return ""
+	}
+	if !strings.Contains(model, "/") {
+		return "openai/" + model
+	}
+	return model
+}
+
+func stripProviderPrefix(model string) string {
+	for _, prefix := range []string{CompatibleProviderID + "/", "openai/"} {
+		if strings.HasPrefix(model, prefix) {
+			return strings.TrimPrefix(model, prefix)
+		}
+	}
+	return model
+}
+
+// localModelID makes a slash-free OpenCode model key. Remote id stays in models[].id.
+func localModelID(remote string) string {
+	remote = strings.TrimSpace(remote)
+	if remote == "" {
+		return "model"
+	}
+	return strings.ReplaceAll(remote, "/", "-")
+}
+
+func displayModelName(remote string) string {
+	if i := strings.LastIndex(remote, "/"); i >= 0 && i+1 < len(remote) {
+		return remote[i+1:]
+	}
+	return remote
 }
 
 func WriteAgents(dir, name, stack, brief, sourceRule string) error {

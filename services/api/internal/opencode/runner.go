@@ -151,10 +151,7 @@ func (c *CLI) Run(ctx context.Context, req Request) (Result, error) {
 	if req.Continue {
 		args = append(args, "--continue")
 	}
-	if model := strings.TrimSpace(ep.Model); model != "" {
-		if !strings.HasPrefix(model, "openai/") {
-			model = "openai/" + model
-		}
+	if model := CLIModel(ep); model != "" {
 		args = append(args, "--model", model)
 	}
 	cmd := exec.CommandContext(runCtx, bin, args...)

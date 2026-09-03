@@ -1,5 +1,22 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "cherry-colab/Qwen-Qwen2.5-1.5B-Instruct",
+  "provider": {
+    "cherry-colab": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Cherry Colab",
+      "options": {
+        "baseURL": "https://cherry.visevent.com/v1",
+        "apiKey": "{env:OPENAI_API_KEY}"
+      },
+      "models": {
+        "Qwen-Qwen2.5-1.5B-Instruct": {
+          "name": "Qwen2.5-1.5B-Instruct",
+          "id": "Qwen/Qwen2.5-1.5B-Instruct"
+        }
+      }
+    }
+  },
   "mcp": {
     "maestro": {
       "type": "local",

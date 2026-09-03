@@ -342,7 +342,9 @@ server_thread = Thread(target=lambda: uvicorn.run(app, host="0.0.0.0", port=8000
 server_thread.start()
 _time.sleep(3)
 print("Inference server running on 0.0.0.0:8000")
-print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")'''
+print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")
+print("GET  /v1/models — id:", BASE_MODEL)
+print("Not served: /v1/responses (OpenCode must use @ai-sdk/openai-compatible)")'''
         ),
         md(
             """## 9. Cloudflare tüneli / Cloudflare tunnel (inferans)
@@ -351,7 +353,9 @@ print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")'''
 
 Token’ı Colab secret veya oturum değişkeni olarak ver — notebook’a, Drive’a, git’e yazma. Cherry yalnızca public HTTPS URL saklar; token stüdyo API’sine girmez.
 
-Colab kapanınca tünel kapanır — üretim inferansı değil."""
+Colab kapanınca tünel kapanır — üretim inferansı değil.
+
+Cherry OpenCode: `cherry-colab` + `@ai-sdk/openai-compatible` → `/v1/chat/completions` (built-in `openai` provider `/v1/responses` ister; bu sunucuda yok)."""
         ),
         py(
             r'''!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb

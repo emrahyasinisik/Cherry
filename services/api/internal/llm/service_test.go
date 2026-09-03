@@ -71,12 +71,15 @@ func TestEffectiveChannelPrefersColabTunnel(t *testing.T) {
 	if snap.Channel != "colab-tunnel" {
 		t.Fatalf("channel %s", snap.Channel)
 	}
-	base, key := svc.OpenCodeEndpoint()
+	base, key, model := svc.OpenCodeEndpoint()
 	if base != "https://example.invalid/v1" {
 		t.Fatalf("base %s", base)
 	}
 	if key != "cherry-colab" {
 		t.Fatalf("key %s", key)
+	}
+	if model != "Qwen/Qwen2.5-1.5B-Instruct" {
+		t.Fatalf("model %s", model)
 	}
 }
 

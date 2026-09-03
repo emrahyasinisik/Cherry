@@ -155,8 +155,39 @@ func TestWriteConfigWithBaseURL(t *testing.T) {
 	if !strings.Contains(text, "cherry.visevent.com/v1") {
 		t.Fatalf("%s", text)
 	}
-	if !strings.Contains(text, "openai/") {
+	if !strings.Contains(text, `"npm": "@ai-sdk/openai-compatible"`) {
+		t.Fatalf("must use openai-compatible (chat.completions), not openai responses: %s", text)
+	}
+	if !strings.Contains(text, CompatibleProviderID+"/") {
 		t.Fatalf("model provider prefix missing: %s", text)
+	}
+	if !strings.Contains(text, `"id": "Qwen/Qwen2.5-1.5B-Instruct"`) {
+		t.Fatalf("remote model id missing: %s", text)
+	}
+	if strings.Contains(text, `"openai"`) {
+		t.Fatalf("must not wire built-in openai provider (hits /v1/responses): %s", text)
+	}
+	cli := CLIModel(Endpoint{BaseURL: "https://cherry.visevent.com/v1", Model: "Qwen/Qwen2.5-1.5B-Instruct"})
+	if cli != CompatibleProviderID+"/Qwen-Qwen2.5-1.5B-Instruct" {
+		t.Fatalf("CLI model %q", cli)
+	}
+}
+
+func TestWriteConfigDefaultsColabModel(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("CHERRY_SIDECAR_DIR", t.TempDir())
+	t.Setenv("CHERRY_OPENCODE_MODEL", "")
+	t.Setenv("CHERRY_LLM_MODEL", "")
+	if err := WriteConfig(dir, Endpoint{BaseURL: "https://cherry.visevent.com/v1"}); err != nil {
+		t.Fatal(err)
+	}
+	body, err := os.ReadFile(filepath.Join(dir, "opencode.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	if !strings.Contains(text, DefaultColabModel) {
+		t.Fatalf("default Colab model missing: %s", text)
 	}
 }
 
