@@ -102,6 +102,38 @@ JSONL satırı:
 {"instruction":"...","input":"...","output":"..."}
 ```
 
+## Geçici inferans / Temporary inference
+
+Fine-tune sonrası model, aynı Colab oturumunda OpenAI uyumlu API olarak sunulabilir. Bu **geçici** bir çözümdür — Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.
+
+### Akış / Flow
+
+```mermaid
+flowchart LR
+  Train[Fine_tune_bitir] --> Serve[FastAPI_8000]
+  Serve --> CF[cloudflared_tunnel]
+  CF --> URL[trycloudflare_URL]
+  URL --> Studio[Cherry_stüdyo]
+  Studio --> Complete[/v1/chat/completions]
+```
+
+1. Notebook hücre 8: Model `model.eval()` ile inferans moduna geçer. FastAPI + uvicorn `0.0.0.0:8000`'de dinler.
+2. Notebook hücre 9: `cloudflared tunnel --url http://localhost:8000` ile quick tunnel açılır. `https://xxx.trycloudflare.com` URL'si yazdırılır.
+3. Notebook hücre 10: Oturumu canlı tutar (60s döngü).
+4. Cherry stüdyoda: LLM yönetici → Colab inferans → URL'yi yapıştır. `setColabInferenceUrl` mutation'ı çağrılır.
+5. Cherry completer, `colab-tunnel` kanalıyla istekleri tünele yönlendirir. GDPR katmanı hâlâ aktif (redact → complete → scan → audit).
+6. Sağlık kontrolü 30 saniyede bir `/v1/models` endpoint'ini yoklar. Yanıt gelmezse durum `DISCONNECTED` olur ve varsayılan completer kullanılır.
+
+### Sabitler / Invariants
+
+| Bu / This | Değil / Not |
+| --- | --- |
+| Geçici inferans — Colab açıkken | 24/7 üretim API |
+| Aynı 16GB T4, aynı QLoRA model | Tam ağırlık büyük model |
+| `colab-tunnel` kanal, GDPR aktif | GDPR'sız doğrudan çağrı |
+| Kullanıcı URL'yi elle yapıştırır | Otomatik keşif |
+| Bağlantı kopunca varsayılan endpoint | Yeniden bağlanma |
+
 ## GPU
 
 Colab ücretsiz T4 ≈ 16GB. Notebook 4-bit `Qwen/Qwen2.5-1.5B-Instruct` + LoRA r=16. GPU yoksa hücre durur; CPU’ya düşmez.

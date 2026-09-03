@@ -57,6 +57,12 @@ type ComplexityRoot struct {
 		TokenHint   func(childComplexity int) int
 	}
 
+	ColabInference struct {
+		Note   func(childComplexity int) int
+		Status func(childComplexity int) int
+		URL    func(childComplexity int) int
+	}
+
 	Connection struct {
 		Account    func(childComplexity int) int
 		AuthMethod func(childComplexity int) int
@@ -216,6 +222,7 @@ type ComplexityRoot struct {
 		RunMaestro              func(childComplexity int, projectID string) int
 		SendProjectMessage      func(childComplexity int, projectID string, body string) int
 		SetActiveVersion        func(childComplexity int, id string) int
+		SetColabInferenceURL    func(childComplexity int, url string) int
 		SetMcpRoot              func(childComplexity int, path string) int
 		StartColabBridge        func(childComplexity int) int
 		StartConnectionOAuth    func(childComplexity int, kind ConnectionKind) int
@@ -254,6 +261,7 @@ type ComplexityRoot struct {
 	Query struct {
 		ChallengeMailbox func(childComplexity int, challengeID string) int
 		ColabBridge      func(childComplexity int) int
+		ColabInference   func(childComplexity int) int
 		Connections      func(childComplexity int) int
 		Devices          func(childComplexity int) int
 		ExportMe         func(childComplexity int) int
@@ -327,6 +335,7 @@ type MutationResolver interface {
 	RegisterLlmVersion(ctx context.Context, slot string, name string, note string, checkpointRef string) (*LlmAdmin, error)
 	StartColabBridge(ctx context.Context) (*ColabBridge, error)
 	StopColabBridge(ctx context.Context) (*ColabBridge, error)
+	SetColabInferenceURL(ctx context.Context, url string) (*ColabInference, error)
 	DeleteMe(ctx context.Context, wipeProjects bool) (bool, error)
 }
 type QueryResolver interface {
@@ -346,6 +355,7 @@ type QueryResolver interface {
 	TrainingPack(ctx context.Context) (*TrainingPack, error)
 	Connections(ctx context.Context) ([]*Connection, error)
 	ColabBridge(ctx context.Context) (*ColabBridge, error)
+	ColabInference(ctx context.Context) (*ColabInference, error)
 }
 
 type executableSchema struct {
@@ -415,6 +425,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.ColabBridge.TokenHint(childComplexity), true
+
+	case "ColabInference.note":
+		if e.complexity.ColabInference.Note == nil {
+			break
+		}
+
+		return e.complexity.ColabInference.Note(childComplexity), true
+	case "ColabInference.status":
+		if e.complexity.ColabInference.Status == nil {
+			break
+		}
+
+		return e.complexity.ColabInference.Status(childComplexity), true
+	case "ColabInference.url":
+		if e.complexity.ColabInference.URL == nil {
+			break
+		}
+
+		return e.complexity.ColabInference.URL(childComplexity), true
 
 	case "Connection.account":
 		if e.complexity.Connection.Account == nil {
@@ -1165,6 +1194,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.SetActiveVersion(childComplexity, args["id"].(string)), true
+	case "Mutation.setColabInferenceUrl":
+		if e.complexity.Mutation.SetColabInferenceURL == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_setColabInferenceUrl_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SetColabInferenceURL(childComplexity, args["url"].(string)), true
 	case "Mutation.setMcpRoot":
 		if e.complexity.Mutation.SetMcpRoot == nil {
 			break
@@ -1355,6 +1395,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.ColabBridge(childComplexity), true
+	case "Query.colabInference":
+		if e.complexity.Query.ColabInference == nil {
+			break
+		}
+
+		return e.complexity.Query.ColabInference(childComplexity), true
 	case "Query.connections":
 		if e.complexity.Query.Connections == nil {
 			break
@@ -1967,6 +2013,17 @@ func (ec *executionContext) field_Mutation_setActiveVersion_args(ctx context.Con
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_setColabInferenceUrl_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "url", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["url"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_setMcpRoot_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -2376,6 +2433,93 @@ func (ec *executionContext) _ColabBridge_note(ctx context.Context, field graphql
 func (ec *executionContext) fieldContext_ColabBridge_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ColabBridge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ColabInference_url(ctx context.Context, field graphql.CollectedField, obj *ColabInference) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ColabInference_url,
+		func(ctx context.Context) (any, error) {
+			return obj.URL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ColabInference_url(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ColabInference",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ColabInference_status(ctx context.Context, field graphql.CollectedField, obj *ColabInference) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ColabInference_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNColabInferenceStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐColabInferenceStatus,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ColabInference_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ColabInference",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ColabInferenceStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ColabInference_note(ctx context.Context, field graphql.CollectedField, obj *ColabInference) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ColabInference_note,
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ColabInference_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ColabInference",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6367,6 +6511,55 @@ func (ec *executionContext) fieldContext_Mutation_stopColabBridge(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_setColabInferenceUrl(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_setColabInferenceUrl,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().SetColabInferenceURL(ctx, fc.Args["url"].(string))
+		},
+		nil,
+		ec.marshalNColabInference2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐColabInference,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_setColabInferenceUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_ColabInference_url(ctx, field)
+			case "status":
+				return ec.fieldContext_ColabInference_status(ctx, field)
+			case "note":
+				return ec.fieldContext_ColabInference_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ColabInference", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_setColabInferenceUrl_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_deleteMe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -7666,6 +7859,43 @@ func (ec *executionContext) fieldContext_Query_colabBridge(_ context.Context, fi
 				return ec.fieldContext_ColabBridge_note(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ColabBridge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_colabInference(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_colabInference,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().ColabInference(ctx)
+		},
+		nil,
+		ec.marshalNColabInference2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐColabInference,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_colabInference(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_ColabInference_url(ctx, field)
+			case "status":
+				return ec.fieldContext_ColabInference_status(ctx, field)
+			case "note":
+				return ec.fieldContext_ColabInference_note(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ColabInference", field.Name)
 		},
 	}
 	return fc, nil
@@ -9788,6 +10018,55 @@ func (ec *executionContext) _ColabBridge(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var colabInferenceImplementors = []string{"ColabInference"}
+
+func (ec *executionContext) _ColabInference(ctx context.Context, sel ast.SelectionSet, obj *ColabInference) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, colabInferenceImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ColabInference")
+		case "url":
+			out.Values[i] = ec._ColabInference_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._ColabInference_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._ColabInference_note(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var connectionImplementors = []string{"Connection"}
 
 func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSet, obj *Connection) graphql.Marshaler {
@@ -10981,6 +11260,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "setColabInferenceUrl":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_setColabInferenceUrl(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "deleteMe":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteMe(ctx, field)
@@ -11548,6 +11834,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_colabBridge(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "colabInference":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_colabInference(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -12214,6 +12522,30 @@ func (ec *executionContext) unmarshalNColabBridgeStatus2githubᚗcomᚋcherryᚋ
 }
 
 func (ec *executionContext) marshalNColabBridgeStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐColabBridgeStatus(ctx context.Context, sel ast.SelectionSet, v ColabBridgeStatus) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNColabInference2githubᚗcomᚋcherryᚋapiᚋgraphᚐColabInference(ctx context.Context, sel ast.SelectionSet, v ColabInference) graphql.Marshaler {
+	return ec._ColabInference(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNColabInference2ᚖgithubᚗcomᚋcherryᚋapiᚋgraphᚐColabInference(ctx context.Context, sel ast.SelectionSet, v *ColabInference) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ColabInference(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNColabInferenceStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐColabInferenceStatus(ctx context.Context, v any) (ColabInferenceStatus, error) {
+	var res ColabInferenceStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNColabInferenceStatus2githubᚗcomᚋcherryᚋapiᚋgraphᚐColabInferenceStatus(ctx context.Context, sel ast.SelectionSet, v ColabInferenceStatus) graphql.Marshaler {
 	return v
 }
 

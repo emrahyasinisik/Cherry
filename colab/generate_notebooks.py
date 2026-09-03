@@ -264,12 +264,146 @@ else:
     print("Zip dosyasını manuel indir ve stüdyoda kaydet.")'''
         ),
         md(
+            """## 8. İnferans sunucusu / Inference server (isteğe bağlı)
+
+Fine-tune bitince modeli OpenAI uyumlu API olarak sun. Cherry stüdyodan bu URL’ye istek gelir. **Geçici** — Colab kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan."""
+        ),
+        py(
+            r'''# Serve the fine-tuned model as an OpenAI-compatible API.
+# Uses a lightweight FastAPI wrapper around the transformers pipeline.
+# Fits 16GB T4 since the model is already loaded from training.
+
+%pip -q install fastapi uvicorn
+
+from threading import Thread
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, StreamingResponse
+import torch, json, time as _time, uuid
+
+app = FastAPI()
+
+model.eval()
+
+@app.get("/v1/models")
+async def list_models():
+    return {"object": "list", "data": [{"id": BASE_MODEL, "object": "model"}]}
+
+@app.post("/v1/chat/completions")
+async def chat_completions(request: Request):
+    body = await request.json()
+    messages = body.get("messages", [])
+    stream = body.get("stream", False)
+    max_tokens = min(body.get("max_tokens", 512), MAX_SEQ)
+
+    prompt_parts = []
+    for msg in messages:
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        prompt_parts.append(f"<|im_start|>{role}\n{content}<|im_end|>")
+    prompt_parts.append("<|im_start|>assistant\n")
+    prompt_text = "\n".join(prompt_parts)
+
+    inputs = tok(prompt_text, return_tensors="pt", truncation=True, max_length=MAX_SEQ).to(model.device)
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=max_tokens,
+            do_sample=True,
+            temperature=body.get("temperature", 0.7),
+            top_p=body.get("top_p", 0.9),
+            pad_token_id=tok.pad_token_id,
+        )
+    new_tokens = outputs[0][inputs["input_ids"].shape[1]:]
+    text = tok.decode(new_tokens, skip_special_tokens=True)
+
+    completion_id = "chatcmpl-" + uuid.uuid4().hex[:12]
+    created = int(_time.time())
+
+    if stream:
+        async def generate():
+            chunk = {
+                "id": completion_id, "object": "chat.completion.chunk",
+                "created": created, "model": BASE_MODEL,
+                "choices": [{"index": 0, "delta": {"role": "assistant", "content": text}, "finish_reason": "stop"}],
+            }
+            yield f"data: {json.dumps(chunk)}\n\n"
+            yield "data: [DONE]\n\n"
+        return StreamingResponse(generate(), media_type="text/event-stream")
+
+    return JSONResponse({
+        "id": completion_id, "object": "chat.completion",
+        "created": created, "model": BASE_MODEL,
+        "choices": [{"index": 0, "message": {"role": "assistant", "content": text}, "finish_reason": "stop"}],
+        "usage": {"prompt_tokens": inputs["input_ids"].shape[1], "completion_tokens": len(new_tokens), "total_tokens": inputs["input_ids"].shape[1] + len(new_tokens)},
+    })
+
+server_thread = Thread(target=lambda: uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info"), daemon=True)
+server_thread.start()
+_time.sleep(3)
+print("Inference server running on 0.0.0.0:8000")
+print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")'''
+        ),
+        md(
+            """## 9. Cloudflare tüneli / Cloudflare tunnel (inferans)
+
+Sunucuyu internete aç. Cherry stüdyoda bu URL’yi yapıştır. Colab kapanınca tünel kapanır — üretim inferansı değil."""
+        ),
+        py(
+            r'''!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+!dpkg -i cloudflared-linux-amd64.deb
+
+import subprocess, re, time as _time
+
+proc = subprocess.Popen(
+    ["cloudflared", "tunnel", "--url", "http://localhost:8000", "--no-autoupdate"],
+    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+)
+
+url = ""
+deadline = _time.time() + 30
+for line in proc.stdout:
+    print(line, end="")
+    m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
+    if m:
+        url = m.group()
+        break
+    if _time.time() > deadline:
+        break
+
+if url:
+    print(f"\n{'='*60}")
+    print(f"Cherry'de kullan / Use in Cherry:")
+    print(f"  CHERRY_LLM_BASE_URL={url}/v1")
+    print(f"{'='*60}")
+    print("LLM yönetici → Colab inferans bölümünde bu URL’yi yapıştır.")
+    print("Paste this URL in the LLM admin → Colab inference section.")
+    print("Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.")
+else:
+    print("cloudflared tünel URL bulunamadı. Log’ları kontrol et.")
+    print("Tunnel URL not found. Check cloudflared logs above.")'''
+        ),
+        md(
+            """## 10. Canlı tut / Keep alive
+
+Colab boşta kalınca oturumu kapatır. Bu hücreyi çalışır bırak."""
+        ),
+        py(
+            r'''import time as _time
+print("Oturum canlı tutuluyor… / Keeping session alive…")
+print("Durdurmak için hücreyi kes. / Stop this cell to disconnect.")
+while True:
+    _time.sleep(60)
+    print(".", end="", flush=True)'''
+        ),
+        md(
             f"""## Sonra / Next
 
 1. Zip’i makineye indir.
 2. Cherry → LLM yönetici → **Colab sürümü kaydet** (işçi {worker}).
 3. Pointer’ı o sürüme al. In-flight işler eski pointer’da biter.
-4. Colab’i kapat. Üretim çağrıları stüdyo işçilerinde kalır."""
+4. İnferans tüneli açıksa stüdyoda URL’yi yapıştır — geçici, Colab kapanınca biter.
+5. Colab’ı kapat. Üretim çağrıları stüdyo işçilerinde kalır."""
         ),
     ]
 

@@ -94,6 +94,69 @@ func (c HTTPCompleter) Complete(ctx context.Context, version store.LlmVersion, p
 	return parsed.Choices[0].Message.Content, nil
 }
 
+// ColabTunnelCompleter sends requests to a Colab inference tunnel (trycloudflare).
+// No API key — the Colab server is unauthenticated behind a quick tunnel.
+type ColabTunnelCompleter struct {
+	BaseURL string
+	Model   string
+	Client  *http.Client
+}
+
+func (c ColabTunnelCompleter) Channel() string { return "colab-tunnel" }
+
+func (c ColabTunnelCompleter) Complete(ctx context.Context, version store.LlmVersion, prompt string) (string, error) {
+	base := strings.TrimRight(c.BaseURL, "/")
+	if base == "" {
+		return "", fmt.Errorf("colab tunnel URL boş")
+	}
+	model := c.Model
+	if model == "" {
+		model = "Qwen/Qwen2.5-1.5B-Instruct"
+	}
+	body, err := json.Marshal(map[string]any{
+		"model": model,
+		"messages": []map[string]string{
+			{"role": "system", "content": "Cherry kod ajanısın. Kısa Türkçe plan yaz. PII uydurma. Versiyon: " + version.Name},
+			{"role": "user", "content": prompt},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base+"/chat/completions", bytes.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := c.Client
+	if client == nil {
+		client = http.DefaultClient
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	raw, _ := io.ReadAll(io.LimitReader(res.Body, 1<<20))
+	if res.StatusCode >= 300 {
+		return "", fmt.Errorf("colab tunnel status %d: %s", res.StatusCode, strings.TrimSpace(string(raw)))
+	}
+	var parsed struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		return "", err
+	}
+	if len(parsed.Choices) == 0 {
+		return "", fmt.Errorf("empty colab tunnel completion")
+	}
+	return parsed.Choices[0].Message.Content, nil
+}
+
 func NewCompleter(apiKey, baseURL, model string) Completer {
 	if strings.TrimSpace(apiKey) == "" {
 		return MockCompleter{}

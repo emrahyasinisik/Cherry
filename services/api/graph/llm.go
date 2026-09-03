@@ -200,6 +200,39 @@ func (r *Resolver) colabBridgePayload() *ColabBridge {
 	return out
 }
 
+func (r *Resolver) colabInferencePayload() *ColabInference {
+	url, status := r.LLM.ColabInferenceState()
+	gqlStatus := ColabInferenceStatusOff
+	switch status {
+	case llm.ColabInferenceOff:
+		gqlStatus = ColabInferenceStatusOff
+	case llm.ColabInferenceConnected:
+		gqlStatus = ColabInferenceStatusConnected
+	case llm.ColabInferenceDisconnected:
+		gqlStatus = ColabInferenceStatusDisconnected
+	case llm.ColabInferenceChecking:
+		gqlStatus = ColabInferenceStatusChecking
+	default:
+		gqlStatus = ColabInferenceStatusOff
+	}
+	note := "Colab inferans kapalı."
+	switch gqlStatus {
+	case ColabInferenceStatusOff:
+		note = "Colab inferans kapalı. Colab notebook'unda tünel aç ve URL'yi yapıştır."
+	case ColabInferenceStatusConnected:
+		note = "Colab inferans bağlı. İstekler Colab tüneline gidiyor. Colab oturumu kapanınca bağlantı kopar."
+	case ColabInferenceStatusDisconnected:
+		note = "Colab inferans bağlantı kesildi. Colab oturumu kapanmış olabilir. Varsayılan endpoint kullanılıyor."
+	case ColabInferenceStatusChecking:
+		note = "Colab inferans kontrol ediliyor…"
+	}
+	return &ColabInference{
+		URL:    url,
+		Status: gqlStatus,
+		Note:   note,
+	}
+}
+
 func trainingPackPayload(pack llm.Pack) (*TrainingPack, error) {
 	body, err := pack.JSON()
 	if err != nil {

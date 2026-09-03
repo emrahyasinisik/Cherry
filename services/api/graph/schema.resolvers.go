@@ -386,6 +386,15 @@ func (r *mutationResolver) StopColabBridge(ctx context.Context) (*ColabBridge, e
 	return r.colabBridgePayload(), nil
 }
 
+// SetColabInferenceURL is the resolver for the setColabInferenceUrl field.
+func (r *mutationResolver) SetColabInferenceURL(ctx context.Context, url string) (*ColabInference, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return nil, gqlErr(err)
+	}
+	r.LLM.SetColabInferenceURL(url)
+	return r.colabInferencePayload(), nil
+}
+
 // DeleteMe is the resolver for the deleteMe field.
 func (r *mutationResolver) DeleteMe(ctx context.Context, wipeProjects bool) (bool, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
@@ -681,6 +690,14 @@ func (r *queryResolver) ColabBridge(ctx context.Context) (*ColabBridge, error) {
 		return nil, gqlErr(err)
 	}
 	return r.colabBridgePayload(), nil
+}
+
+// ColabInference is the resolver for the colabInference field.
+func (r *queryResolver) ColabInference(ctx context.Context) (*ColabInference, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.colabInferencePayload(), nil
 }
 
 // Mutation returns MutationResolver implementation.
