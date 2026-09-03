@@ -32,12 +32,15 @@ Before writing code, read that section’s **rule and document**. If the documen
 ## Intended layout (when coding starts)
 
 ```
-apps/web/          Next.js (renderer UI)
-apps/desktop/      Electron main + preload
-services/api/      Go GraphQL
+package.json       npm workspaces root (apps/*) — single lockfile, single node_modules
+apps/web/          Next.js (renderer UI)          workspace: cherry-web
+apps/desktop/      Electron main + preload        workspace: cherry-desktop
+services/api/      Go GraphQL (own Go module, outside the npm workspace)
 docs/              this documentation
 .cursor/rules/     cursor rules per section
 ```
+
+Install from the repo root only (`npm install`). Never run `npm install` inside `apps/*`, and never commit a lockfile there. Add a dependency with `npm i <pkg> -w cherry-web`.
 
 ## Do not
 

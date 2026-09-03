@@ -32,12 +32,18 @@ Başlangıç noktası: [docs/README.md](docs/README.md)
 
 ## Çalıştır / Run
 
-İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). SMTP veya Resend yoksa kod **in-app geçici kutuya** düşer (`emailSent: false`). Oturum bellekte (Docker yoksa).
+Depo bir **npm workspaces monorepo**'sudur: bağımlılıklar kökten tek seferde kurulur, tek `package-lock.json` ve tek `node_modules` vardır. Alt klasörlerde `npm install` çalıştırma.
+
+**TR:** İki süreç: GraphQL API (`43148`) ve Next.js UI (`43147`). SMTP veya Resend yoksa kod **in-app geçici kutuya** düşer (`emailSent: false`). Oturum bellekte (Docker yoksa).
 
 ```bash
-npm run dev:api
-npm run dev:web
+npm install          # bir kez, kökte — apps/web + apps/desktop
+npm run dev:api      # Go GraphQL, 43148
+npm run dev:web      # Next.js, 43147
+npm run dev:desktop  # Electron kabuk
 ```
+
+Tek bir workspace'e paket eklemek için: `npm i <paket> -w cherry-web`.
 
 Gerçek e-posta için `.env.example` → `SMTP_*` (Gmail uygulama şifresi) **veya** `RESEND_API_KEY`. Ayrıntı: [docs/email-verification.md](docs/email-verification.md).
 
