@@ -24,7 +24,8 @@ Stüdyo **LLM** sayfasından da indirilir: canlı paket (JSON + JSONL), notebook
 
 ```mermaid
 flowchart LR
-  Studio[LLM_yonetici] --> Pack[training_pack_json]
+  Studio[LLM_yonetici] --> Tunnel[cloudflared_quick_tunnel]
+  Tunnel --> Pack[training_pack_json]
   Pack --> NbA[Colab_A_T4]
   Pack --> NbB[Colab_B_T4]
   NbA --> ZipA[adapter_A_zip]
@@ -36,11 +37,48 @@ flowchart LR
 ```
 
 1. Cherry’de bir proje üret (brif + kod + Maestro). Yoksa seed paketi kullan.
-2. LLM yönetici → **Eğitim paketini indir** (`cherry-training-pack.json` + `.jsonl`).
+2. LLM yönetici → **Colab tünelini aç** (`cloudflared` quick tunnel). URL + köprü token’ı notebook’a yapıştır. `cloudflared` yoksa tünel açılmaz — sahte URL yok; o zaman paketi elle indir.
 3. [colab.research.google.com](https://colab.research.google.com) — **iki oturum**. Her birinde Runtime → GPU → **T4**.
-4. Oturum A’ya `cherry_worker_a.ipynb` + JSON yükle. Oturum B’ye `cherry_worker_b.ipynb` + **aynı** JSON.
-5. Hücreleri sırayla çalıştır. Adapter zip iner.
-6. LLM yönetici → **Colab sürümü kaydet** (`slot` A veya B, `checkpointRef` = zip adı). Pointer’ı **sen** çevirirsin. In-flight iş eski pointer’da biter.
+4. Oturum A’ya `cherry_worker_a.ipynb` yükle (tünel paketi çeker). Tünel yoksa JSON’u elle yükle. Oturum B’ye `cherry_worker_b.ipynb` + **aynı** paket.
+5. Hücreleri sırayla çalıştır. Adapter zip tünelden stüdyoya döner; yoksa makineye iner.
+6. Tünel kaydı immutable `llmVersion` üretir. Pointer’ı **sen** çevirirsin. In-flight iş eski pointer’da biter. Elle yol: LLM yönetici → **Colab sürümü kaydet**.
+
+## Cloudflare tüneli / Cloudflare tunnel
+
+**TR:** Colab Google’da çalışır; stüdyo yerelde. El sıkışması `cloudflared tunnel --url` (trycloudflare quick tunnel). Cherry Colab barındırmaz. Bu, **Bağlantılar → Cloudflare Workers** değildir.
+
+**EN:** Colab runs on Google; the studio is local. Handshake is `cloudflared tunnel --url` (trycloudflare quick tunnel). Cherry does not host Colab. This is **not** Connections → Cloudflare Workers.
+
+```mermaid
+flowchart TB
+  subgraph studio [Cherry_yerel]
+    UI[LLM_yonetici]
+    API[Go_API_43148]
+    Bridge[bridge_127_0_0_1]
+    UI --> API
+    API --> Bridge
+  end
+  CF[cloudflared_quick_tunnel]
+  subgraph colab [Colab_T4]
+    Nb[notebook_A_veya_B]
+  end
+  Bridge --> CF
+  Nb -->|Bearer_token_pack_ve_zip| CF
+  CF --> Bridge
+```
+
+| Bu / This | Değil / Not |
+| --- | --- |
+| Yerel köprü + public HTTPS (trycloudflare) | Cherry’de Colab runtime |
+| Token’lı `GET /pack.json` + `POST /checkpoint` | Tüm GraphQL’i internete açmak |
+| Sidecar `cloudflared` (vendor/bin veya PATH) | Bağlantılar’daki kişi Cloudflare hesabı |
+| Colab paket çeker / adapter gönderir | Colab 24/7 üretim inferansı |
+
+Köprü yalnızca `127.0.0.1` üzerinde dinler. Tünel o porta bakar — platform GraphQL, auth ve mailbox public olmaz. Token oturum token’ı değildir; tünel her açılışta yenilenir. GraphQL stüdyo oturumuna tam token’ı gösterir (yapıştırmak için); `tokenHint` son 4.
+
+`cloudflared` yoksa durum `FAILED`, `publicUrl` boş. Sahte “bağlı” yok.
+
+Env: `CHERRY_CLOUDFLARED_BIN`, `CHERRY_COLAB_BRIDGE_ADDR` (varsayılan `127.0.0.1:43149`).
 
 ## Sabitler / Invariants
 
@@ -50,6 +88,7 @@ flowchart LR
 | İki Colab = iki GPU hakkı | Tek T4’te A+B |
 | Paket: brif + kaynak + Maestro + redakte tamamlamalar | Ham e-posta, token, `.env`, `preview/` |
 | Checkpoint → immutable `llmVersion` | Colab 24/7 üretim API |
+| Cloudflare quick tunnel = Colab el sıkışması | Müşteri Workers / D1 / R2 |
 
 ## Paket içeriği / Pack contents
 

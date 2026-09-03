@@ -361,6 +361,31 @@ func (r *mutationResolver) RegisterLlmVersion(ctx context.Context, slot string, 
 	return r.llmAdminPayload(ctx, user.ID)
 }
 
+// StartColabBridge is the resolver for the startColabBridge field.
+func (r *mutationResolver) StartColabBridge(ctx context.Context) (*ColabBridge, error) {
+	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Bridge == nil {
+		return r.colabBridgePayload(), nil
+	}
+	r.Bridge.Start(user.ID)
+	return r.colabBridgePayload(), nil
+}
+
+// StopColabBridge is the resolver for the stopColabBridge field.
+func (r *mutationResolver) StopColabBridge(ctx context.Context) (*ColabBridge, error) {
+	_, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	if r.Bridge != nil {
+		r.Bridge.Stop()
+	}
+	return r.colabBridgePayload(), nil
+}
+
 // DeleteMe is the resolver for the deleteMe field.
 func (r *mutationResolver) DeleteMe(ctx context.Context, wipeProjects bool) (bool, error) {
 	user, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx))
@@ -648,6 +673,14 @@ func (r *queryResolver) Connections(ctx context.Context) ([]*Connection, error) 
 		out = append(out, item)
 	}
 	return out, nil
+}
+
+// ColabBridge is the resolver for the colabBridge field.
+func (r *queryResolver) ColabBridge(ctx context.Context) (*ColabBridge, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.colabBridgePayload(), nil
 }
 
 // Mutation returns MutationResolver implementation.

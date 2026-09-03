@@ -15,6 +15,7 @@ type Query {
   exportMe: ExportBundle!
   trainingPack: TrainingPack!
   connections: [Connection!]!
+  colabBridge: ColabBridge!
 }
 
 type Mutation {
@@ -52,6 +53,8 @@ type Mutation {
   setActiveVersion(id: ID!): LlmAdmin!
   setMcpRoot(path: String!): LlmAdmin!
   registerLlmVersion(slot: String!, name: String!, note: String!, checkpointRef: String!): LlmAdmin!
+  startColabBridge: ColabBridge!
+  stopColabBridge: ColabBridge!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
 
@@ -318,6 +321,25 @@ type TrainingPack {
   jsonl: String!
   liveExamples: Int!
   seedExamples: Int!
+  note: String!
+}
+
+enum ColabBridgeStatus {
+  IDLE
+  STARTING
+  RUNNING
+  STOPPING
+  FAILED
+}
+
+type ColabBridge {
+  status: ColabBridgeStatus!
+  publicUrl: String
+  localUrl: String
+  token: String
+  tokenHint: String!
+  cloudflared: String!
+  startedAt: String
   note: String!
 }
 

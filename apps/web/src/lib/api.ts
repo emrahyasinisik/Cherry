@@ -197,6 +197,42 @@ export type TrainingPack = {
   note: string;
 };
 
+export type ColabBridgeStatus = "IDLE" | "STARTING" | "RUNNING" | "STOPPING" | "FAILED";
+
+export type ColabBridge = {
+  status: ColabBridgeStatus;
+  publicUrl?: string | null;
+  localUrl?: string | null;
+  token?: string | null;
+  tokenHint: string;
+  cloudflared: string;
+  startedAt?: string | null;
+  note: string;
+};
+
+export const COLAB_BRIDGE_FIELDS = `
+  status publicUrl localUrl token tokenHint cloudflared startedAt note
+`;
+
+export function colabBridgeStatusLabel(status: ColabBridgeStatus): string {
+  switch (status) {
+    case "IDLE":
+      return "kapalı";
+    case "STARTING":
+      return "açılıyor";
+    case "RUNNING":
+      return "açık";
+    case "STOPPING":
+      return "kapanıyor";
+    case "FAILED":
+      return "hata";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
 export const LLM_ADMIN_FIELDS = `
   gdpr activeSlot mcpRoot queued
   slotA { slot wired role occupancy activeVersionId versions { id name note checkpointRef } }

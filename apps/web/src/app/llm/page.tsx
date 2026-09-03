@@ -7,10 +7,13 @@ import { AppShell } from "@/components/app-shell";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  COLAB_BRIDGE_FIELDS,
   LLM_ADMIN_FIELDS,
+  colabBridgeStatusLabel,
   getToken,
   graphql,
   llmOccupancyLabel,
+  type ColabBridge,
   type LlmAdmin,
   type LlmSlotCard,
   type TrainingPack,
@@ -34,6 +37,8 @@ export default function LlmAdminPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [admin, setAdmin] = useState<LlmAdmin | null>(null);
+  const [bridge, setBridge] = useState<ColabBridge | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
   const [mcpRoot, setMcpRoot] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -45,10 +50,11 @@ export default function LlmAdminPage() {
   const rooted = useRef(false);
 
   async function load() {
-    const data = await graphql<{ me: User | null; llmAdmin: LlmAdmin }>(
+    const data = await graphql<{ me: User | null; llmAdmin: LlmAdmin; colabBridge: ColabBridge }>(
       `query LlmAdmin {
         me { id email workspaceKind totpEnabled }
         llmAdmin { ${LLM_ADMIN_FIELDS} }
+        colabBridge { ${COLAB_BRIDGE_FIELDS} }
       }`,
     );
     if (!data.me) {
@@ -57,6 +63,7 @@ export default function LlmAdminPage() {
     }
     setUser(data.me);
     setAdmin(data.llmAdmin);
+    setBridge(data.colabBridge);
     if (!rooted.current) {
       setMcpRoot(data.llmAdmin.mcpRoot);
       rooted.current = true;
@@ -104,8 +111,8 @@ export default function LlmAdminPage() {
         <div>
           <h1 className="text-base font-medium">LLM yönetici</h1>
           <p className="text-muted-foreground">
-            A ve B aynı işi yapar. Boş olan alır; ikisi de meşgulse kuyruk. Fine-tune Colab’de: paketi indir,
-            iki T4 oturumu, adapter zip’ini kaydet. Colab üretim inferansı değil.
+            A ve B aynı işi yapar. Boş olan alır; ikisi de meşgulse kuyruk. Fine-tune Colab’de: tüneli aç
+            veya paketi indir, iki T4 oturumu, adapter’ı kaydet. Colab üretim inferansı değil.
           </p>
         </div>
         {error ? (
@@ -150,6 +157,15 @@ export default function LlmAdminPage() {
             }}
           />
         </div>
+        <ColabTunnelCard
+          bridge={bridge}
+          pending={pending}
+          copied={copied}
+          onCopied={setCopied}
+          onError={setError}
+          onPending={setPending}
+          onBridge={setBridge}
+        />
         <section className="flex flex-col gap-3 rounded-[10px] border border-border p-4">
           <h2 className="text-sm font-medium">Colab eğitim dosyaları</h2>
           <p className="text-muted-foreground">
@@ -351,6 +367,146 @@ export default function LlmAdminPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function ColabTunnelCard({
+  bridge,
+  pending,
+  copied,
+  onCopied,
+  onError,
+  onPending,
+  onBridge,
+}: {
+  bridge: ColabBridge | null;
+  pending: boolean;
+  copied: string | null;
+  onCopied: (v: string | null) => void;
+  onError: (v: string | null) => void;
+  onPending: (v: boolean) => void;
+  onBridge: (v: ColabBridge) => void;
+}) {
+  const status = bridge?.status ?? "IDLE";
+  const running = status === "RUNNING";
+  const busy = status === "STARTING" || status === "STOPPING";
+  const failed = status === "FAILED";
+
+  function copy(label: string, value: string) {
+    void navigator.clipboard.writeText(value).then(() => {
+      onCopied(label);
+      setTimeout(() => onCopied(null), 1200);
+    });
+  }
+
+  function start() {
+    onPending(true);
+    onError(null);
+    void graphql<{ startColabBridge: ColabBridge }>(
+      `mutation { startColabBridge { ${COLAB_BRIDGE_FIELDS} } }`,
+    )
+      .then((d) => onBridge(d.startColabBridge))
+      .catch((err: unknown) => {
+        onError(err instanceof Error ? err.message : "Tünel açılamadı.");
+      })
+      .finally(() => onPending(false));
+  }
+
+  function stop() {
+    onPending(true);
+    onError(null);
+    void graphql<{ stopColabBridge: ColabBridge }>(
+      `mutation { stopColabBridge { ${COLAB_BRIDGE_FIELDS} } }`,
+    )
+      .then((d) => onBridge(d.stopColabBridge))
+      .catch((err: unknown) => {
+        onError(err instanceof Error ? err.message : "Tünel kapatılamadı.");
+      })
+      .finally(() => onPending(false));
+  }
+
+  return (
+    <section
+      className={cn(
+        "flex flex-col gap-3 rounded-[10px] border p-4",
+        running ? "border-primary" : "border-border",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium">Colab tüneli</h2>
+        <span
+          className={cn(
+            "text-[11px] font-mono",
+            failed ? "text-destructive" : "text-muted-foreground",
+          )}
+        >
+          {colabBridgeStatusLabel(status)}
+        </span>
+      </div>
+      <p className="text-muted-foreground">
+        cloudflared quick-tunnel. Colab notebook eğitim paketini buradan çeker, adapter&apos;ı geri
+        yükler. Bağlantılar sayfasındaki Cloudflare entegrasyonundan ayrıdır.
+      </p>
+
+      {running && bridge?.publicUrl ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded border border-border bg-card/40 px-2 py-1 font-mono text-[11px]">
+              {bridge.publicUrl}
+            </code>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => copy("url", bridge.publicUrl!)}
+            >
+              {copied === "url" ? "Kopyalandı" : "URL"}
+            </Button>
+          </div>
+          {bridge.token ? (
+            <div className="flex items-center gap-2">
+              <code className="flex-1 truncate rounded border border-border bg-card/40 px-2 py-1 font-mono text-[11px]">
+                {bridge.tokenHint}
+              </code>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => copy("token", bridge.token!)}
+              >
+                {copied === "token" ? "Kopyalandı" : "Token"}
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {bridge?.note ? (
+        <p className="text-[11px] text-muted-foreground">{bridge.note}</p>
+      ) : null}
+
+      <div className="flex items-center gap-2">
+        {running ? (
+          <Button type="button" variant="outline" disabled={pending || busy} onClick={stop}>
+            Tüneli kapat
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" disabled={pending || busy} onClick={start}>
+            Tüneli aç
+          </Button>
+        )}
+        {bridge?.cloudflared ? (
+          <span className="rounded border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+            {bridge.cloudflared}
+          </span>
+        ) : null}
+        {bridge?.startedAt ? (
+          <span className="font-mono text-[10px] text-muted-foreground">
+            {bridge.startedAt}
+          </span>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

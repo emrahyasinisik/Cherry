@@ -23,9 +23,9 @@ User notes below are not the current slice.
 
 ### 3. Colab belgeleri / Colab files
 
-**TR:** `colab/` notebook + seed paket + LLM sayfasından indirme. İki T4 oturumu. **Kodda.**
+**TR:** `colab/` notebook + seed paket + LLM sayfasından indirme. İki T4 oturumu. Cloudflare quick tunnel ile stüdyo ↔ Colab. **Kodda.**
 
-**EN:** `colab/` notebooks + seed pack + LLM admin download. Two T4 sessions. **In code.**
+**EN:** `colab/` notebooks + seed pack + LLM admin download. Two T4 sessions. Studio ↔ Colab via Cloudflare quick tunnel. **In code.**
 
 ### 4. Marka / Brand
 

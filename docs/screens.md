@@ -76,7 +76,7 @@ Referans: [design/cherry-llm-admin.png](design/cherry-llm-admin.png)
 
 İki kart A/B: aynı iş, ikinci kart yoğunluk işçisi. Versiyon select, MCP kök, kuyruk/meşgul durumu. Versiyon değişince chip metni anında yeni pointer.
 
-Colab: eğitim paketi indir (JSON + JSONL), notebook A/B, seed paket. Adapter zip sonrası `registerLlmVersion`; aktif pointer ayrı.
+Colab: eğitim paketi indir (JSON + JSONL), notebook A/B, seed paket. **Colab tüneli:** aç / kapat, trycloudflare URL + köprü token (mono), boş = tünel kapalı (elle yükle), hata = `cloudflared` yok — yeşil “bağlı” yok. Adapter zip sonrası `registerLlmVersion`; aktif pointer ayrı. Tünel ≠ Bağlantılar Cloudflare.
 
 ## 6. Güvenlik
 

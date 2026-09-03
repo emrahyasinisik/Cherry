@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/cherry/api/internal/colabbridge"
 	"github.com/cherry/api/internal/llm"
 	"github.com/cherry/api/internal/store"
 )
@@ -133,6 +134,70 @@ func (r *Resolver) buildTrainingPack(ctx context.Context, userID string) (llm.Pa
 		Logs:     logs,
 		Maestro:  traces,
 	}), nil
+}
+
+func (r *Resolver) PackBodies(ctx context.Context, userID string) (string, string, error) {
+	pack, err := r.buildTrainingPack(ctx, userID)
+	if err != nil {
+		return "", "", err
+	}
+	body, err := pack.JSON()
+	if err != nil {
+		return "", "", err
+	}
+	jsonl, err := pack.JSONL()
+	if err != nil {
+		return "", "", err
+	}
+	return body, jsonl, nil
+}
+
+func (r *Resolver) colabBridgePayload() *ColabBridge {
+	if r.Bridge == nil {
+		missing := "missing"
+		note := "Colab köprüsü bağlı değil."
+		return &ColabBridge{
+			Status:      ColabBridgeStatusFailed,
+			Cloudflared: missing,
+			TokenHint:   "",
+			Note:        note,
+		}
+	}
+	snap := r.Bridge.Snapshot()
+	status := ColabBridgeStatusIdle
+	switch snap.Status {
+	case colabbridge.StatusIdle:
+		status = ColabBridgeStatusIdle
+	case colabbridge.StatusStarting:
+		status = ColabBridgeStatusStarting
+	case colabbridge.StatusRunning:
+		status = ColabBridgeStatusRunning
+	case colabbridge.StatusStopping:
+		status = ColabBridgeStatusStopping
+	case colabbridge.StatusFailed:
+		status = ColabBridgeStatusFailed
+	default:
+		status = ColabBridgeStatusFailed
+	}
+	out := &ColabBridge{
+		Status:      status,
+		Cloudflared: snap.Cloudflared,
+		TokenHint:   snap.TokenHint,
+		Note:        snap.Note,
+	}
+	if snap.PublicURL != "" {
+		out.PublicURL = &snap.PublicURL
+	}
+	if snap.LocalURL != "" {
+		out.LocalURL = &snap.LocalURL
+	}
+	if snap.Token != "" {
+		out.Token = &snap.Token
+	}
+	if snap.StartedAt != "" {
+		out.StartedAt = &snap.StartedAt
+	}
+	return out
 }
 
 func trainingPackPayload(pack llm.Pack) (*TrainingPack, error) {

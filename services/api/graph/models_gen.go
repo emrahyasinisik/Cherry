@@ -9,6 +9,17 @@ import (
 	"strconv"
 )
 
+type ColabBridge struct {
+	Status      ColabBridgeStatus `json:"status"`
+	PublicURL   *string           `json:"publicUrl,omitempty"`
+	LocalURL    *string           `json:"localUrl,omitempty"`
+	Token       *string           `json:"token,omitempty"`
+	TokenHint   string            `json:"tokenHint"`
+	Cloudflared string            `json:"cloudflared"`
+	StartedAt   *string           `json:"startedAt,omitempty"`
+	Note        string            `json:"note"`
+}
+
 type Connection struct {
 	Kind       ConnectionKind   `json:"kind"`
 	Status     ConnectionStatus `json:"status"`
@@ -381,6 +392,67 @@ func (e *ChatRole) UnmarshalJSON(b []byte) error {
 }
 
 func (e ChatRole) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ColabBridgeStatus string
+
+const (
+	ColabBridgeStatusIdle     ColabBridgeStatus = "IDLE"
+	ColabBridgeStatusStarting ColabBridgeStatus = "STARTING"
+	ColabBridgeStatusRunning  ColabBridgeStatus = "RUNNING"
+	ColabBridgeStatusStopping ColabBridgeStatus = "STOPPING"
+	ColabBridgeStatusFailed   ColabBridgeStatus = "FAILED"
+)
+
+var AllColabBridgeStatus = []ColabBridgeStatus{
+	ColabBridgeStatusIdle,
+	ColabBridgeStatusStarting,
+	ColabBridgeStatusRunning,
+	ColabBridgeStatusStopping,
+	ColabBridgeStatusFailed,
+}
+
+func (e ColabBridgeStatus) IsValid() bool {
+	switch e {
+	case ColabBridgeStatusIdle, ColabBridgeStatusStarting, ColabBridgeStatusRunning, ColabBridgeStatusStopping, ColabBridgeStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ColabBridgeStatus) String() string {
+	return string(e)
+}
+
+func (e *ColabBridgeStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ColabBridgeStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ColabBridgeStatus", str)
+	}
+	return nil
+}
+
+func (e ColabBridgeStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ColabBridgeStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ColabBridgeStatus) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

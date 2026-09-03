@@ -14,6 +14,7 @@ alwaysApply: false
 - The person connects **their** accounts under sidebar **Bağlantılar**. Cherry does not host customer apps.
 - Backend target is chosen by the person (local, Supabase, Cloudflare, similar plugins). OpenCode writes the generated `backend/` for that target.
 - Never mix Cherry Go GraphQL + MongoDB with the customer backend, even when the customer backend is Supabase or Cloudflare.
+- The Colab `cloudflared` quick tunnel (LLM admin) is not this menu’s Cloudflare Workers connection. Do not store the bridge token as a customer Cloudflare token.
 - GitHub: the person can push the developed project to their repo. Vercel and Render are the person’s deploys, not Cherry hosting.
 - Token paste is the advanced fallback. Primary connect is **OAuth 2.0** (authorization code + consent screen). Empty token is not connected. Do not fake OAuth success.
 - When GitHub/Vercel/Supabase client ids are unset, Cherry shows a local consent page that still requires explicit Allow/Deny. That is not a silent connect.

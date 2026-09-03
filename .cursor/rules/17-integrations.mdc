@@ -17,3 +17,4 @@ alwaysApply: false
 - **Do not connect:** Figma/Canva, SMS providers, extra filesystem/shell MCPs, MongoDB MCP as a requirement.
 - Never commit real `.cursor/mcp.json` with secrets. Use the `.example` files.
 - Colab is not an MCP. Do not fake a Colab MCP. Fine-tune is two notebooks (workers A and B), parallel as two sessions, **16GB GPU each**. One card does not host both.
+- `cloudflared` is an optional sidecar for the Colab bridge (LLM admin). It is not the customer Cloudflare connection. Do not expose GraphQL through the tunnel.

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/cherry/api/internal/colabbridge"
 	"github.com/cherry/api/internal/connect"
 	"github.com/cherry/api/internal/store"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -41,6 +42,12 @@ func gqlErr(err error) error {
 		return &gqlerror.Error{Message: "Kayıt bulunamadı."}
 	case errors.Is(err, connect.ErrConnect):
 		return &gqlerror.Error{Message: strings.TrimPrefix(err.Error(), "bağlantı: ")}
+	case errors.Is(err, colabbridge.ErrBridge):
+		msg := strings.TrimPrefix(err.Error(), "colab köprüsü: ")
+		if msg == "" {
+			msg = "Colab tüneli açılamadı."
+		}
+		return &gqlerror.Error{Message: msg}
 	default:
 		return &gqlerror.Error{Message: "İşlem yapılamadı."}
 	}

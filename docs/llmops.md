@@ -94,4 +94,8 @@ Dilim 8: dosyalar `colab/`, stüdyodan paket indirme, checkpoint → `registerLl
 
 Slice 8: files in `colab/`, studio pack download, checkpoint → `registerLlmVersion`. Colab is not production inference.
 
+Colab el sıkışması: LLM yönetici **Cloudflare quick tunnel** (`cloudflared`). Notebook token ile paketi çeker, adapter zip’i geri yollar. Bu Bağlantılar’daki Cloudflare Workers değildir. `cloudflared` yoksa tünel yok — sahte URL yok.
+
+Colab handshake: LLM admin **Cloudflare quick tunnel** (`cloudflared`). The notebook pulls the pack and posts the adapter zip with a bridge token. Not the Connections Cloudflare Workers target. Missing `cloudflared` → no tunnel, no fake URL.
+
 Adım adım: [colab.md](colab.md)

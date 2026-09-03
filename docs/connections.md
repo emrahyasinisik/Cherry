@@ -53,6 +53,7 @@ flowchart TB
 - Müşteri backend’i dosyadır; hedef **yerel Go iskeleti**, **Supabase**, **Cloudflare** veya benzeri olabilir — kişi seçer.
 - Cherry bu servislerde uygulama **barındırmaz**. Token ve proje kişinin hesabındadır.
 - OpenCode, bağlı hedefe göre `backend/` (ve gerekirse frontend env) yazar.
+- **Colab tüneli bu menü değildir.** LLM yöneticideki `cloudflared` quick tunnel, stüdyo ↔ Colab el sıkışmasıdır (paket / adapter). Kişinin Cloudflare Workers hesabına karışmaz. [colab.md](colab.md).
 
 ## Menü / Menu
 

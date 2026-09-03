@@ -118,6 +118,30 @@ print("sft_rows", len(rows))
 if len(rows) < 2:
     raise SystemExit("Paket boş. Stüdyodan JSON indir veya examples/cherry_training_pack.json yükle.")'''
         ),
+        md(
+            """## 3b. Tünel ile paket çek / Fetch pack via tunnel (isteğe bağlı)
+
+Stüdyoda **Tüneli aç** dediysen URL ve token'ı aşağıya yapıştır. Yoksa üstteki dosya yüklemeyi kullan."""
+        ),
+        py(
+            r'''# Optional: fetch training pack from Cherry tunnel instead of file upload.
+# Paste the tunnel URL and token from the LLM admin page.
+TUNNEL_URL = ""   # e.g. "https://xxx.trycloudflare.com"
+TUNNEL_TOKEN = "" # bearer token from studio
+
+if TUNNEL_URL and TUNNEL_TOKEN:
+    import urllib.request, json as _json
+    req = urllib.request.Request(
+        TUNNEL_URL.rstrip("/") + "/pack",
+        headers={"Authorization": f"Bearer {TUNNEL_TOKEN}"},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        pack = _json.loads(resp.read())
+    PACK_PATH.write_text(_json.dumps(pack, ensure_ascii=False))
+    print("tunnel: fetched pack", len(pack.get("examples", [])), "examples")
+else:
+    print("tunnel: skipped (no URL). Using file upload or seed.")'''
+        ),
         md("## 4. Dataset"),
         py(
             r'''from datasets import Dataset
@@ -208,6 +232,36 @@ print("zip", zip_path + ".zip")
 print("Stüdyo LLM sayfasında kaydet / Register in Cherry:")
 print(f'  slot={worker}  name=v-colab  checkpointRef=cherry_adapter_worker_{worker}.zip')
 files.download(zip_path + ".zip")'''
+        ),
+        md(
+            """## 7b. Adapter'ı tünele yükle / POST adapter to tunnel (isteğe bağlı)
+
+Tünel açıksa adapter zip'i stüdyoya geri gönderir. Yoksa zip'i manuel indir."""
+        ),
+        py(
+            f'''# Optional: POST adapter zip back to the Cherry tunnel.
+import os
+
+zip_file = zip_path + ".zip"
+if TUNNEL_URL and TUNNEL_TOKEN and os.path.exists(zip_file):
+    import urllib.request
+    with open(zip_file, "rb") as f:
+        body = f.read()
+    req = urllib.request.Request(
+        TUNNEL_URL.rstrip("/") + "/checkpoint",
+        data=body,
+        headers={{
+            "Authorization": f"Bearer {{TUNNEL_TOKEN}}",
+            "Content-Type": "application/zip",
+            "X-Worker": "{worker}",
+        }},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        print("tunnel: uploaded", len(body), "bytes", resp.status)
+else:
+    print("tunnel: skipped checkpoint upload (no URL or no zip).")
+    print("Zip dosyasını manuel indir ve stüdyoda kaydet.")'''
         ),
         md(
             f"""## Sonra / Next

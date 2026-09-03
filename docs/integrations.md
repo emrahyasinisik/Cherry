@@ -33,6 +33,7 @@ Bunlar **Cursor’a süs için değil**, Cherry ve OpenCode’un çalışması i
 | --- | --- | --- |
 | **Maestro CLI + `maestro mcp`** | UI test; boş işçi (A veya B) ekranı görür | Cherry `vendor/bin`. Geliştirici: `curl -fsSL "https://get.maestro.mobile.dev" \| bash`. Java 17+, `JAVA_HOME`. |
 | **OpenCode CLI** | Ajanın kod yazma motoru | Cherry sidecar. Proje `opencode.json` içinde Maestro bağlı. |
+| **cloudflared** (isteğe) | Colab’in yereldeki stüdyoya ulaşması | Cherry sidecar. Yoksa tünel `FAILED`, sahte URL yok. [colab.md](colab.md). |
 | **Node.js LTS + Go 1.22+ + Docker** | Next.js, GraphQL, Mongo | Docker Compose ile Mongo. |
 | **Emülatör** | Maestro’nun gerçek cihazı | Android Studio AVD (Win/Mac). iOS Simulator yalnızca Mac. Yoksa test `skipped`, asla sahte `passed`. |
 | **SMTP (prod)** | Bizim e-posta + 6 hane | Env ile mailer. AgentMail yok. Dev: in-app kutu. [email-verification.md](email-verification.md) |
@@ -74,7 +75,7 @@ GitHub MCP (aşağıdaki Cursor tablosu) **bizim** repo işi içindir; müşteri
 | MongoDB MCP | Platform Docker ile konuşur; şart değil. |
 | SMS / Twilio | Güvenlik modeli SMS yasak. |
 
-Colab **MCP değil**: Google hesabı + iki notebook (`colab/cherry_worker_a.ipynb`, `_b.ipynb`). Her oturum **16GB GPU**. Cursor’a bağlanmaz. Tek kartta iki notebook varsayma. Adımlar: [colab.md](colab.md).
+Colab **MCP değil**: Google hesabı + iki notebook (`colab/cherry_worker_a.ipynb`, `_b.ipynb`). Her oturum **16GB GPU**. Cursor’a bağlanmaz. Tek kartta iki notebook varsayma. Stüdyo ↔ Colab el sıkışması `cloudflared` quick tunnel (LLM yönetici); Bağlantılar’daki Cloudflare Workers değil. Adımlar: [colab.md](colab.md).
 
 ## Kurulum sırası / Install order (senin makinen)
 

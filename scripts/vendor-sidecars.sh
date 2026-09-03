@@ -98,5 +98,12 @@ else
   echo "Java 17+ and JAVA_HOME required. Customer still does not install Maestro by hand."
 fi
 
+if copy_from_path cloudflared; then
+  true
+else
+  echo "cloudflared not on PATH. Optional sidecar for Colab quick tunnel — https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/"
+  echo "Missing binary → Colab bridge FAILED, no fake URL. Customer still does not install cloudflared by hand."
+fi
+
 echo "look order: ICERDE_*_BIN -> ICERDE_SIDECAR_DIR -> $dest -> PATH"
 ls -la "$dest"
