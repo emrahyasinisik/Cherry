@@ -14,5 +14,6 @@ alwaysApply: false
 - Maestro is used by **whichever worker** (A or B) is free for that job. Every Maestro-related LLM call still goes through the GDPR layer. Do not reserve B for tests.
 - Flows are YAML files owned by the generated project under `maestro/`. They ship with the customer files.
 - If no emulator is available, still write flows and record SKIPPED; do not pretend a pass.
-- Failure loop: inspect → fix code or flow → re-run. Bound the loop; do not infinite-heal.
+- Prefer `maestro --device <id> test`; discover via `adb devices` and (on Mac) booted simulators. Optional `CHERRY_MAESTRO_START_DEVICE=1`.
+- Failure loop: inspect → fix code or flow → re-run. Bound to max 3 attempts per flow; do not infinite-heal.
 - Read [docs/maestro.md](docs/maestro.md).

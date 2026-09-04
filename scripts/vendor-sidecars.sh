@@ -91,10 +91,64 @@ else
   echo "Customer still does not install OpenCode by hand — this script is the installer."
 fi
 
-if copy_from_path maestro; then
+download_maestro() {
+  local url tmp found name
+  url="https://github.com/mobile-dev-inc/maestro/releases/latest/download/maestro.zip"
+  tmp="$(mktemp -d)"
+  echo "downloading $url"
+  if ! curl -fL --retry 3 --retry-delay 2 -o "$tmp/maestro.zip" "$url"; then
+    rm -rf "$tmp"
+    return 1
+  fi
+  python3 - "$tmp/maestro.zip" "$tmp" <<'PY'
+import sys, zipfile
+zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])
+PY
+  # Prefer the Unix launcher; Windows gets maestro.bat from the same tree when needed.
+  found="$(find "$tmp" -type f -path '*/bin/maestro' ! -name '*.bat' ! -name '*.exe' | head -n 1)"
+  if [[ -z "$found" ]]; then
+    found="$(find "$tmp" -type f \( -name maestro.bat -o -name maestro.exe \) | head -n 1)"
+  fi
+  if [[ -z "$found" ]]; then
+    echo "maestro binary missing from archive"
+    rm -rf "$tmp"
+    return 1
+  fi
+  # Keep the unzipped tree under vendor/maestro-dist so the launcher can find libs.
+  rm -rf "$dest/../maestro-dist"
+  mkdir -p "$dest/../maestro-dist"
+  local root_dir
+  root_dir="$(find "$tmp" -maxdepth 2 -type d -name bin | head -n 1)"
+  if [[ -n "$root_dir" ]]; then
+    root_dir="$(dirname "$root_dir")"
+    cp -R "$root_dir"/. "$dest/../maestro-dist/"
+  else
+    cp -R "$tmp"/. "$dest/../maestro-dist/"
+  fi
+  name="maestro"
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*|Windows_NT) name="maestro.bat" ;;
+  esac
+  rm -f "$dest/maestro" "$dest/maestro.bat"
+  if [[ -f "$dest/../maestro-dist/bin/$name" ]]; then
+    ln -sfn "$(cd "$dest/../maestro-dist/bin" && pwd)/$name" "$dest/$name"
+  elif [[ -f "$dest/../maestro-dist/bin/maestro" ]]; then
+    ln -sfn "$(cd "$dest/../maestro-dist/bin" && pwd)/maestro" "$dest/maestro"
+    name="maestro"
+  else
+    echo "maestro launcher missing after extract"
+    rm -rf "$tmp"
+    return 1
+  fi
+  chmod +x "$dest/../maestro-dist/bin/maestro" 2>/dev/null || true
+  rm -rf "$tmp"
+  echo "vendored $dest/$name (needs Java 17+ / JAVA_HOME)"
+}
+
+if copy_from_path maestro || download_maestro; then
   true
 else
-  echo "maestro not on PATH. Optional: curl -fsSL \"https://get.maestro.mobile.dev\" | bash"
+  echo "maestro not vendored. Optional: curl -fsSL \"https://get.maestro.mobile.dev\" | bash"
   echo "Java 17+ and JAVA_HOME required. Customer still does not install Maestro by hand."
 fi
 
