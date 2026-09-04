@@ -429,6 +429,7 @@ export type Connection = {
   note: string;
   authMethod: ConnectionAuth;
   scopes: string[];
+  oauthMode: OAuthMode;
 };
 
 export function connectionKindLabel(kind: ConnectionKind): string {
@@ -500,9 +501,9 @@ export function connectionAuthLabel(method: ConnectionAuth): string {
 export function oauthModeLabel(mode: OAuthMode): string {
   switch (mode) {
     case "CONSENT":
-      return "İzin ekranı";
+      return "Yerel izin ekranı";
     case "PROVIDER":
-      return "Sağlayıcı";
+      return "Gerçek OAuth";
     default: {
       const exhaustive: never = mode;
       return exhaustive;

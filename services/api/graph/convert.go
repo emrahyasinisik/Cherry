@@ -196,6 +196,10 @@ func mapConnectionStatus(status store.ConnectionStatus) (ConnectionStatus, error
 }
 
 func mapConnection(row store.Connection) (*Connection, error) {
+	return mapConnectionWithMode(row, "CONSENT")
+}
+
+func mapConnectionWithMode(row store.Connection, mode string) (*Connection, error) {
 	kind, err := mapConnectionKind(row.Kind)
 	if err != nil {
 		return nil, err
@@ -205,6 +209,10 @@ func mapConnection(row store.Connection) (*Connection, error) {
 		return nil, err
 	}
 	auth, err := mapConnectionAuth(row.AuthMethod, row.Status)
+	if err != nil {
+		return nil, err
+	}
+	oauthMode, err := mapOAuthMode(mode)
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +228,7 @@ func mapConnection(row store.Connection) (*Connection, error) {
 		Note:       row.Note,
 		AuthMethod: auth,
 		Scopes:     scopes,
+		OauthMode:  oauthMode,
 	}, nil
 }
 

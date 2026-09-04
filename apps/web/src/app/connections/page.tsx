@@ -15,6 +15,7 @@ import {
   connectionTokenHint,
   getToken,
   graphql,
+  oauthModeLabel,
   type Connection,
   type ConnectionKind,
   type OAuthMode,
@@ -25,7 +26,7 @@ import { getLastProjectId } from "@/lib/last-project";
 import { isConnectionKind, providerPurpose } from "@/lib/oauth";
 import { cn } from "@/lib/utils";
 
-const CONN_FIELDS = `kind status account tokenHint note authMethod scopes`;
+const CONN_FIELDS = `kind status account tokenHint note authMethod scopes oauthMode`;
 
 function oauthBanner(status: string | null, kind: string | null): { tone: "ok" | "warn"; text: string } | null {
   const name = isConnectionKind(kind) ? connectionKindLabel(kind) : null;
@@ -259,7 +260,7 @@ function ConnectionsBody() {
                       <p className="text-[11px] leading-4 text-muted-foreground">
                         {connected
                           ? `${item.account}${item.authMethod !== "NONE" ? ` · ${connectionAuthLabel(item.authMethod)}` : ""}`
-                          : providerPurpose(item.kind)}
+                          : `${providerPurpose(item.kind)} · ${oauthModeLabel(item.oauthMode)}`}
                       </p>
                     </div>
                     {connected ? (

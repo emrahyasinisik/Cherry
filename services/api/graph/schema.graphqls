@@ -170,6 +170,8 @@ type Connection {
   note: String!
   authMethod: ConnectionAuth!
   scopes: [String!]!
+  """CONSENT = yerel izin ekranı; PROVIDER = gerçek GitHub/Vercel/… OAuth uygulaması."""
+  oauthMode: OAuthMode!
 }
 
 type GitPushResult {

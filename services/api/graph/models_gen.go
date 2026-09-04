@@ -34,6 +34,8 @@ type Connection struct {
 	Note       string           `json:"note"`
 	AuthMethod ConnectionAuth   `json:"authMethod"`
 	Scopes     []string         `json:"scopes"`
+	// CONSENT = yerel izin ekranı; PROVIDER = gerçek GitHub/Vercel/… OAuth uygulaması.
+	OauthMode OAuthMode `json:"oauthMode"`
 }
 
 type DesignScreen struct {

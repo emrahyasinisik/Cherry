@@ -68,6 +68,7 @@ type ComplexityRoot struct {
 		AuthMethod func(childComplexity int) int
 		Kind       func(childComplexity int) int
 		Note       func(childComplexity int) int
+		OauthMode  func(childComplexity int) int
 		Scopes     func(childComplexity int) int
 		Status     func(childComplexity int) int
 		TokenHint  func(childComplexity int) int
@@ -469,6 +470,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Connection.Note(childComplexity), true
+	case "Connection.oauthMode":
+		if e.complexity.Connection.OauthMode == nil {
+			break
+		}
+
+		return e.complexity.Connection.OauthMode(childComplexity), true
 	case "Connection.scopes":
 		if e.complexity.Connection.Scopes == nil {
 			break
@@ -2728,6 +2735,35 @@ func (ec *executionContext) fieldContext_Connection_scopes(_ context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Connection_oauthMode(ctx context.Context, field graphql.CollectedField, obj *Connection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Connection_oauthMode,
+		func(ctx context.Context) (any, error) {
+			return obj.OauthMode, nil
+		},
+		nil,
+		ec.marshalNOAuthMode2githubᚗcomᚋcherryᚋapiᚋgraphᚐOAuthMode,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Connection_oauthMode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Connection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type OAuthMode does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6018,6 +6054,8 @@ func (ec *executionContext) fieldContext_Mutation_connectProvider(ctx context.Co
 				return ec.fieldContext_Connection_authMethod(ctx, field)
 			case "scopes":
 				return ec.fieldContext_Connection_scopes(ctx, field)
+			case "oauthMode":
+				return ec.fieldContext_Connection_oauthMode(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -6124,6 +6162,8 @@ func (ec *executionContext) fieldContext_Mutation_completeConnectionOAuth(ctx co
 				return ec.fieldContext_Connection_authMethod(ctx, field)
 			case "scopes":
 				return ec.fieldContext_Connection_scopes(ctx, field)
+			case "oauthMode":
+				return ec.fieldContext_Connection_oauthMode(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -6181,6 +6221,8 @@ func (ec *executionContext) fieldContext_Mutation_disconnectProvider(ctx context
 				return ec.fieldContext_Connection_authMethod(ctx, field)
 			case "scopes":
 				return ec.fieldContext_Connection_scopes(ctx, field)
+			case "oauthMode":
+				return ec.fieldContext_Connection_oauthMode(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -7810,6 +7852,8 @@ func (ec *executionContext) fieldContext_Query_connections(_ context.Context, fi
 				return ec.fieldContext_Connection_authMethod(ctx, field)
 			case "scopes":
 				return ec.fieldContext_Connection_scopes(ctx, field)
+			case "oauthMode":
+				return ec.fieldContext_Connection_oauthMode(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Connection", field.Name)
 		},
@@ -10110,6 +10154,11 @@ func (ec *executionContext) _Connection(ctx context.Context, sel ast.SelectionSe
 			}
 		case "scopes":
 			out.Values[i] = ec._Connection_scopes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "oauthMode":
+			out.Values[i] = ec._Connection_oauthMode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
