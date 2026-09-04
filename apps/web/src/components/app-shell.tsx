@@ -161,14 +161,15 @@ export function AppShell({
                 <Link
                   key={item.label}
                   href={item.href}
+                  data-active={active}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
+                    "cherry-nav-link flex items-center gap-2 rounded-md py-1.5 pr-2 pl-2.5",
                     active
                       ? "bg-sidebar-accent text-foreground"
                       : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
                   )}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="size-4 shrink-0" />
                   {item.label}
                 </Link>
               );
@@ -226,7 +227,7 @@ function WorkerChip({
   return (
     <span
       className={cn(
-        "px-2.5 py-1 text-[11px] font-medium",
+        "cherry-chip px-2.5 py-1 text-[11px] font-medium",
         busy ? "bg-primary text-primary-foreground" : "text-muted-foreground",
       )}
     >

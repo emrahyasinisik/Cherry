@@ -6,9 +6,10 @@ type CodeInputsProps = {
   value: string;
   onChange: (next: string) => void;
   disabled?: boolean;
+  error?: boolean;
 };
 
-export function CodeInputs({ value, onChange, disabled }: CodeInputsProps) {
+export function CodeInputs({ value, onChange, disabled, error }: CodeInputsProps) {
   const digits = toCells(value);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -73,7 +74,9 @@ export function CodeInputs({ value, onChange, disabled }: CodeInputsProps) {
           onChange={(event) => handleChange(index, event)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          className="cherry-focus h-12 w-10 rounded-md border border-input bg-transparent text-center font-mono text-lg outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="cherry-focus cherry-code-cell h-12 w-10 rounded-md border border-input bg-transparent text-center font-mono text-lg outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          data-filled={digit.length > 0}
+          data-error={error}
         />
       ))}
     </div>

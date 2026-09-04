@@ -333,7 +333,7 @@ export default function StudioPage() {
 
 function ChatLine({ line }: { line: JobLog }) {
   return (
-    <div className={cn("flex", alignFor(line.role))}>
+    <div className={cn("cherry-log-line flex", alignFor(line.role))}>
       <div className={cn("max-w-[90%] rounded-[10px] px-3 py-2 text-[13px] leading-5", bubbleFor(line.role))}>
         {line.role !== "SYSTEM" ? (
           <span className="mb-1 block font-mono text-[10px] text-muted-foreground">{labelFor(line.role)}</span>
