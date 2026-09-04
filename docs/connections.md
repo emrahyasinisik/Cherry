@@ -21,6 +21,26 @@ GitHub OAuth uygulaması (`CHERRY_GITHUB_CLIENT_ID`) varsa gerçek `github.com/l
 
 Token yapıştırma gelişmiş yedek yoldur (Cloudflare API token, PAT, …).
 
+## Gerçek OAuth uygulaması / Real OAuth app
+
+**TR:** Sağlayıcıda bir OAuth App oluştur; callback her zaman:
+
+`http://127.0.0.1:43148/oauth/provider/callback`
+
+(üretimde API origin’in `/oauth/provider/callback` yolu).
+
+| Sağlayıcı | Env |
+| --- | --- |
+| GitHub | `CHERRY_GITHUB_CLIENT_ID` + `CHERRY_GITHUB_CLIENT_SECRET` |
+| Vercel | `CHERRY_VERCEL_CLIENT_ID` + secret (+ isteğe URL override) |
+| Supabase | `CHERRY_SUPABASE_CLIENT_ID` + secret |
+| Render | `CHERRY_RENDER_CLIENT_ID` + secret |
+| Cloudflare | `CHERRY_CLOUDFLARE_CLIENT_ID` + secret **ve** `CHERRY_CLOUDFLARE_AUTH_URL` + `CHERRY_CLOUDFLARE_TOKEN_URL` |
+
+Bağlantılar listesinde `oauthMode`: **PROVIDER** = gerçek site; **CONSENT** = yerel izin. Cloudflare çoğu kurulumda token yapıştırır; OAuth yalnızca Auth/Token URL verilince açılır.
+
+**EN:** Register an OAuth App at the provider; callback is always `…/oauth/provider/callback`. Connections show `oauthMode` PROVIDER vs CONSENT. Cloudflare usually uses token paste unless Auth/Token URLs are set.
+
 ## İki backend kuralı durur / Two-backend rule still holds
 
 ```mermaid

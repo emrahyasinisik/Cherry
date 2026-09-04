@@ -234,7 +234,7 @@ func (r *mutationResolver) ConnectProvider(ctx context.Context, kind ConnectionK
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	out, err := mapConnection(row)
+	out, err := r.connectionPayload(row)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
@@ -278,7 +278,7 @@ func (r *mutationResolver) CompleteConnectionOAuth(ctx context.Context, code str
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	out, err := mapConnection(row)
+	out, err := r.connectionPayload(row)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
@@ -298,7 +298,7 @@ func (r *mutationResolver) DisconnectProvider(ctx context.Context, kind Connecti
 	if err != nil {
 		return nil, gqlErr(err)
 	}
-	out, err := mapConnection(row)
+	out, err := r.connectionPayload(row)
 	if err != nil {
 		return nil, gqlErr(err)
 	}
@@ -675,7 +675,7 @@ func (r *queryResolver) Connections(ctx context.Context) ([]*Connection, error) 
 	}
 	out := make([]*Connection, 0, len(rows))
 	for _, row := range rows {
-		item, err := mapConnection(row)
+		item, err := r.connectionPayload(row)
 		if err != nil {
 			return nil, gqlErr(err)
 		}

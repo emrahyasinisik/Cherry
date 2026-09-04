@@ -419,7 +419,42 @@ func LoadClientsFromEnv() map[store.ConnectionKind]OAuthClient {
 			Scopes:       catalogScopes(store.KindSupabase),
 		}
 	}
+	// Cloudflare / Render: set CLIENT_ID (+ secret) and Auth/Token URLs for your OAuth app.
+	// Without AUTH_URL Cherry keeps the local consent screen; token paste still works.
+	if id := strings.TrimSpace(os.Getenv("CHERRY_CLOUDFLARE_CLIENT_ID")); id != "" {
+		authURL := strings.TrimSpace(os.Getenv("CHERRY_CLOUDFLARE_AUTH_URL"))
+		tokenURL := strings.TrimSpace(os.Getenv("CHERRY_CLOUDFLARE_TOKEN_URL"))
+		if authURL != "" && tokenURL != "" {
+			out[store.KindCloudflare] = OAuthClient{
+				ClientID:     id,
+				ClientSecret: strings.TrimSpace(os.Getenv("CHERRY_CLOUDFLARE_CLIENT_SECRET")),
+				AuthURL:      authURL,
+				TokenURL:     tokenURL,
+				UserURL:      getenv("CHERRY_CLOUDFLARE_USER_URL", "https://api.cloudflare.com/client/v4/user"),
+				Scopes:       catalogScopes(store.KindCloudflare),
+			}
+		}
+	}
+	if id := strings.TrimSpace(os.Getenv("CHERRY_RENDER_CLIENT_ID")); id != "" {
+		out[store.KindRender] = OAuthClient{
+			ClientID:     id,
+			ClientSecret: strings.TrimSpace(os.Getenv("CHERRY_RENDER_CLIENT_SECRET")),
+			AuthURL:      getenv("CHERRY_RENDER_AUTH_URL", "https://api.render.com/oauth/authorize"),
+			TokenURL:     getenv("CHERRY_RENDER_TOKEN_URL", "https://api.render.com/oauth/token"),
+			UserURL:      getenv("CHERRY_RENDER_USER_URL", "https://api.render.com/v1/owners"),
+			Scopes:       catalogScopes(store.KindRender),
+		}
+	}
 	return out
+}
+
+// ModeFor reports whether Bağlan will open the provider site or the local consent page.
+func (s *Service) ModeFor(kind store.ConnectionKind) string {
+	s.ensureOAuth()
+	if _, ok := s.clientFor(kind); ok {
+		return oauthModeProvider
+	}
+	return oauthModeConsent
 }
 
 func getenv(key, fallback string) string {

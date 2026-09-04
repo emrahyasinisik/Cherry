@@ -17,7 +17,8 @@ alwaysApply: false
 - The Colab `cloudflared` quick tunnel (LLM admin) is not this menu’s Cloudflare Workers connection. Do not store the bridge token as a customer Cloudflare token.
 - GitHub: the person can push the developed project to their repo. Vercel and Render are the person’s deploys, not Cherry hosting.
 - Token paste is the advanced fallback. Primary connect is **OAuth 2.0** (authorization code + consent screen). Empty token is not connected. Do not fake OAuth success.
-- When GitHub/Vercel/Supabase client ids are unset, Cherry shows a local consent page that still requires explicit Allow/Deny. That is not a silent connect.
+- When GitHub/Vercel/Supabase/Render client ids are unset, Cherry shows a local consent page that still requires explicit Allow/Deny. That is not a silent connect.
+- Cloudflare PROVIDER mode also needs `CHERRY_CLOUDFLARE_AUTH_URL` and `CHERRY_CLOUDFLARE_TOKEN_URL`. Otherwise token paste / local consent.
 - Zip/git handoff is the chosen mobile stack’s **language** and Clean Architecture (`frontend/`) plus that backend — not `preview/` HTML.
 - Do not fake a connected provider. Missing OAuth/token → explicit error.
 - Do not send connection secrets to the LLM unredacted. Token is memory-only; GraphQL returns tokenHint only.

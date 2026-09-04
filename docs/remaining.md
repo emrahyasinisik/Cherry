@@ -48,7 +48,7 @@ LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a
 
 ## Kalan / Remaining
 
-Colab stüdyo işçisi değildir. Mongo `store.Store` adapter’ı kodda (`MONGO_URI`); gerçek OAuth app, emülatörlü Maestro PASSED — ürün kararı, zorunlu dilim yok.
+Colab stüdyo işçisi değildir. Mongo `store.Store` ve gerçek OAuth env (GitHub/Vercel/Supabase/Render/Cloudflare URL’leri) kodda; emülatörlü Maestro PASSED — ürün kararı, zorunlu dilim yok.
 
 ```bash
 npm run dev:api

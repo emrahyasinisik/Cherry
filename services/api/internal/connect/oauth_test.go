@@ -208,3 +208,37 @@ func TestExchangeRejectsEmptyToken(t *testing.T) {
 		t.Fatal("expected")
 	}
 }
+
+func TestLoadClientsCloudflareNeedsURLs(t *testing.T) {
+	t.Setenv("CHERRY_CLOUDFLARE_CLIENT_ID", "cf-id")
+	t.Setenv("CHERRY_CLOUDFLARE_CLIENT_SECRET", "cf-secret")
+	t.Setenv("CHERRY_CLOUDFLARE_AUTH_URL", "")
+	t.Setenv("CHERRY_CLOUDFLARE_TOKEN_URL", "")
+	clients := LoadClientsFromEnv()
+	if _, ok := clients[store.KindCloudflare]; ok {
+		t.Fatal("cloudflare without auth/token URL must stay consent-only")
+	}
+	t.Setenv("CHERRY_CLOUDFLARE_AUTH_URL", "https://example.test/oauth/authorize")
+	t.Setenv("CHERRY_CLOUDFLARE_TOKEN_URL", "https://example.test/oauth/token")
+	clients = LoadClientsFromEnv()
+	cf, ok := clients[store.KindCloudflare]
+	if !ok || cf.ClientID != "cf-id" {
+		t.Fatalf("cloudflare client: %#v", clients)
+	}
+}
+
+func TestLoadClientsRenderAndModeFor(t *testing.T) {
+	t.Setenv("CHERRY_RENDER_CLIENT_ID", "r-id")
+	t.Setenv("CHERRY_RENDER_CLIENT_SECRET", "r-secret")
+	clients := LoadClientsFromEnv()
+	if _, ok := clients[store.KindRender]; !ok {
+		t.Fatal("expected render client")
+	}
+	svc := &Service{Clients: clients, WebOrigin: "http://web", APIOrigin: "http://api"}
+	if got := svc.ModeFor(store.KindRender); got != oauthModeProvider {
+		t.Fatalf("mode render: %s", got)
+	}
+	if got := svc.ModeFor(store.KindGithub); got != oauthModeConsent {
+		t.Fatalf("mode github without id: %s", got)
+	}
+}
