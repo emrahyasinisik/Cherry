@@ -76,6 +76,9 @@ func main() {
 		Store:     st,
 		Completer: llm.NewCompleter(os.Getenv("CHERRY_LLM_API_KEY"), os.Getenv("CHERRY_LLM_BASE_URL"), os.Getenv("CHERRY_LLM_MODEL")),
 	}
+	if err := llmSvc.LoadColabFromStore(context.Background()); err != nil {
+		log.Printf("colab urls from store: %v", err)
+	}
 	projectsRoot := getenv("CHERRY_PROJECTS_ROOT", "")
 	if projectsRoot == "" {
 		projectsRoot = filepath.Join("..", "..", "var", "projects")

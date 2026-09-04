@@ -684,7 +684,13 @@ func (m *Mongo) GetLlmState(ctx context.Context) (LlmState, error) {
 	if err != nil {
 		return LlmState{}, err
 	}
-	return LlmState{ActiveAID: doc.ActiveAID, ActiveBID: doc.ActiveBID, McpRoot: doc.McpRoot}, nil
+	return LlmState{
+		ActiveAID: doc.ActiveAID,
+		ActiveBID: doc.ActiveBID,
+		McpRoot:   doc.McpRoot,
+		ColabURLA: doc.ColabURLA,
+		ColabURLB: doc.ColabURLB,
+	}, nil
 }
 
 func (m *Mongo) SetLlmState(ctx context.Context, state LlmState) error {
@@ -693,6 +699,8 @@ func (m *Mongo) SetLlmState(ctx context.Context, state LlmState) error {
 		"activeAId": state.ActiveAID,
 		"activeBId": state.ActiveBID,
 		"mcpRoot":   state.McpRoot,
+		"colabUrlA": state.ColabURLA,
+		"colabUrlB": state.ColabURLB,
 	}, options.Replace().SetUpsert(true))
 	return err
 }

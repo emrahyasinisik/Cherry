@@ -21,6 +21,7 @@ type ColabBridge struct {
 }
 
 type ColabInference struct {
+	Slot   string               `json:"slot"`
 	URL    string               `json:"url"`
 	Status ColabInferenceStatus `json:"status"`
 	Note   string               `json:"note"`

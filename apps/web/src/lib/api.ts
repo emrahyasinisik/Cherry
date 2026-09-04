@@ -213,13 +213,14 @@ export type ColabBridge = {
 export type ColabInferenceStatus = "OFF" | "CONNECTED" | "DISCONNECTED" | "CHECKING";
 
 export type ColabInference = {
+  slot: string;
   url: string;
   status: ColabInferenceStatus;
   note: string;
 };
 
 export const COLAB_INFERENCE_FIELDS = `
-  url status note
+  slot url status note
 `;
 
 export function colabInferenceStatusLabel(status: ColabInferenceStatus): string {

@@ -16,7 +16,8 @@ type Query {
   trainingPack: TrainingPack!
   connections: [Connection!]!
   colabBridge: ColabBridge!
-  colabInference: ColabInference!
+  colabInferenceA: ColabInference!
+  colabInferenceB: ColabInference!
 }
 
 type Mutation {
@@ -56,7 +57,7 @@ type Mutation {
   registerLlmVersion(slot: String!, name: String!, note: String!, checkpointRef: String!): LlmAdmin!
   startColabBridge: ColabBridge!
   stopColabBridge: ColabBridge!
-  setColabInferenceUrl(url: String!): ColabInference!
+  setColabInferenceUrl(slot: String!, url: String!): ColabInference!
   deleteMe(wipeProjects: Boolean!): Boolean!
 }
 
@@ -367,6 +368,7 @@ enum ColabInferenceStatus {
 }
 
 type ColabInference {
+  slot: String!
   url: String!
   status: ColabInferenceStatus!
   note: String!

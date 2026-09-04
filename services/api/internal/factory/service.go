@@ -400,7 +400,7 @@ func (s *Service) runOpenCode(ctx context.Context, project store.Project) error 
 		Continue: false,
 	}
 	if s.LLM != nil {
-		req.BaseURL, req.APIKey, req.Model = s.LLM.OpenCodeEndpoint()
+		req.BaseURL, req.APIKey, req.Model = s.LLM.OpenCodeEndpoint("")
 	}
 	res, err := s.OpenCode.Run(ctx, req)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
@@ -433,17 +433,21 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 	if err := s.logRole(ctx, project.ID, body, store.RoleUser); err != nil {
 		return store.Project{}, err
 	}
+	chatSlot := store.LlmSlot("")
 	if s.LLM != nil {
 		if err := s.LLM.SetMcpRoot(ctx, project.RootPath); err != nil {
 			return store.Project{}, err
 		}
-		_, _ = s.LLM.Complete(ctx, llm.CompleteInput{
+		out, cerr := s.LLM.Complete(ctx, llm.CompleteInput{
 			UserID:     project.UserID,
 			ProjectID:  project.ID,
 			Purpose:    "chat",
 			LegalBasis: "contract",
 			Prompt:     "Amaç: sohbet düzeltmesi. Yalnızca proje kökü.\nMesaj: " + safe,
 		})
+		if cerr == nil {
+			chatSlot = out.Slot
+		}
 	}
 	if s.OpenCode == nil {
 		if err := s.logRole(ctx, project.ID, "Ajan bu stüdyoda bağlı değil. OpenCode penceresi açılmaz; iskelet duruyor.", store.RoleAgent); err != nil {
@@ -471,7 +475,7 @@ func (s *Service) SendMessage(ctx context.Context, userID, id, body string) (sto
 		Continue: true,
 	}
 	if s.LLM != nil {
-		ocReq.BaseURL, ocReq.APIKey, ocReq.Model = s.LLM.OpenCodeEndpoint()
+		ocReq.BaseURL, ocReq.APIKey, ocReq.Model = s.LLM.OpenCodeEndpoint(chatSlot)
 	}
 	res, err := s.OpenCode.Run(ctx, ocReq)
 	if writeErr := opencode.WriteLog(project.RootPath, opencode.LogBody(res)); writeErr != nil {
