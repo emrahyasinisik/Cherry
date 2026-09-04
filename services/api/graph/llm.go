@@ -200,8 +200,8 @@ func (r *Resolver) colabBridgePayload() *ColabBridge {
 	return out
 }
 
-func (r *Resolver) colabInferencePayload() *ColabInference {
-	url, status := r.LLM.ColabInferenceState()
+func (r *Resolver) colabInferencePayload(slot store.LlmSlot) *ColabInference {
+	url, status := r.LLM.ColabInferenceState(slot)
 	gqlStatus := ColabInferenceStatusOff
 	switch status {
 	case llm.ColabInferenceOff:
@@ -215,18 +215,25 @@ func (r *Resolver) colabInferencePayload() *ColabInference {
 	default:
 		gqlStatus = ColabInferenceStatusOff
 	}
+	label := "A"
+	if slot == store.SlotB {
+		label = "B"
+	}
 	note := "Colab inferans kapalı."
 	switch gqlStatus {
 	case ColabInferenceStatusOff:
-		note = "Colab inferans kapalı. Colab notebook'unda tünel aç ve URL'yi yapıştır."
+		note = "İşçi " + label + " Colab inferans kapalı. Notebook " + label + " tünel URL’sini yapıştır."
 	case ColabInferenceStatusConnected:
-		note = "Colab inferans bağlı. İstekler Colab tüneline gidiyor. Colab oturumu kapanınca bağlantı kopar."
+		note = "İşçi " + label + " Colab’e bağlı. Bu yuvanın işleri bu tünele gider."
 	case ColabInferenceStatusDisconnected:
-		note = "Colab inferans bağlantı kesildi. Colab oturumu kapanmış olabilir. Varsayılan endpoint kullanılıyor."
+		note = "İşçi " + label + " bağlantısı koptu. Colab oturumu kapanmış olabilir."
 	case ColabInferenceStatusChecking:
-		note = "Colab inferans kontrol ediliyor…"
+		note = "İşçi " + label + " Colab inferans kontrol ediliyor…"
+	default:
+		note = "İşçi " + label + " Colab durumu bilinmiyor."
 	}
 	return &ColabInference{
+		Slot:   string(slot),
 		URL:    url,
 		Status: gqlStatus,
 		Note:   note,

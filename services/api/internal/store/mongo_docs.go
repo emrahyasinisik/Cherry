@@ -225,6 +225,8 @@ type llmStateDoc struct {
 	ActiveAID string `bson:"activeAId"`
 	ActiveBID string `bson:"activeBId"`
 	McpRoot   string `bson:"mcpRoot"`
+	ColabURLA string `bson:"colabUrlA"`
+	ColabURLB string `bson:"colabUrlB"`
 }
 
 type auditDoc struct {

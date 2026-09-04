@@ -265,6 +265,8 @@ type LlmState struct {
 	ActiveAID string
 	ActiveBID string
 	McpRoot   string
+	ColabURLA string
+	ColabURLB string
 }
 
 type AuditEvent struct {

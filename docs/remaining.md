@@ -44,11 +44,11 @@ User notes below are not the current slice.
 | 7 LLM B + kuyruk | A ve B aynı iş. Boş olan alır; ikisi meşgulse kuyruk. Versiyon pointer’ı sonraki cevabı değiştirir; in-flight eski pointer’da biter. |
 | 8 Colab fine-tune | `colab/cherry_worker_{a,b}.ipynb`, seed paket, `trainingPack` + `registerLlmVersion`. Colab MCP/üretim değil. |
 
-LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`. Bağlı Colab inferans (`setColabInferenceUrl`) → `colab-tunnel` (health `/llm` alanı da bunu gösterir). OpenCode CLI `vendor/bin` ( `./scripts/vendor-sidecars.sh` ).
+LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`. İşçi A/B Colab inferans (`setColabInferenceUrl(slot, url)`) → o yuvada `colab-tunnel`. OpenCode CLI `vendor/bin`.
 
 ## Kalan / Remaining
 
-Colab stüdyo işçisi değildir. Mongo, gerçek OAuth env ve Maestro PASSED yolu (CLI vendor + `--device` + 3 deneme) kodda; emülatör hâlâ senin makinen — yoksa SKIPPED.
+Colab stüdyo işçisi değildir. Mongo, OAuth, Maestro PASSED yolu ve **Colab A/B ayrı inferans URL** kodda; emülatör senin makinen.
 
 ```bash
 npm run dev:api

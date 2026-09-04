@@ -55,14 +55,15 @@ func TestEffectiveChannelPrefersColabTunnel(t *testing.T) {
 		t.Fatal(err)
 	}
 	svc := &Service{Store: mem, Completer: MockCompleter{}}
-	svc.SetColabInferenceURL("https://example.invalid/v1")
+	svc.SetColabInferenceURL(store.SlotA, "https://example.invalid/v1")
 	svc.colabMu.Lock()
-	if svc.colabStopHealth != nil {
-		close(svc.colabStopHealth)
-		svc.colabStopHealth = nil
+	if cur := svc.colab[store.SlotA]; cur != nil && cur.stop != nil {
+		close(cur.stop)
+		cur.stop = nil
 	}
-	svc.colabInferenceURL = "https://example.invalid/v1"
-	svc.colabStatus = ColabInferenceConnected
+	svc.ensureColab()
+	svc.colab[store.SlotA].url = "https://example.invalid/v1"
+	svc.colab[store.SlotA].status = ColabInferenceConnected
 	svc.colabMu.Unlock()
 	snap, err := svc.Snapshot(ctx)
 	if err != nil {
@@ -71,7 +72,7 @@ func TestEffectiveChannelPrefersColabTunnel(t *testing.T) {
 	if snap.Channel != "colab-tunnel" {
 		t.Fatalf("channel %s", snap.Channel)
 	}
-	base, key, model := svc.OpenCodeEndpoint()
+	base, key, model := svc.OpenCodeEndpoint(store.SlotA)
 	if base != "https://example.invalid/v1" {
 		t.Fatalf("base %s", base)
 	}
@@ -80,6 +81,52 @@ func TestEffectiveChannelPrefersColabTunnel(t *testing.T) {
 	}
 	if model != "Qwen/Qwen2.5-1.5B-Instruct" {
 		t.Fatalf("model %s", model)
+	}
+}
+
+func TestColabSlotsIndependent(t *testing.T) {
+	mem := store.NewMemory()
+	ctx := context.Background()
+	if err := Seed(ctx, mem); err != nil {
+		t.Fatal(err)
+	}
+	svc := &Service{Store: mem, Completer: MockCompleter{}}
+	svc.SetColabInferenceURL(store.SlotA, "https://a.example/v1")
+	svc.SetColabInferenceURL(store.SlotB, "https://b.example/v1")
+	svc.colabMu.Lock()
+	for _, slot := range []store.LlmSlot{store.SlotA, store.SlotB} {
+		if cur := svc.colab[slot]; cur != nil && cur.stop != nil {
+			close(cur.stop)
+			cur.stop = nil
+		}
+	}
+	svc.colab[store.SlotA].url = "https://a.example/v1"
+	svc.colab[store.SlotA].status = ColabInferenceConnected
+	svc.colab[store.SlotB].url = "https://b.example/v1"
+	svc.colab[store.SlotB].status = ColabInferenceDisconnected
+	svc.colabMu.Unlock()
+	compA := svc.effectiveCompleter(store.SlotA)
+	compB := svc.effectiveCompleter(store.SlotB)
+	if compA.Channel() != "colab-tunnel" {
+		t.Fatalf("A want tunnel, got %s", compA.Channel())
+	}
+	if compB.Channel() == "colab-tunnel" {
+		t.Fatal("B disconnected must fall back")
+	}
+	baseA, _, _ := svc.OpenCodeEndpoint(store.SlotA)
+	baseB, _, _ := svc.OpenCodeEndpoint(store.SlotB)
+	if baseA != "https://a.example/v1" {
+		t.Fatalf("A base %s", baseA)
+	}
+	if baseB == "https://b.example/v1" {
+		t.Fatal("B should not use disconnected URL")
+	}
+	state, err := mem.GetLlmState(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.ColabURLA != "https://a.example/v1" || state.ColabURLB != "https://b.example/v1" {
+		t.Fatalf("persisted %#v", state)
 	}
 }
 

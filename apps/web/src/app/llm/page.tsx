@@ -41,8 +41,10 @@ export default function LlmAdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [admin, setAdmin] = useState<LlmAdmin | null>(null);
   const [bridge, setBridge] = useState<ColabBridge | null>(null);
-  const [inference, setInference] = useState<ColabInference | null>(null);
-  const [inferenceUrl, setInferenceUrl] = useState("");
+  const [inferenceA, setInferenceA] = useState<ColabInference | null>(null);
+  const [inferenceB, setInferenceB] = useState<ColabInference | null>(null);
+  const [inferenceUrlA, setInferenceUrlA] = useState("");
+  const [inferenceUrlB, setInferenceUrlB] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [mcpRoot, setMcpRoot] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -59,13 +61,15 @@ export default function LlmAdminPage() {
       me: User | null;
       llmAdmin: LlmAdmin;
       colabBridge: ColabBridge;
-      colabInference: ColabInference;
+      colabInferenceA: ColabInference;
+      colabInferenceB: ColabInference;
     }>(
       `query LlmAdmin {
         me { id email workspaceKind totpEnabled }
         llmAdmin { ${LLM_ADMIN_FIELDS} }
         colabBridge { ${COLAB_BRIDGE_FIELDS} }
-        colabInference { ${COLAB_INFERENCE_FIELDS} }
+        colabInferenceA { ${COLAB_INFERENCE_FIELDS} }
+        colabInferenceB { ${COLAB_INFERENCE_FIELDS} }
       }`,
     );
     if (!data.me) {
@@ -75,10 +79,12 @@ export default function LlmAdminPage() {
     setUser(data.me);
     setAdmin(data.llmAdmin);
     setBridge(data.colabBridge);
-    setInference(data.colabInference);
+    setInferenceA(data.colabInferenceA);
+    setInferenceB(data.colabInferenceB);
     if (!rooted.current) {
       setMcpRoot(data.llmAdmin.mcpRoot);
-      setInferenceUrl(data.colabInference.url);
+      setInferenceUrlA(data.colabInferenceA.url);
+      setInferenceUrlB(data.colabInferenceB.url);
       rooted.current = true;
     }
   }
@@ -180,15 +186,29 @@ export default function LlmAdminPage() {
           onBridge={setBridge}
         />
         <ColabInferenceCard
-          inference={inference}
-          url={inferenceUrl}
+          slot="A"
+          inference={inferenceA}
+          url={inferenceUrlA}
           pending={pending}
-          onUrl={setInferenceUrl}
+          onUrl={setInferenceUrlA}
           onError={setError}
           onPending={setPending}
           onInference={(v) => {
-            setInference(v);
-            setInferenceUrl(v.url);
+            setInferenceA(v);
+            setInferenceUrlA(v.url);
+          }}
+        />
+        <ColabInferenceCard
+          slot="B"
+          inference={inferenceB}
+          url={inferenceUrlB}
+          pending={pending}
+          onUrl={setInferenceUrlB}
+          onError={setError}
+          onPending={setPending}
+          onInference={(v) => {
+            setInferenceB(v);
+            setInferenceUrlB(v.url);
           }}
         />
         <section className="flex flex-col gap-3 rounded-[10px] border border-border p-4">
@@ -536,6 +556,7 @@ function ColabTunnelCard({
 }
 
 function ColabInferenceCard({
+  slot,
   inference,
   url,
   pending,
@@ -544,6 +565,7 @@ function ColabInferenceCard({
   onPending,
   onInference,
 }: {
+  slot: ColabSlot;
   inference: ColabInference | null;
   url: string;
   pending: boolean;
@@ -554,15 +576,17 @@ function ColabInferenceCard({
 }) {
   const status = inference?.status ?? "OFF";
   const connected = status === "CONNECTED";
+  const placeholder =
+    slot === "A" ? "https://cherry.visevent.com/v1" : "https://cherry-b.visevent.com/v1";
 
   function save() {
     onPending(true);
     onError(null);
     void graphql<{ setColabInferenceUrl: ColabInference }>(
-      `mutation SetInfer($url: String!) {
-        setColabInferenceUrl(url: $url) { ${COLAB_INFERENCE_FIELDS} }
+      `mutation SetInfer($slot: String!, $url: String!) {
+        setColabInferenceUrl(slot: $slot, url: $url) { ${COLAB_INFERENCE_FIELDS} }
       }`,
-      { url: url.trim() },
+      { slot, url: url.trim() },
     )
       .then((d) => onInference(d.setColabInferenceUrl))
       .catch((err: unknown) => {
@@ -576,9 +600,10 @@ function ColabInferenceCard({
     onPending(true);
     onError(null);
     void graphql<{ setColabInferenceUrl: ColabInference }>(
-      `mutation ClearInfer {
-        setColabInferenceUrl(url: "") { ${COLAB_INFERENCE_FIELDS} }
+      `mutation ClearInfer($slot: String!) {
+        setColabInferenceUrl(slot: $slot, url: "") { ${COLAB_INFERENCE_FIELDS} }
       }`,
+      { slot },
     )
       .then((d) => onInference(d.setColabInferenceUrl))
       .catch((err: unknown) => {
@@ -595,20 +620,20 @@ function ColabInferenceCard({
       )}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium">Colab inferans</h2>
+        <h2 className="text-sm font-medium">Colab inferans · işçi {slot}</h2>
         <span className="font-mono text-[11px] text-muted-foreground">
           {colabInferenceStatusLabel(status)}
         </span>
       </div>
       <p className="text-muted-foreground">
-        Notebook geçici OpenAI uyumlu URL (örn. https://cherry.visevent.com/v1). curl gerekmez — yapıştır ve
-        kaydet. Bağlıyken LLM ve OpenCode bu kanala gider.
+        Notebook {slot} geçici OpenAI uyumlu URL. Bu yuvanın işleri bu tünele gider; diğer işçi ayrı URL
+        kullanabilir.
       </p>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           value={url}
           onChange={(event) => onUrl(event.target.value)}
-          placeholder="https://cherry.visevent.com/v1"
+          placeholder={placeholder}
           className="cherry-focus font-mono text-[12px]"
         />
         <Button type="button" variant="outline" disabled={pending} onClick={save}>

@@ -40,7 +40,7 @@ The prompt is stdin; already redacted. Working directory is the customer folder 
 | `CHERRY_OPENCODE_REQUIRE=1` | CLI yoksa iş başarısız |
 | `CHERRY_LLM_API_KEY` | varsa `OPENAI_API_KEY` olarak OpenCode’a geçer |
 | `CHERRY_LLM_BASE_URL` | OpenAI uyumlu kök (Colab `https://…/v1` dahil); `OPENAI_BASE_URL` + `opencode.json` custom provider |
-| Colab inferans (bağlı) | `setColabInferenceUrl` → OpenCode aynı URL’yi kullanır; anahtar yoksa yer tutucu `cherry-colab`; model varsayılan `Qwen/Qwen2.5-1.5B-Instruct` |
+| Colab inferans (bağlı, yuva) | `setColabInferenceUrl(slot, url)` → OpenCode o yuvanın URL’sini kullanır; anahtar yoksa yer tutucu `cherry-colab`; model varsayılan `Qwen/Qwen2.5-1.5B-Instruct` |
 
 **Colab / OpenAI-compatible:** OpenCode’un built-in `openai` provider’ı `@ai-sdk/openai` ile **`/v1/responses`** çağırır. Colab FastAPI yalnızca **`GET /v1/models`** + **`POST /v1/chat/completions`** sunar → `Not Found: {"detail":"Not Found"}`. Cherry bu yüzden özel provider yazar: `cherry-colab` + `npm: @ai-sdk/openai-compatible` (chat.completions). Model anahtarı slash’sız (`Qwen-Qwen2.5-1.5B-Instruct`); uzak id `models[].id` ile `Qwen/Qwen2.5-1.5B-Instruct`. Base URL `…/v1` olmalı — çift `/v1/v1` yok.
 

@@ -113,7 +113,7 @@ Fine-tune sonrası model, aynı Colab oturumunda OpenAI uyumlu API olarak sunula
 | Komut | `cloudflared tunnel --no-autoupdate run --token …` | `cloudflared tunnel --url http://localhost:8000` |
 | URL | Sabit alt alan (Zero Trust DNS), örn. `https://colab.yourdomain.com` | Rastgele `https://xxx.trycloudflare.com` |
 | Token | Colab **secret** / env `CLOUDFLARE_TUNNEL_TOKEN` — **asla git’e yazma** | Yok |
-| Cherry | Yalnızca public HTTPS URL (`setColabInferenceUrl`) | Aynı — yalnızca URL |
+| Cherry | İşçi A/B ayrı public HTTPS URL (`setColabInferenceUrl(slot, url)`) | Aynı — URL’ler yuvaya göre |
 | Ne zaman | Sabit hostname istiyorsan | Token yoksa / hızlı deneme |
 
 **TR:** Token **yalnızca Colab içinde** çalışır. Cherry Go API’sine token koyma. Stüdyo yalnızca public URL saklar. Sohbette veya ekran görüntüsünde token göründüyse Zero Trust → Tunnels’te **döndür (rotate)**.
@@ -127,7 +127,7 @@ Fine-tune sonrası model, aynı Colab oturumunda OpenAI uyumlu API olarak sunula
 3. DNS CNAME’i Cloudflare’in verdiği tunnel hedefine bağla.
 4. Token’ı kopyala → Colab **Secrets** adı `CLOUDFLARE_TUNNEL_TOKEN` (veya oturumda `os.environ` / hücre değişkeni). Notebook’a, Drive’a, `.env` örnek dosyasına gerçek değer yazma.
 5. İsteğe bağlı: `CHERRY_COLAB_PUBLIC_URL=https://colab.yourdomain.com` (Colab env veya hücre).
-6. Notebook hücre 9’u çalıştır. Yazdırılan sabit URL’yi Cherry LLM yönetici → Colab inferans’a yapıştır (`setColabInferenceUrl`).
+6. Notebook hücre 9’u çalıştır. Yazdırılan sabit URL’yi Cherry LLM yönetici → **Colab inferans · işçi A veya B** kartına yapıştır (`setColabInferenceUrl(slot, url)`). A ve B ayrı tünel kullanabilir.
 
 Placeholder’lar (gerçek değer değil): `.env.example` içinde yorum satırı olarak `CHERRY_COLAB_PUBLIC_URL` ve `CLOUDFLARE_TUNNEL_TOKEN`.
 

@@ -27,15 +27,19 @@ const (
 	ColabInferenceChecking     ColabInferenceStatus = "CHECKING"
 )
 
+type colabSlot struct {
+	url    string
+	status ColabInferenceStatus
+	stop   chan struct{}
+}
+
 type Service struct {
 	Store     store.Store
 	Completer Completer
 	q         *queue
 
-	colabMu          sync.Mutex
-	colabInferenceURL string
-	colabStatus      ColabInferenceStatus
-	colabStopHealth  chan struct{}
+	colabMu sync.Mutex
+	colab   map[store.LlmSlot]*colabSlot
 }
 
 func (s *Service) ensureQueue() *queue {
@@ -43,6 +47,33 @@ func (s *Service) ensureQueue() *queue {
 		s.q = newQueue()
 	}
 	return s.q
+}
+
+func (s *Service) ensureColab() {
+	if s.colab == nil {
+		s.colab = map[store.LlmSlot]*colabSlot{
+			store.SlotA: {status: ColabInferenceOff},
+			store.SlotB: {status: ColabInferenceOff},
+		}
+	}
+}
+
+// LoadColabFromStore restores A/B inference URLs after process start (Mongo/memory).
+func (s *Service) LoadColabFromStore(ctx context.Context) error {
+	if s.Store == nil {
+		return nil
+	}
+	state, err := s.Store.GetLlmState(ctx)
+	if err != nil {
+		return err
+	}
+	if state.ColabURLA != "" {
+		s.SetColabInferenceURL(store.SlotA, state.ColabURLA)
+	}
+	if state.ColabURLB != "" {
+		s.SetColabInferenceURL(store.SlotB, state.ColabURLB)
+	}
+	return nil
 }
 
 func Seed(ctx context.Context, st store.Store) error {
@@ -178,16 +209,16 @@ type CompleteResult struct {
 }
 
 func (s *Service) Complete(ctx context.Context, in CompleteInput) (CompleteResult, error) {
-	comp := s.effectiveCompleter()
-	if comp == nil {
-		return CompleteResult{}, fmt.Errorf("%w: completer yok", store.ErrLLMFailed)
-	}
 	slot, err := s.ensureQueue().acquire(ctx)
 	if err != nil {
 		return CompleteResult{}, err
 	}
 	held := lease{Slot: slot, q: s.q}
 	defer held.Release()
+	comp := s.effectiveCompleter(slot)
+	if comp == nil {
+		return CompleteResult{}, fmt.Errorf("%w: completer yok", store.ErrLLMFailed)
+	}
 	version, err := s.versionFor(ctx, slot)
 	if err != nil {
 		return CompleteResult{}, err
@@ -261,9 +292,17 @@ func (s *Service) Snapshot(ctx context.Context) (StatusView, error) {
 		return StatusView{}, err
 	}
 	channel := "none"
-	comp := s.effectiveCompleter()
-	if comp != nil {
+	if comp := s.effectiveCompleter(store.SlotA); comp != nil {
 		channel = comp.Channel()
+	}
+	if channel != "colab-tunnel" {
+		if comp := s.effectiveCompleter(store.SlotB); comp != nil && comp.Channel() == "colab-tunnel" {
+			channel = "colab-tunnel"
+		} else if channel == "none" {
+			if comp := s.effectiveCompleter(store.SlotB); comp != nil {
+				channel = comp.Channel()
+			}
+		}
 	}
 	return StatusView{
 		Channel:  channel,
@@ -276,43 +315,80 @@ func (s *Service) Snapshot(ctx context.Context) (StatusView, error) {
 	}, nil
 }
 
-func (s *Service) SetColabInferenceURL(url string) {
+func ParseSlot(raw string) (store.LlmSlot, error) {
+	switch strings.ToUpper(strings.TrimSpace(raw)) {
+	case string(store.SlotA):
+		return store.SlotA, nil
+	case string(store.SlotB):
+		return store.SlotB, nil
+	default:
+		return "", store.ErrValidation
+	}
+}
+
+func (s *Service) SetColabInferenceURL(slot store.LlmSlot, url string) {
 	url = strings.TrimSpace(url)
 	s.colabMu.Lock()
-	defer s.colabMu.Unlock()
-
-	if s.colabStopHealth != nil {
-		close(s.colabStopHealth)
-		s.colabStopHealth = nil
+	s.ensureColab()
+	cur := s.colab[slot]
+	if cur == nil {
+		cur = &colabSlot{status: ColabInferenceOff}
+		s.colab[slot] = cur
 	}
-
+	if cur.stop != nil {
+		close(cur.stop)
+		cur.stop = nil
+	}
 	if url == "" {
-		s.colabInferenceURL = ""
-		s.colabStatus = ColabInferenceOff
+		cur.url = ""
+		cur.status = ColabInferenceOff
+		s.colabMu.Unlock()
+		s.persistColabURL(slot, "")
 		return
 	}
-
-	s.colabInferenceURL = strings.TrimRight(url, "/")
-	s.colabStatus = ColabInferenceChecking
-
+	cur.url = strings.TrimRight(url, "/")
+	cur.status = ColabInferenceChecking
 	stop := make(chan struct{})
-	s.colabStopHealth = stop
-	go s.healthLoop(s.colabInferenceURL, stop)
+	cur.stop = stop
+	base := cur.url
+	s.colabMu.Unlock()
+	s.persistColabURL(slot, base)
+	go s.healthLoop(slot, base, stop)
 }
 
-func (s *Service) ColabInferenceURL() string {
+func (s *Service) persistColabURL(slot store.LlmSlot, url string) {
+	if s.Store == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	state, err := s.Store.GetLlmState(ctx)
+	if err != nil {
+		return
+	}
+	switch slot {
+	case store.SlotA:
+		state.ColabURLA = url
+	case store.SlotB:
+		state.ColabURLB = url
+	default:
+		return
+	}
+	_ = s.Store.SetLlmState(ctx, state)
+}
+
+func (s *Service) ColabInferenceState(slot store.LlmSlot) (string, ColabInferenceStatus) {
 	s.colabMu.Lock()
 	defer s.colabMu.Unlock()
-	return s.colabInferenceURL
+	s.ensureColab()
+	cur := s.colab[slot]
+	if cur == nil {
+		return "", ColabInferenceOff
+	}
+	return cur.url, cur.status
 }
 
-func (s *Service) ColabInferenceState() (string, ColabInferenceStatus) {
-	s.colabMu.Lock()
-	defer s.colabMu.Unlock()
-	return s.colabInferenceURL, s.colabStatus
-}
-
-func (s *Service) healthLoop(baseURL string, stop chan struct{}) {
+func (s *Service) healthLoop(slot store.LlmSlot, baseURL string, stop chan struct{}) {
 	client := &http.Client{Timeout: 8 * time.Second}
 	checkOnce := func() bool {
 		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
@@ -346,11 +422,11 @@ func (s *Service) healthLoop(baseURL string, stop chan struct{}) {
 
 	ok := check()
 	s.colabMu.Lock()
-	if s.colabInferenceURL == baseURL {
+	if cur := s.colab[slot]; cur != nil && cur.url == baseURL {
 		if ok {
-			s.colabStatus = ColabInferenceConnected
+			cur.status = ColabInferenceConnected
 		} else {
-			s.colabStatus = ColabInferenceDisconnected
+			cur.status = ColabInferenceDisconnected
 		}
 	}
 	s.colabMu.Unlock()
@@ -364,24 +440,31 @@ func (s *Service) healthLoop(baseURL string, stop chan struct{}) {
 		case <-ticker.C:
 			ok := check()
 			s.colabMu.Lock()
-			if s.colabInferenceURL != baseURL {
+			cur := s.colab[slot]
+			if cur == nil || cur.url != baseURL {
 				s.colabMu.Unlock()
 				return
 			}
 			if ok {
-				s.colabStatus = ColabInferenceConnected
+				cur.status = ColabInferenceConnected
 			} else {
-				s.colabStatus = ColabInferenceDisconnected
+				cur.status = ColabInferenceDisconnected
 			}
 			s.colabMu.Unlock()
 		}
 	}
 }
 
-func (s *Service) effectiveCompleter() Completer {
+func (s *Service) effectiveCompleter(slot store.LlmSlot) Completer {
 	s.colabMu.Lock()
-	url := s.colabInferenceURL
-	status := s.colabStatus
+	s.ensureColab()
+	cur := s.colab[slot]
+	var url string
+	var status ColabInferenceStatus
+	if cur != nil {
+		url = cur.url
+		status = cur.status
+	}
 	s.colabMu.Unlock()
 
 	if url != "" && status == ColabInferenceConnected {
@@ -393,17 +476,31 @@ func (s *Service) effectiveCompleter() Completer {
 	return s.Completer
 }
 
-// OpenCodeEndpoint returns base URL, API key, and model for the OpenCode CLI.
-// Prefers a connected Colab tunnel; otherwise CHERRY_LLM_BASE_URL / CHERRY_LLM_API_KEY.
-// Colab has no real key — a placeholder is forwarded so OpenCode still sends Authorization.
-// Model defaults to the notebook BASE_MODEL when Colab is connected (chat.completions only).
-func (s *Service) OpenCodeEndpoint() (baseURL, apiKey, model string) {
+// OpenCodeEndpoint returns base URL, API key, and model for the OpenCode CLI for a worker slot.
+// Empty slot prefers A if connected, else B, else env defaults.
+func (s *Service) OpenCodeEndpoint(slot store.LlmSlot) (baseURL, apiKey, model string) {
 	apiKey = strings.TrimSpace(os.Getenv("CHERRY_LLM_API_KEY"))
 	baseURL = strings.TrimSpace(os.Getenv("CHERRY_LLM_BASE_URL"))
 	model = strings.TrimSpace(firstNonEmptyEnv("CHERRY_OPENCODE_MODEL", "CHERRY_LLM_MODEL"))
+	pick := slot
+	if pick != store.SlotA && pick != store.SlotB {
+		if _, st := s.ColabInferenceState(store.SlotA); st == ColabInferenceConnected {
+			pick = store.SlotA
+		} else if _, st := s.ColabInferenceState(store.SlotB); st == ColabInferenceConnected {
+			pick = store.SlotB
+		} else {
+			pick = store.SlotA
+		}
+	}
 	s.colabMu.Lock()
-	url := s.colabInferenceURL
-	status := s.colabStatus
+	s.ensureColab()
+	cur := s.colab[pick]
+	var url string
+	var status ColabInferenceStatus
+	if cur != nil {
+		url = cur.url
+		status = cur.status
+	}
 	s.colabMu.Unlock()
 	if url != "" && status == ColabInferenceConnected {
 		baseURL = url
@@ -432,7 +529,7 @@ func (s *Service) Status(ctx context.Context) (store.LlmVersion, string, error) 
 		return store.LlmVersion{}, "", err
 	}
 	channel := "none"
-	comp := s.effectiveCompleter()
+	comp := s.effectiveCompleter(store.SlotA)
 	if comp != nil {
 		channel = comp.Channel()
 	}

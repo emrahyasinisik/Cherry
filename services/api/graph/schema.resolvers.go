@@ -10,6 +10,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/cherry/api/internal/llm"
 	"github.com/cherry/api/internal/store"
 )
 
@@ -387,12 +388,16 @@ func (r *mutationResolver) StopColabBridge(ctx context.Context) (*ColabBridge, e
 }
 
 // SetColabInferenceURL is the resolver for the setColabInferenceUrl field.
-func (r *mutationResolver) SetColabInferenceURL(ctx context.Context, url string) (*ColabInference, error) {
+func (r *mutationResolver) SetColabInferenceURL(ctx context.Context, slot string, url string) (*ColabInference, error) {
 	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
 		return nil, gqlErr(err)
 	}
-	r.LLM.SetColabInferenceURL(url)
-	return r.colabInferencePayload(), nil
+	parsed, err := llm.ParseSlot(slot)
+	if err != nil {
+		return nil, gqlErr(err)
+	}
+	r.LLM.SetColabInferenceURL(parsed, url)
+	return r.colabInferencePayload(parsed), nil
 }
 
 // DeleteMe is the resolver for the deleteMe field.
@@ -692,12 +697,20 @@ func (r *queryResolver) ColabBridge(ctx context.Context) (*ColabBridge, error) {
 	return r.colabBridgePayload(), nil
 }
 
-// ColabInference is the resolver for the colabInference field.
-func (r *queryResolver) ColabInference(ctx context.Context) (*ColabInference, error) {
+// ColabInferenceA is the resolver for the colabInferenceA field.
+func (r *queryResolver) ColabInferenceA(ctx context.Context) (*ColabInference, error) {
 	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
 		return nil, gqlErr(err)
 	}
-	return r.colabInferencePayload(), nil
+	return r.colabInferencePayload(store.SlotA), nil
+}
+
+// ColabInferenceB is the resolver for the colabInferenceB field.
+func (r *queryResolver) ColabInferenceB(ctx context.Context) (*ColabInference, error) {
+	if _, _, err := r.Auth.SessionUser(ctx, TokenFrom(ctx)); err != nil {
+		return nil, gqlErr(err)
+	}
+	return r.colabInferencePayload(store.SlotB), nil
 }
 
 // Mutation returns MutationResolver implementation.
