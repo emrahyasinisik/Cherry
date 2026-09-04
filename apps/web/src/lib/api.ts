@@ -567,11 +567,11 @@ export function maestroResultLabel(result: MaestroResult): string {
 export function maestroDeviceLabel(deviceStatus: string): string {
   switch (deviceStatus) {
     case "device":
-      return "Cihaz görüldü. Koşu gerçek sonuç yazar; PASSED uydurulmaz.";
+      return "Cihaz görüldü. maestro --device ile koşulur; PASSED yalnızca gerçek geçişte.";
     case "no_cli":
-      return "Maestro CLI yok. Koşu SKIPPED — cihaz olsa da CLI olmadan test yok.";
+      return "Maestro CLI yok. ./scripts/vendor-sidecars.sh — SKIPPED (sahte PASSED yok).";
     case "none":
-      return "Cihaz yok. Koşu SKIPPED olur — geçti sayılmaz.";
+      return "Emülatör yok. AVD veya Simulator aç — yoksa SKIPPED, geçti sayılmaz.";
     default:
       return "Maestro durumu bilinmiyor. SKIPPED olabilir.";
   }

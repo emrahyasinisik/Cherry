@@ -20,6 +20,7 @@ var/projects/
 services/api/var/
 vendor/bin/*
 !vendor/bin/README.md
+vendor/maestro-dist/
 
 # npm workspaces: lockfile lives at the repo root only
 apps/*/package-lock.json

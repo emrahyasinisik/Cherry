@@ -13,12 +13,35 @@ Müşteri Maestro kurmaz. Cherry `vendor/bin` (veya `resources/bin`) paketler. G
 The customer does not install Maestro. Cherry vendors it. PATH is a developer fallback.
 
 ```bash
-./scripts/vendor-sidecars.sh
+./scripts/vendor-sidecars.sh   # downloads OpenCode + Maestro zip (Java 17+)
 # or, developer machine only:
 curl -fsSL "https://get.maestro.mobile.dev" | bash
 ```
 
 Electron main, CLI varsa `maestro mcp` (stdio) ayağa kaldırır; yoksa host boş kalır, akışlar SKIPPED.
+
+## Emülatör / Device (PASSED için)
+
+**TR:** PASSED yalnızca gerçek cihaz veya emülatörde. Cloud agent’ta emülatör yoksa SKIPPED doğru kalır.
+
+**EN:** PASSED only with a real device or emulator. No emulator in cloud → SKIPPED is correct.
+
+| Platform | Ne |
+| --- | --- |
+| Android | Android Studio AVD; `adb devices` → `device` |
+| iOS (Mac) | Simulator booted; `xcrun simctl list devices booted` |
+| Seçim | `CHERRY_MAESTRO_DEVICE=<id>` |
+| Otomatik aç | `CHERRY_MAESTRO_START_DEVICE=1` → `maestro start-device` (SDK gerekir) |
+
+```bash
+# Android AVD örneği
+emulator -avd Pixel_6_API_34 &
+adb wait-for-device
+npm run dev:api
+# Studio → Maestro → Koş → PASSED veya FAILED (SKIPPED değil)
+```
+
+Runner: `maestro --device <id> test flow.yaml`. FAILED en fazla **3** deneme; sonra FAILED kalır. PASSED asla uydurulmaz.
 
 ## Test döngüsü / Test loop
 

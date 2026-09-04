@@ -1,8 +1,8 @@
-# Sidecar binaries — OpenCode + Maestro
+# Sidecar binaries — OpenCode + Maestro + cloudflared
 
-**TR:** Müşteri OpenCode, Maestro veya cloudflared kurmaz. `./scripts/vendor-sidecars.sh` resmi OpenCode binary’sini buraya indirir (git’e ikili atılmaz). Maestro / cloudflared PATH’teyse kopyalanır.
+**TR:** Müşteri bu CLI’leri kurmaz. `./scripts/vendor-sidecars.sh` resmi OpenCode + Maestro zip’ini indirir (git’e ikili atılmaz). cloudflared PATH’teyse kopyalanır.
 
-**EN:** The customer does not install OpenCode or Maestro. `./scripts/vendor-sidecars.sh` downloads the official OpenCode binary here (not committed). Maestro is copied from PATH when present.
+**EN:** The customer does not install these CLIs. `./scripts/vendor-sidecars.sh` downloads OpenCode and Maestro (not committed). cloudflared is copied from PATH when present.
 
 ## Look order / Arama sırası
 
@@ -13,6 +13,6 @@
 
 Kaynak etiketleri: `env` | `bundled` | `path` | `missing`.
 
-Yazmak için CLI yetmez; `CHERRY_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) veya bağlı Colab inferans URL gerekir. Anahtar yoksa CLI bulunur ama model çağrısı düşer — sahte yazım yok. `CHERRY_LLM_BASE_URL` / Colab URL → `OPENAI_BASE_URL` + `opencode.json` provider.
+Maestro needs **Java 17+** (`JAVA_HOME`). Without an emulator/device, runs stay **SKIPPED** — never fake PASSED.
 
-The CLI is not enough to write: `CHERRY_LLM_API_KEY` is forwarded as `OPENAI_API_KEY`, or a connected Colab inference URL is used. No key and no Colab URL → no fake write.
+Yazmak için CLI yetmez; `CHERRY_LLM_API_KEY` (OpenCode’a `OPENAI_API_KEY`) veya bağlı Colab inferans URL gerekir. Anahtar yoksa CLI bulunur ama model çağrısı düşer — sahte yazım yok. `CHERRY_LLM_BASE_URL` / Colab URL → `OPENAI_BASE_URL` + `opencode.json` provider.
