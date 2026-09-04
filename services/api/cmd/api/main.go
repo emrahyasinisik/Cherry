@@ -37,23 +37,24 @@ func main() {
 	mongoURI := os.Getenv("MONGO_URI")
 	pepper := getenv("CHERRY_CODE_PEPPER", "cherry-dev-pepper-change-me")
 
-	memory := store.NewMemory()
-	var mongoOK bool
+	var st store.Store = store.NewMemory()
 	if mongoURI != "" {
-		ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-		client, err := store.TryMongo(ctx, mongoURI)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		mongoStore, err := store.OpenMongo(ctx, mongoURI)
 		cancel()
 		if err != nil {
 			log.Printf("mongo unavailable, using memory store: %v", err)
 		} else {
-			mongoOK = true
-			defer func() { _ = client.Disconnect(context.Background()) }()
-			log.Printf("mongo ping ok; auth collections still memory until mongo adapters")
+			st = mongoStore
+			defer func() { _ = mongoStore.Close(context.Background()) }()
+			log.Printf("store=mongo db=%s", mongoStore.DBName())
 		}
+	} else {
+		log.Printf("store=memory (set MONGO_URI for persistence)")
 	}
 
 	mail := &mailer.Service{
-		Store:      memory,
+		Store:      st,
 		WebURL:     webOrigin,
 		ResendKey:  os.Getenv("RESEND_API_KEY"),
 		ResendFrom: os.Getenv("RESEND_FROM"),
@@ -67,12 +68,12 @@ func main() {
 		},
 	}
 	log.Printf("mailer channel=%s require=%v", mail.Channel(), mail.Require)
-	authSvc := auth.New(memory, mail, pepper, webOrigin)
-	if err := llm.Seed(context.Background(), memory); err != nil {
+	authSvc := auth.New(st, mail, pepper, webOrigin)
+	if err := llm.Seed(context.Background(), st); err != nil {
 		log.Fatalf("llm seed: %v", err)
 	}
 	llmSvc := &llm.Service{
-		Store:     memory,
+		Store:     st,
 		Completer: llm.NewCompleter(os.Getenv("CHERRY_LLM_API_KEY"), os.Getenv("CHERRY_LLM_BASE_URL"), os.Getenv("CHERRY_LLM_MODEL")),
 	}
 	projectsRoot := getenv("CHERRY_PROJECTS_ROOT", "")
@@ -82,7 +83,7 @@ func main() {
 	if abs, err := filepath.Abs(projectsRoot); err == nil {
 		projectsRoot = abs
 	}
-	fact := factory.New(memory, projectsRoot)
+	fact := factory.New(st, projectsRoot)
 	fact.LLM = llmSvc
 	oc := opencode.NewCLI()
 	fact.OpenCode = oc
@@ -105,7 +106,7 @@ func main() {
 		apiOrigin = "http://127.0.0.1" + addr
 	}
 	connectSvc := &connect.Service{
-		Store:     memory,
+		Store:     st,
 		Git:       connect.CLIGit{},
 		WebOrigin: webOrigin,
 		APIOrigin: apiOrigin,
@@ -137,10 +138,7 @@ func main() {
 	mux.Handle("/graphql", withRequestMeta(srv))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		status := "memory"
-		if mongoOK {
-			status = "memory+mongo-ping"
-		}
+		status := st.Name()
 		llmChannel := "none"
 		if snap, err := llmSvc.Snapshot(r.Context()); err == nil {
 			llmChannel = snap.Channel

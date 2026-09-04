@@ -19,6 +19,7 @@ flowchart TB
   mail[tempMailboxes]
   projects[projects]
   jobs[jobs]
+  conns[connections]
   models[llmModels]
   versions[llmVersions]
   audit[auditEvents]
@@ -29,6 +30,7 @@ flowchart TB
   users --> codes
   users --> mail
   users --> projects
+  users --> conns
   orgs --> projects
   projects --> jobs
   models --> versions
@@ -58,3 +60,18 @@ flowchart LR
 - `sessions.tokenHash`, unique; at most one `active` per user.
 - `projects.diskPath` is a pointer on the machine, not the source tree in GridFS.
 - `auditEvents` immutable insert; redacted payload only.
+
+## Adapter / Runtime
+
+**TR:** `store.Store` arayüzü: `Memory` (varsayılan) veya `Mongo` (`MONGO_URI`). API ping başarısızsa memory’ye düşer. Koleksiyonlar: `users`, `devices`, `sessions`, `verificationCodes`, `tempMailboxes`, `projects`, `jobs`, `connections`, `llmVersions`, `llmState`, `auditEvents`.
+
+**EN:** `store.Store` is either `Memory` (default) or `Mongo` (`MONGO_URI`). Failed ping falls back to memory. Collections: `users`, `devices`, `sessions`, `verificationCodes`, `tempMailboxes`, `projects`, `jobs`, `connections`, `llmVersions`, `llmState`, `auditEvents`.
+
+```bash
+docker compose up -d mongo
+export MONGO_URI=mongodb://127.0.0.1:27017/cherry
+npm run dev:api
+# /health → "store":"mongo"
+```
+
+Indexes: unique `users.email`, unique `sessions.tokenHash`, unique `(userId,fpHash)` on devices, unique `(userId,kind)` on connections, TTL on `verificationCodes.expiresAt`.
