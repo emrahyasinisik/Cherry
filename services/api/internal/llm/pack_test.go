@@ -90,7 +90,7 @@ func TestBuildPackSeedsWhenEmpty(t *testing.T) {
 	if pack.Stats.LiveExamples != 0 {
 		t.Fatalf("live=%d", pack.Stats.LiveExamples)
 	}
-	if pack.Stats.SeedExamples < 4 {
+	if pack.Stats.SeedExamples < 24 {
 		t.Fatalf("seed=%d", pack.Stats.SeedExamples)
 	}
 	if pack.Schema != PackSchema {
@@ -102,6 +102,27 @@ func TestBuildPackSeedsWhenEmpty(t *testing.T) {
 	}
 	if !strings.Contains(string(raw), "instruction") {
 		t.Fatal(string(raw))
+	}
+}
+
+func TestBuildPackSkipsShortAuditPreviews(t *testing.T) {
+	pack := BuildPack(context.Background(), PackInput{
+		Audits: []store.AuditEvent{{
+			ID:            "short",
+			PromptPreview: "plan yaz",
+			OutputPreview: "ok",
+			Slot:          store.SlotA,
+			VersionName:   "v1",
+			Purpose:       "codegen",
+		}},
+	})
+	for _, ex := range pack.Examples {
+		if ex.ID == "audit-short" {
+			t.Fatal("short audit preview must not enter the pack")
+		}
+	}
+	if pack.Stats.SeedExamples < 24 {
+		t.Fatalf("expected seed pad, seed=%d", pack.Stats.SeedExamples)
 	}
 }
 

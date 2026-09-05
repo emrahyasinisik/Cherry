@@ -94,7 +94,28 @@ Env: `CHERRY_CLOUDFLARED_BIN`, `CHERRY_COLAB_BRIDGE_ADDR` (varsayılan `127.0.0.
 
 `schema`: `cherry.training_pack.v1`
 
-Her örnek: `instruction`, `input`, `output`. Canlı iz inceyse stüdyo **seed** örnek ekler (işaret `source: seed`).
+Her örnek: `instruction`, `input`, `output`.
+
+### Seed vs canlı / Seed vs live
+
+| Kural / Rule | Detay / Detail |
+| --- | --- |
+| Seed corpus | `services/api/internal/llm/seed_pack.go` — ~30+ somut satır (brief, kaynak, Maestro, completion). `colab/examples/` ile senkron. |
+| Canlı pad | `liveExamples < 48` ise stüdyo seed’i pakete ekler. |
+| Kısa audit | UI preview (~180 karakter) SFT’ye **girmez**; gürültü. |
+| Notebook guard | `sft_rows < 24` → eğitim durur. 3 satırlık mini seed **yok**. |
+
+**TR:** İnce seed ile QLoRA yapmak çıktıyı bozar. Önce `examples/cherry_training_pack.json` veya stüdyo canlı paketini yükle; Colab log’da `sft_rows` ve `seedExamples` kontrol et.
+
+**EN:** Tiny seed QLoRA harms quality. Upload `examples/cherry_training_pack.json` or a live studio pack; check `sft_rows` / `seedExamples` in the notebook log.
+
+Seed dosyalarını Go’dan yenilemek / Refresh examples from Go:
+
+```bash
+cd services/api
+CHERRY_EXPORT_SEED=1 CHERRY_EXPORT_SEED_DIR=../../colab/examples \
+  go test ./internal/llm -run TestExportSeedPackFiles
+```
 
 JSONL satırı:
 
