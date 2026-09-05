@@ -14,10 +14,11 @@
 
 Nasıl: [docs/colab.md](../docs/colab.md)
 
-Notebook `sft_rows < 24` ise train etmez. Seed kaynağı: `services/api/internal/llm/seed_pack.go`.
+Notebook `sft_rows < 24` ise train etmez. Seed `generate_notebooks.py` ile **ipynb içine gömülür** — Colab’de JSON yüklemek zorunlu değil.
 
 ```bash
-python3 colab/generate_notebooks.py
+# seed_pack.go → examples/*.json → regenerate notebooks (embeds seed)
 cd services/api && CHERRY_EXPORT_SEED=1 CHERRY_EXPORT_SEED_DIR=../../colab/examples \
   go test ./internal/llm -run TestExportSeedPackFiles
+python3 colab/generate_notebooks.py
 ```

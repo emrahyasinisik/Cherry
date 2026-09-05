@@ -1,39 +1,122 @@
 #!/usr/bin/env python3
-"""Generate Cherry Colab notebooks A and B from one recipe."""
+"""Generate Cherry Colab notebooks A and B from one recipe.
+
+The seed training pack (colab/examples/cherry_training_pack.json) is base64-embedded
+into each notebook so Colab runs without a manual JSON upload.
+"""
 
 from __future__ import annotations
 
+import base64
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+SEED_PACK_PATH = ROOT / "examples" / "cherry_training_pack.json"
 
 
-def cells(worker: str) -> list[dict]:
-    other = "B" if worker == "A" else "A"
-    md = lambda text: {
+def embedded_pack_b64() -> str:
+    pack = json.loads(SEED_PACK_PATH.read_text(encoding="utf-8"))
+    n = len(pack.get("examples") or [])
+    if n < 24:
+        raise SystemExit(f"seed pack too thin for embed: {SEED_PACK_PATH} has {n} examples")
+    return base64.b64encode(json.dumps(pack, ensure_ascii=False).encode("utf-8")).decode("ascii")
+
+
+def md(text: str) -> dict:
+    return {
         "cell_type": "markdown",
         "metadata": {},
         "source": [line + "\n" for line in text.strip("\n").split("\n")],
     }
-    py = lambda text: {
+
+
+def py(text: str) -> dict:
+    return {
         "cell_type": "code",
         "metadata": {},
         "execution_count": None,
         "outputs": [],
         "source": [line + "\n" for line in text.strip("\n").split("\n")],
     }
+
+
+def pack_cell() -> str:
+    b64 = embedded_pack_b64()
+    b64_literal = "\n".join(b64[i : i + 100] for i in range(0, len(b64), 100))
+    return f'''from pathlib import Path
+import base64
+import json
+
+MIN_SFT_ROWS = 24
+PACK_PATH = Path("/content/cherry_training_pack.json")
+
+# Full seed corpus baked into this notebook (from colab/examples/cherry_training_pack.json).
+_EMBEDDED_B64 = """
+{b64_literal}
+""".replace("\\n", "").strip()
+
+EMBEDDED_PACK = json.loads(base64.b64decode(_EMBEDDED_B64).decode("utf-8"))
+
+def rows_from_pack(pack):
+    out = []
+    for ex in pack.get("examples", []):
+        instruction = (ex.get("instruction") or "").strip()
+        output = (ex.get("output") or "").strip()
+        if not instruction or not output:
+            continue
+        out.append({{
+            "instruction": instruction,
+            "input": (ex.get("input") or "").strip(),
+            "output": output,
+        }})
+    return out
+
+CANDIDATES = [
+    PACK_PATH,
+    Path("/content/examples/cherry_training_pack.json"),
+]
+
+pack = None
+loaded_from = None
+for path in CANDIDATES:
+    if path.exists():
+        pack = json.loads(path.read_text())
+        loaded_from = str(path)
+        break
+
+if pack is None:
+    pack = EMBEDDED_PACK
+    loaded_from = "embedded_seed_pack"
+    print("no upload; using EMBEDDED seed pack", len(pack.get("examples", [])))
+else:
+    print("loaded upload/file", loaded_from, "examples", len(pack.get("examples", [])))
+
+rows = rows_from_pack(pack)
+stats = pack.get("stats") or {{}}
+print("source", loaded_from)
+print("examples_in_pack", len(pack.get("examples", [])))
+print("liveExamples", stats.get("liveExamples"), "seedExamples", stats.get("seedExamples"))
+print("sft_rows", len(rows))
+if len(rows) < MIN_SFT_ROWS:
+    raise SystemExit(
+        f"sft_rows={{len(rows)}} < {{MIN_SFT_ROWS}}. Paket fine-tune için çok ince."
+    )'''
+
+
+def cells(worker: str) -> list[dict]:
+    other = "B" if worker == "A" else "A"
     return [
         md(
             f"""# Cherry — Colab fine-tune (işçi {worker})
 
-**TR:** Bu notebook **LLM {worker}** için. Aynı tarif **LLM {other}** notebook’unda da var. İki ayrı Colab oturumu, her biri **16GB GPU (T4)**. Tek kartta iki notebook yok. Colab üretim inferansı değildir — adapter’ı indir, stüdyoda sürüm olarak kaydet.
+**TR:** Bu notebook **LLM {worker}** için. Aynı tarif **LLM {other}** notebook’unda. İki ayrı Colab oturumu, her biri **16GB GPU (T4)**. Colab üretim inferansı değil.
 
-**EN:** Same QLoRA recipe as worker {other}. Two Colab sessions, **16GB GPU each**. Colab is not production inference.
+**EN:** Same QLoRA recipe as worker {other}. Two Colab sessions, **16GB GPU each**.
 
-Dosyalar / Files:
-1. `cherry_training_pack.json` (stüdyodan veya `colab/examples/`)
-2. Bu `.ipynb` — Runtime → GPU (T4)"""
+**Seed pack notebook içinde gömülü (~30+ satır).** JSON yüklemek **zorunlu değil**. Upload/tünel varsa o öncelikli.
+
+Runtime → GPU (T4)"""
         ),
         md("## 0. GPU kontrol / GPU check"),
         py(
@@ -67,70 +150,18 @@ print("worker", WORKER, "base", BASE_MODEL, "gpu_budget_gb", 16)"""
         md(
             """## 3. Eğitim paketi / Training pack
 
-Soldan **cherry_training_pack.json** yükle (stüdyo LLM sayfası veya repodaki `colab/examples/cherry_training_pack.json`).
+Gömülü seed corpus kullanılır (JSON yüklemeden). İstersen `/content/cherry_training_pack.json` yükle veya tünel aç — o zaman upload/tünel öncelikli.
 
-**Önemli / Important:** 3 satırlık mini seed ile train etme — çıktılar bozulur. En az ~24 örnek gerekir; seed corpus ~30+ satırdır."""
+Mini 3’lük seed **yok**. `sft_rows` en az 24 olmalı."""
         ),
-        py(
-            r'''from pathlib import Path
-import json
-
-PACK_PATH = Path("/content/cherry_training_pack.json")
-CANDIDATES = [
-    PACK_PATH,
-    Path("/content/examples/cherry_training_pack.json"),
-    Path("/content/cherry_training_pack.json"),
-]
-MIN_SFT_ROWS = 24
-
-def rows_from_pack(pack):
-    out = []
-    for ex in pack.get("examples", []):
-        instruction = (ex.get("instruction") or "").strip()
-        output = (ex.get("output") or "").strip()
-        if not instruction or not output:
-            continue
-        out.append({
-            "instruction": instruction,
-            "input": (ex.get("input") or "").strip(),
-            "output": output,
-        })
-    return out
-
-pack = None
-loaded_from = None
-for path in CANDIDATES:
-    if path.exists():
-        pack = json.loads(path.read_text())
-        loaded_from = str(path)
-        break
-
-if pack is None:
-    raise SystemExit(
-        "Eğitim paketi yok. Stüdyo LLM → paketi indir ve /content/cherry_training_pack.json olarak yükle "
-        "(veya colab/examples/cherry_training_pack.json). 3 satırlık mini seed bilerek kaldırıldı."
-    )
-
-rows = rows_from_pack(pack)
-stats = pack.get("stats") or {}
-print("loaded", loaded_from)
-print("examples_in_pack", len(pack.get("examples", [])))
-print("liveExamples", stats.get("liveExamples"), "seedExamples", stats.get("seedExamples"))
-print("sft_rows", len(rows))
-if len(rows) < MIN_SFT_ROWS:
-    raise SystemExit(
-        f"sft_rows={len(rows)} < {MIN_SFT_ROWS}. Bu paket fine-tune için çok ince; "
-        "stüdyoda proje üretip canlı paketi indir veya examples seed corpus’unu yükle."
-    )'''
-        ),
+        py(pack_cell()),
         md(
             """## 3b. Tünel ile paket çek / Fetch pack via tunnel (isteğe bağlı)
 
-Stüdyoda **Tüneli aç** dediysen URL ve token'ı aşağıya yapıştır. Yoksa üstteki dosya yüklemeyi kullan."""
+Stüdyoda tünel açtıysan URL + token yapıştır. Boş bırakırsan gömülü/yüklenen paket kullanılır."""
         ),
         py(
-            r'''# Optional: fetch training pack from Cherry tunnel instead of file upload.
-# Paste the tunnel URL and token from the LLM admin page.
+            '''# Optional: fetch training pack from Cherry tunnel.
 TUNNEL_URL = ""   # e.g. "https://xxx.trycloudflare.com"
 TUNNEL_TOKEN = "" # bearer token from studio
 
@@ -148,28 +179,29 @@ if TUNNEL_URL and TUNNEL_TOKEN:
     if len(rows) < MIN_SFT_ROWS:
         raise SystemExit(f"tunnel pack too thin: sft_rows={len(rows)} < {MIN_SFT_ROWS}")
 else:
-    print("tunnel: skipped (no URL). Using uploaded pack; sft_rows=", len(rows))'''
+    print("tunnel: skipped (no URL). Using pack source above; sft_rows=", len(rows))'''
         ),
         md("## 4. Dataset"),
         py(
-            r'''from datasets import Dataset
+            '''from datasets import Dataset
 
 def format_row(ex):
     user = ex["instruction"]
     if ex["input"]:
-        user = user + "\n\n" + ex["input"]
+        user = user + "\\n\\n" + ex["input"]
     return (
-        f"<|im_start|>system\nCherry işçi {WORKER}. Mobil frontend/backend ve Maestro YAML yaz. PII yok. HTML site yazma.<|im_end|>\n"
-        f"<|im_start|>user\n{user}<|im_end|>\n"
-        f"<|im_start|>assistant\n{ex['output']}<|im_end|>"
+        f"<|im_start|>system\\nCherry işçi {WORKER}. Mobil frontend/backend ve Maestro YAML yaz. PII yok. HTML site yazma.<|im_end|>\\n"
+        f"<|im_start|>user\\n{user}<|im_end|>\\n"
+        f"<|im_start|>assistant\\n{ex['output']}<|im_end|>"
     )
 
 ds = Dataset.from_list(rows).map(lambda ex: {"text": format_row(ex)})
+print("dataset_rows", len(ds))
 print(ds[0]["text"][:400])'''
         ),
         md("## 5. 4-bit QLoRA (16GB T4)"),
         py(
-            r'''from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+            '''from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 import torch
 
@@ -201,7 +233,7 @@ model.print_trainable_parameters()'''
         ),
         md("## 6. Eğitim / Train"),
         py(
-            r'''from transformers import DataCollatorForLanguageModeling, Trainer, TrainingArguments
+            '''from transformers import DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
 def tokenize(batch):
     out = tok(batch["text"], truncation=True, max_length=MAX_SEQ, padding=False)
@@ -274,14 +306,10 @@ else:
         md(
             """## 8. İnferans sunucusu / Inference server (isteğe bağlı)
 
-Fine-tune bitince modeli OpenAI uyumlu API olarak sun. Cherry stüdyodan bu URL’ye istek gelir. **Geçici** — Colab kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan."""
+Fine-tune bitince modeli OpenAI uyumlu API olarak sun. **Geçici** — Colab kapanınca kopar."""
         ),
         py(
-            r'''# Serve the fine-tuned model as an OpenAI-compatible API.
-# Uses a lightweight FastAPI wrapper around the transformers pipeline.
-# Fits 16GB T4 since the model is already loaded from training.
-
-%pip -q install fastapi uvicorn
+            '''%pip -q install fastapi uvicorn
 
 from threading import Thread
 import uvicorn
@@ -290,7 +318,6 @@ from fastapi.responses import JSONResponse, StreamingResponse
 import torch, json, time as _time, uuid
 
 app = FastAPI()
-
 model.eval()
 
 @app.get("/v1/models")
@@ -308,9 +335,9 @@ async def chat_completions(request: Request):
     for msg in messages:
         role = msg.get("role", "user")
         content = msg.get("content", "")
-        prompt_parts.append(f"<|im_start|>{role}\n{content}<|im_end|>")
-    prompt_parts.append("<|im_start|>assistant\n")
-    prompt_text = "\n".join(prompt_parts)
+        prompt_parts.append(f"<|im_start|>{role}\\n{content}<|im_end|>")
+    prompt_parts.append("<|im_start|>assistant\\n")
+    prompt_text = "\\n".join(prompt_parts)
 
     inputs = tok(prompt_text, return_tensors="pt", truncation=True, max_length=MAX_SEQ).to(model.device)
     with torch.no_grad():
@@ -335,8 +362,8 @@ async def chat_completions(request: Request):
                 "created": created, "model": BASE_MODEL,
                 "choices": [{"index": 0, "delta": {"role": "assistant", "content": text}, "finish_reason": "stop"}],
             }
-            yield f"data: {json.dumps(chunk)}\n\n"
-            yield "data: [DONE]\n\n"
+            yield f"data: {json.dumps(chunk)}\\n\\n"
+            yield "data: [DONE]\\n\\n"
         return StreamingResponse(generate(), media_type="text/event-stream")
 
     return JSONResponse({
@@ -350,36 +377,21 @@ server_thread = Thread(target=lambda: uvicorn.run(app, host="0.0.0.0", port=8000
 server_thread.start()
 _time.sleep(3)
 print("Inference server running on 0.0.0.0:8000")
-print("POST /v1/chat/completions — OpenAI uyumlu / OpenAI-compatible")
-print("GET  /v1/models — id:", BASE_MODEL)
-print("Not served: /v1/responses (OpenCode must use @ai-sdk/openai-compatible)")'''
+print("POST /v1/chat/completions — OpenAI uyumlu")
+print("GET  /v1/models — id:", BASE_MODEL)'''
         ),
         md(
             """## 9. Cloudflare tüneli / Cloudflare tunnel (inferans)
 
-**Öncelik / Prefer:** named tunnel (sabit alt alan + token). Token yoksa quick tunnel (`trycloudflare`).
-
-Token’ı Colab secret veya oturum değişkeni olarak ver — notebook’a, Drive’a, git’e yazma. Cherry yalnızca public HTTPS URL saklar; token stüdyo API’sine girmez.
-
-Colab kapanınca tünel kapanır — üretim inferansı değil.
-
-Cherry OpenCode: `cherry-colab` + `@ai-sdk/openai-compatible` → `/v1/chat/completions` (built-in `openai` provider `/v1/responses` ister; bu sunucuda yok)."""
+**Öncelik:** named tunnel (token). Yoksa quick tunnel (`trycloudflare`). Token’ı Colab secret yap — notebook’a yazma."""
         ),
         py(
-            r'''!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+            '''!wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
 !dpkg -i cloudflared-linux-amd64.deb
 
-# Prefer named tunnel (fixed subdomain). Set token via Colab secret or paste once.
-# NEVER commit a real token.
-import os
-import subprocess
-import re
-import time as _time
+import os, subprocess, re, time as _time
 
 CLOUDFLARE_TUNNEL_TOKEN = os.environ.get("CLOUDFLARE_TUNNEL_TOKEN", "").strip()
-# Or set here for this session only (do not save to Drive with token in cleartext):
-# CLOUDFLARE_TUNNEL_TOKEN = ""
-
 try:
     from google.colab import userdata
     if not CLOUDFLARE_TUNNEL_TOKEN:
@@ -388,94 +400,48 @@ except Exception:
     pass
 
 if CLOUDFLARE_TUNNEL_TOKEN:
-    # named tunnel — URL is the DNS hostname you configured in Zero Trust
-    # (public hostname must route to http://localhost:8000 in the tunnel config)
     COLAB_PUBLIC_BASE = os.environ.get(
         "CHERRY_COLAB_PUBLIC_URL", "https://YOUR_SUBDOMAIN.example.com"
     ).rstrip("/")
-    # Optional session override (do not commit / save to Drive):
-    # COLAB_PUBLIC_BASE = "https://colab.yourdomain.com"
-
     proc = subprocess.Popen(
-        [
-            "cloudflared",
-            "tunnel",
-            "--no-autoupdate",
-            "run",
-            "--token",
-            CLOUDFLARE_TUNNEL_TOKEN,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
+        ["cloudflared", "tunnel", "--no-autoupdate", "run", "--token", CLOUDFLARE_TUNNEL_TOKEN],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
     )
-    # Drain a few startup lines without printing the token.
     deadline = _time.time() + 8
     while _time.time() < deadline:
         line = proc.stdout.readline() if proc.stdout else ""
         if not line:
             break
         print(line, end="")
-
     print("=" * 60)
-    print("Named tunnel (sabit alt alan / fixed subdomain).")
     print(f"Cherry URL: {COLAB_PUBLIC_BASE}/v1")
-    print()
-    print("TR: CHERRY_COLAB_PUBLIC_URL’yi Zero Trust’teki sabit hostname yap")
-    print("    (örn. https://colab.yourdomain.com). Bu URL’yi Cherry LLM")
-    print("    yöneticide Colab inferans alanına yapıştır (setColabInferenceUrl).")
-    print("EN: Set CHERRY_COLAB_PUBLIC_URL to the fixed hostname from Zero Trust")
-    print("    (e.g. https://colab.yourdomain.com). Paste that into Cherry LLM")
-    print("    admin → Colab inference (setColabInferenceUrl).")
-    print()
-    print("Güvenlik / Security: Token yalnızca Colab secret / env. Git’e,")
-    print("    notebook’a veya Drive’a yazma. Sohbette yapıştırdıysan")
-    print("    Zero Trust → Tunnels’te token’ı döndür (rotate).")
-    print("Token Cherry API sürecine girmez — yalnızca public HTTPS URL.")
+    print("LLM yönetici → Colab inferans alanına yapıştır (setColabInferenceUrl).")
     print("=" * 60)
 else:
-    # fallback: quick tunnel, parse trycloudflare.com URL from logs
-    print("CLOUDFLARE_TUNNEL_TOKEN yok — quick tunnel (trycloudflare) kullanılıyor.")
-    print("No token — falling back to quick tunnel (trycloudflare).")
+    print("CLOUDFLARE_TUNNEL_TOKEN yok — quick tunnel (trycloudflare).")
     proc = subprocess.Popen(
         ["cloudflared", "tunnel", "--url", "http://localhost:8000", "--no-autoupdate"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
     )
-
     url = ""
     deadline = _time.time() + 30
     for line in proc.stdout:
         print(line, end="")
-        m = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
+        m = re.search(r"https://[a-zA-Z0-9-]+\\.trycloudflare\\.com", line)
         if m:
             url = m.group()
             break
         if _time.time() > deadline:
             break
-
     if url:
-        print(f"\n{'='*60}")
-        print(f"Cherry'de kullan / Use in Cherry:")
-        print(f"  {url}/v1")
-        print(f"{'='*60}")
-        print("LLM yönetici → Colab inferans bölümünde bu URL’yi yapıştır.")
-        print("Paste this URL in the LLM admin → Colab inference section.")
-        print("Colab oturumu kapanınca bağlantı kopar. Üretim için kalıcı endpoint kullan.")
+        print(f"\\nCherry'de kullan: {url}/v1")
     else:
-        print("cloudflared tünel URL bulunamadı. Log’ları kontrol et.")
-        print("Tunnel URL not found. Check cloudflared logs above.")'''
+        print("Tunnel URL not found.")'''
         ),
-        md(
-            """## 10. Canlı tut / Keep alive
-
-Colab boşta kalınca oturumu kapatır. Bu hücreyi çalışır bırak."""
-        ),
+        md("## 10. Canlı tut / Keep alive"),
         py(
-            r'''import time as _time
-print("Oturum canlı tutuluyor… / Keeping session alive…")
-print("Durdurmak için hücreyi kes. / Stop this cell to disconnect.")
+            '''import time as _time
+print("Oturum canlı tutuluyor… Stop cell to disconnect.")
 while True:
     _time.sleep(60)
     print(".", end="", flush=True)'''
@@ -483,11 +449,10 @@ while True:
         md(
             f"""## Sonra / Next
 
-1. Zip’i makineye indir.
+1. Zip’i indir (`adapter_model.safetensors` içinde olmalı).
 2. Cherry → LLM yönetici → **Colab sürümü kaydet** (işçi {worker}).
-3. Pointer’ı o sürüme al. In-flight işler eski pointer’da biter.
-4. İnferans tüneli açıksa sabit veya quick URL’yi stüdyoda yapıştır — geçici, Colab kapanınca biter.
-5. Colab’ı kapat. Üretim çağrıları stüdyo işçilerinde kalır."""
+3. Pointer’ı o sürüme al.
+4. Colab’ı kapat."""
         ),
     ]
 

@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/11-llmops.mdc](../.cursor/rules/11-llmops.mdc) · [llmops.md](llmops.md)
 
-**TR:** Colab’de eğitim **senin Google hesabında** olur. Cherry Colab barındırmaz ve Colab MCP değildir. Bu repodaki dosyaları Colab’e yüklersin; adapter zip’ini indirir, stüdyoda yeni `llmVersion` kaydedersin.
+**TR:** Colab’de eğitim **senin Google hesabında** olur. Cherry Colab barındırmaz ve Colab MCP değildir. Notebook’ları Colab’e yükle; **seed pack notebook içinde gömülü** (JSON yüklemek zorunlu değil). Adapter zip’ini indir, stüdyoda yeni `llmVersion` kaydet.
 
-**EN:** Training runs on **your** Colab runtime. Cherry does not host Colab. Upload these files, download the adapter zip, register a new immutable version in the studio.
+**EN:** Training runs on **your** Colab runtime. Cherry does not host Colab. Upload the notebooks; the **seed pack is embedded** (JSON upload optional). Download the adapter zip, register a new immutable version in the studio.
 
 ## Dosyalar / Files
 
@@ -39,7 +39,7 @@ flowchart LR
 1. Cherry’de bir proje üret (brif + kod + Maestro). Yoksa seed paketi kullan.
 2. LLM yönetici → **Colab tünelini aç** (`cloudflared` quick tunnel). URL + köprü token’ı notebook’a yapıştır. `cloudflared` yoksa tünel açılmaz — sahte URL yok; o zaman paketi elle indir.
 3. [colab.research.google.com](https://colab.research.google.com) — **iki oturum**. Her birinde Runtime → GPU → **T4**.
-4. Oturum A’ya `cherry_worker_a.ipynb` yükle (tünel paketi çeker). Tünel yoksa JSON’u elle yükle. Oturum B’ye `cherry_worker_b.ipynb` + **aynı** paket.
+4. Oturum A’ya `cherry_worker_a.ipynb` yükle. Seed gömülü — JSON şart değil. Tünel/upload varsa canlı paket öncelikli. Oturum B’ye `cherry_worker_b.ipynb`.
 5. Hücreleri sırayla çalıştır. Adapter zip tünelden stüdyoya döner; yoksa makineye iner.
 6. Tünel kaydı immutable `llmVersion` üretir. Pointer’ı **sen** çevirirsin. In-flight iş eski pointer’da biter. Elle yol: LLM yönetici → **Colab sürümü kaydet**.
 
@@ -104,10 +104,11 @@ Her örnek: `instruction`, `input`, `output`.
 | Canlı pad | `liveExamples < 48` ise stüdyo seed’i pakete ekler. |
 | Kısa audit | UI preview (~180 karakter) SFT’ye **girmez**; gürültü. |
 | Notebook guard | `sft_rows < 24` → eğitim durur. 3 satırlık mini seed **yok**. |
+| Embedded seed | `cherry_worker_{a,b}.ipynb` içinde base64 seed (~34 satır). Log: `no upload; using EMBEDDED seed pack 34`. |
 
-**TR:** İnce seed ile QLoRA yapmak çıktıyı bozar. Önce `examples/cherry_training_pack.json` veya stüdyo canlı paketini yükle; Colab log’da `sft_rows` ve `seedExamples` kontrol et.
+**TR:** JSON yükleyemiyorsan sorun değil — notebook gömülü corpus ile `sft_rows=34` basmalı. Canlı paket varsa upload/tünel onu ezer.
 
-**EN:** Tiny seed QLoRA harms quality. Upload `examples/cherry_training_pack.json` or a live studio pack; check `sft_rows` / `seedExamples` in the notebook log.
+**EN:** JSON upload is optional — notebooks print `sft_rows=34` from the embedded corpus. A live upload/tunnel pack overrides it.
 
 Seed dosyalarını Go’dan yenilemek / Refresh examples from Go:
 
