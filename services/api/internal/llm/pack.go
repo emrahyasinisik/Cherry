@@ -102,7 +102,9 @@ func BuildPack(_ context.Context, in PackInput) Pack {
 		if i >= 40 {
 			break
 		}
-		pack.Examples = append(pack.Examples, exampleFromAudit(event))
+		if ex, ok := exampleFromAudit(event); ok {
+			pack.Examples = append(pack.Examples, ex)
+		}
 	}
 	live := 0
 	kept := make([]PackExample, 0, len(pack.Examples))
@@ -119,14 +121,17 @@ func BuildPack(_ context.Context, in PackInput) Pack {
 		}
 	}
 	pack.Examples = kept
-	if live < 4 {
+	// Short audit previews must not dominate. Until live traces are rich, always
+	// pad with the curated seed corpus (dozens of real files / Maestro rows).
+	const minLiveWithoutSeed = 48
+	if live < minLiveWithoutSeed {
 		seed := SeedExamples()
 		pack.Examples = append(pack.Examples, seed...)
 		pack.Stats.SeedExamples = len(seed)
 		if live == 0 {
-			pack.Note = "Canlı iz yok veya ince. Seed örnekleri eklendi — Colab yine çalışır. Gerçek brif üretince paketi yeniden indir."
+			pack.Note = "Canlı iz yok. Seed corpus eklendi (" + strconv.Itoa(len(seed)) + " satır). Colab’de sft_rows’u kontrol et; gerçek proje üretince paketi yeniden indir."
 		} else {
-			pack.Note = "Canlı iz ince. Seed örnekleri doldurma olarak eklendi. Yeni proje üretince paketi yeniden indir."
+			pack.Note = "Canlı iz ince (" + strconv.Itoa(live) + "). Seed corpus doldurma olarak eklendi. " + strconv.Itoa(minLiveWithoutSeed) + "+ canlı örnek birikince seed düşer."
 		}
 	}
 	pack.Stats.LiveExamples = live
@@ -299,20 +304,26 @@ func exampleFromMaestro(trace MaestroTrace) PackExample {
 	}
 }
 
-func exampleFromAudit(event store.AuditEvent) PackExample {
+func exampleFromAudit(event store.AuditEvent) (PackExample, bool) {
+	input := strings.TrimSpace(event.PromptPreview)
+	output := strings.TrimSpace(event.OutputPreview)
+	// UI audit previews are ~180 chars — too short for SFT; skip noise.
+	if len([]rune(input)) < 80 || len([]rune(output)) < 80 {
+		return PackExample{}, false
+	}
 	return PackExample{
 		ID:          "audit-" + event.ID,
 		Kind:        "completion",
 		Source:      "live",
 		Instruction: "GDPR sarmalı tamamla. PII yok. İşçi " + string(event.Slot) + ", sürüm " + event.VersionName + ".",
-		Input:       event.PromptPreview,
-		Output:      event.OutputPreview,
+		Input:       input,
+		Output:      output,
 		Meta: map[string]string{
 			"slot":    string(event.Slot),
 			"version": event.VersionName,
 			"purpose": event.Purpose,
 		},
-	}
+	}, true
 }
 
 type chatPair struct {

@@ -67,56 +67,61 @@ print("worker", WORKER, "base", BASE_MODEL, "gpu_budget_gb", 16)"""
         md(
             """## 3. Eğitim paketi / Training pack
 
-Soldan **cherry_training_pack.json** yükle (stüdyo LLM sayfası veya `colab/examples/`). Yoksa hücredeki seed çalışır."""
+Soldan **cherry_training_pack.json** yükle (stüdyo LLM sayfası veya repodaki `colab/examples/cherry_training_pack.json`).
+
+**Önemli / Important:** 3 satırlık mini seed ile train etme — çıktılar bozulur. En az ~24 örnek gerekir; seed corpus ~30+ satırdır."""
         ),
         py(
             r'''from pathlib import Path
 import json
 
 PACK_PATH = Path("/content/cherry_training_pack.json")
-MINI = {
-  "schema": "cherry.training_pack.v1",
-  "recipe": {"baseModel": BASE_MODEL, "method": "qlora", "gpuBudgetGb": 16},
-  "examples": [
-    {
-      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. preview/ HTML site yazma. PII uydurma.",
-      "input": "Proje: Kahve sipariş\nYığın: EXPO\nBrif: Mahalle kahvecisi. Giriş + ana ekran. Yerel backend.",
-      "output": "Plan (Expo SDK 57):\n- frontend/ domain-data-presentation\n- backend/ yerel\n- maestro/ login.yaml + home.yaml"
-    },
-    {
-      "instruction": "Maestro YAML yaz. Cihaz yoksa SKIPPED; PASSED uydurma.",
-      "input": "Akış: login.yaml\nSonuç: SKIPPED",
-      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n"
-    },
-    {
-      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
-      "input": "Yığın: EXPO\nYol: frontend/src/domain/entities/item.ts",
-      "output": "export type Item = {\n  id: string;\n  title: string;\n};\n"
-    },
-  ],
-}
+CANDIDATES = [
+    PACK_PATH,
+    Path("/content/examples/cherry_training_pack.json"),
+    Path("/content/cherry_training_pack.json"),
+]
+MIN_SFT_ROWS = 24
 
-if PACK_PATH.exists():
-    pack = json.loads(PACK_PATH.read_text())
-    print("loaded", PACK_PATH, "examples", len(pack.get("examples", [])))
-else:
-    pack = MINI
-    print("no upload; using mini seed", len(pack["examples"]))
+def rows_from_pack(pack):
+    out = []
+    for ex in pack.get("examples", []):
+        instruction = (ex.get("instruction") or "").strip()
+        output = (ex.get("output") or "").strip()
+        if not instruction or not output:
+            continue
+        out.append({
+            "instruction": instruction,
+            "input": (ex.get("input") or "").strip(),
+            "output": output,
+        })
+    return out
 
-rows = []
-for ex in pack.get("examples", []):
-    instruction = (ex.get("instruction") or "").strip()
-    output = (ex.get("output") or "").strip()
-    if not instruction or not output:
-        continue
-    rows.append({
-        "instruction": instruction,
-        "input": (ex.get("input") or "").strip(),
-        "output": output,
-    })
+pack = None
+loaded_from = None
+for path in CANDIDATES:
+    if path.exists():
+        pack = json.loads(path.read_text())
+        loaded_from = str(path)
+        break
+
+if pack is None:
+    raise SystemExit(
+        "Eğitim paketi yok. Stüdyo LLM → paketi indir ve /content/cherry_training_pack.json olarak yükle "
+        "(veya colab/examples/cherry_training_pack.json). 3 satırlık mini seed bilerek kaldırıldı."
+    )
+
+rows = rows_from_pack(pack)
+stats = pack.get("stats") or {}
+print("loaded", loaded_from)
+print("examples_in_pack", len(pack.get("examples", [])))
+print("liveExamples", stats.get("liveExamples"), "seedExamples", stats.get("seedExamples"))
 print("sft_rows", len(rows))
-if len(rows) < 2:
-    raise SystemExit("Paket boş. Stüdyodan JSON indir veya examples/cherry_training_pack.json yükle.")'''
+if len(rows) < MIN_SFT_ROWS:
+    raise SystemExit(
+        f"sft_rows={len(rows)} < {MIN_SFT_ROWS}. Bu paket fine-tune için çok ince; "
+        "stüdyoda proje üretip canlı paketi indir veya examples seed corpus’unu yükle."
+    )'''
         ),
         md(
             """## 3b. Tünel ile paket çek / Fetch pack via tunnel (isteğe bağlı)
@@ -137,10 +142,13 @@ if TUNNEL_URL and TUNNEL_TOKEN:
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
         pack = _json.loads(resp.read())
-    PACK_PATH.write_text(_json.dumps(pack, ensure_ascii=False))
-    print("tunnel: fetched pack", len(pack.get("examples", [])), "examples")
+    PACK_PATH.write_text(_json.dumps(pack, ensure_ascii=False), encoding="utf-8")
+    rows = rows_from_pack(pack)
+    print("tunnel: fetched pack", len(pack.get("examples", [])), "examples", "sft_rows", len(rows))
+    if len(rows) < MIN_SFT_ROWS:
+        raise SystemExit(f"tunnel pack too thin: sft_rows={len(rows)} < {MIN_SFT_ROWS}")
 else:
-    print("tunnel: skipped (no URL). Using file upload or seed.")'''
+    print("tunnel: skipped (no URL). Using uploaded pack; sft_rows=", len(rows))'''
         ),
         md("## 4. Dataset"),
         py(

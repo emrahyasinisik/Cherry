@@ -1,6 +1,6 @@
 {
   "schema": "cherry.training_pack.v1",
-  "exportedAt": "2026-09-02T00:00:00Z",
+  "exportedAt": "2026-09-05T00:00:00Z",
   "recipe": {
     "baseModel": "Qwen/Qwen2.5-1.5B-Instruct",
     "method": "qlora",
@@ -10,78 +10,414 @@
   },
   "examples": [
     {
-      "id": "seed-expo-brief",
+      "id": "seed-expo-brief-coffee",
       "kind": "brief",
       "source": "seed",
       "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
       "input": "Proje: Kahve sipariş\nYığın: EXPO\nBrif:\nMahalle kahvecisi için sipariş listesi. Giriş ve ana ekran. Yerel backend.",
-      "output": "Plan (Expo SDK 57, TypeScript):\n- frontend/: domain / data / presentation.\n- backend/: yerel HTTP, barındırma yok.\n- maestro/: login.yaml + home.yaml.\n- preview/ zip’e girmez.",
-      "meta": { "stack": "EXPO", "kind": "brief" }
+      "output": "Plan (Expo SDK 57, TypeScript):\n- frontend/: domain / data / presentation.\n- backend/: yerel HTTP (127.0.0.1), barındırma yok.\n- maestro/: login.yaml + home.yaml.\n- preview/ yalnızca stüdyo maketi; zip’e girmez.\nTeslim: klasör / zip / git — müşteri kendi hesabına bağlar.",
+      "meta": {
+        "kind": "brief",
+        "stack": "EXPO"
+      }
     },
     {
-      "id": "seed-expo-entity",
+      "id": "seed-flutter-brief-fitness",
+      "kind": "brief",
+      "source": "seed",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "input": "Proje: Antrenman günlüğü\nYığın: FLUTTER\nBrif:\nGünlük egzersiz kaydı. Liste + detay. Offline-first yerel API.",
+      "output": "Plan (Flutter 3.x, Dart):\n- frontend/lib/features/{auth,home}/ domain / data / presentation.\n- backend/: Go veya Dart yerel sunucu, hosting yok.\n- maestro/: login.yaml + workout_list.yaml.\n- Clean Architecture katmanlarını karıştırma; preview/ zip dışı.",
+      "meta": {
+        "kind": "brief",
+        "stack": "FLUTTER"
+      }
+    },
+    {
+      "id": "seed-native-brief-notes",
+      "kind": "brief",
+      "source": "seed",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "input": "Proje: Not defteri\nYığın: NATIVE\nBrif:\nSwiftUI not listesi ve düzenleme. Yerel backend.",
+      "output": "Plan (SwiftUI):\n- frontend/Domain, frontend/Data, frontend/Presentation.\n- backend/: yerel HTTP.\n- maestro/: login.yaml + notes.yaml.\n- UIKit storyboard / HTML site üretme.",
+      "meta": {
+        "kind": "brief",
+        "stack": "NATIVE"
+      }
+    },
+    {
+      "id": "seed-expo-brief-inventory",
+      "kind": "brief",
+      "source": "seed",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "input": "Proje: Depo stok\nYığın: EXPO\nBrif:\nÜrün stok listesi, ekle/sil. Auth zorunlu. Supabase sonra Bağlantılar’dan; şimdi local.",
+      "output": "Plan (Expo):\n1) İskele: frontend domain-data-presentation + backend local.\n2) Auth ekranı + stok listesi.\n3) maestro login + inventory.\n4) Backend target sonra Bağlantılar’dan değişir; Cherry host etmez.\npreview/ teslim değil.",
+      "meta": {
+        "kind": "brief",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-workers-capacity",
+      "kind": "brief",
+      "source": "seed",
+      "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
+      "input": "Proje: Kapasite notu\nYığın: EXPO\nBrif:\nA ve B aynı işi yapar. Boş işçi alır; ikisi meşgulse kuyruk. Kod/test ayrımı yok.",
+      "output": "Plan:\n- Tek tarif, iki kapasite işçisi (A/B).\n- Versiyon pointer’ı yalnızca sonraki cevapları değiştirir.\n- Colab üretim inferansı değil; checkpoint stüdyoya döner.\n- OpenCode yazar; LLM plan/yama üretir.",
+      "meta": {
+        "kind": "capacity",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-entity-item",
       "kind": "source",
       "source": "seed",
       "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
       "input": "Yığın: EXPO\nYol: frontend/src/domain/entities/item.ts\nBrif: Kahve sipariş listesi.",
-      "output": "export type Item = {\n  id: string;\n  title: string;\n};\n",
-      "meta": { "stack": "EXPO", "path": "frontend/src/domain/entities/item.ts" }
+      "output": "export type Item = {\n  id: string;\n  title: string;\n  quantity: number;\n};\n",
+      "meta": {
+        "path": "frontend/src/domain/entities/item.ts",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-entity-user",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/domain/entities/user.ts\nBrif: E-posta ile giriş; telefon kimlik değil.",
+      "output": "export type User = {\n  id: string;\n  email: string;\n};\n",
+      "meta": {
+        "path": "frontend/src/domain/entities/user.ts",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-repo",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/data/repositories/itemRepository.ts\nBrif: Yerel HTTP’den sipariş listesi.",
+      "output": "import type { Item } from '../../domain/entities/item';\n\nconst BASE = 'http://127.0.0.1:47001';\n\nexport async function listItems(): Promise\u003cItem[]\u003e {\n  const res = await fetch(`${BASE}/items`);\n  if (!res.ok) throw new Error('items_failed');\n  return (await res.json()) as Item[];\n}\n",
+      "meta": {
+        "path": "frontend/src/data/repositories/itemRepository.ts",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-usecase",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/domain/usecases/listItems.ts\nBrif: Domain use case; UI bilmesin.",
+      "output": "import type { Item } from '../entities/item';\nimport { listItems as fetchItems } from '../../data/repositories/itemRepository';\n\nexport async function listItems(): Promise\u003cItem[]\u003e {\n  return fetchItems();\n}\n",
+      "meta": {
+        "path": "frontend/src/domain/usecases/listItems.ts",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-screen-home",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/presentation/screens/HomeScreen.tsx\nBrif: Sipariş listesi; boş ve hata durumu.",
+      "output": "import { useEffect, useState } from 'react';\nimport { ActivityIndicator, FlatList, Text, View } from 'react-native';\nimport type { Item } from '../../domain/entities/item';\nimport { listItems } from '../../domain/usecases/listItems';\n\nexport function HomeScreen() {\n  const [items, setItems] = useState\u003cItem[] | null\u003e(null);\n  const [error, setError] = useState\u003cstring | null\u003e(null);\n\n  useEffect(() =\u003e {\n    listItems()\n      .then(setItems)\n      .catch(() =\u003e setError('Liste yüklenemedi'));\n  }, []);\n\n  if (error) return \u003cText\u003e{error}\u003c/Text\u003e;\n  if (!items) return \u003cActivityIndicator /\u003e;\n  if (items.length === 0) return \u003cText\u003eSipariş yok\u003c/Text\u003e;\n\n  return (\n    \u003cView\u003e\n      \u003cText\u003eSiparişler\u003c/Text\u003e\n      \u003cFlatList\n        data={items}\n        keyExtractor={(item) =\u003e item.id}\n        renderItem={({ item }) =\u003e \u003cText\u003e{item.title}\u003c/Text\u003e}\n      /\u003e\n    \u003c/View\u003e\n  );\n}\n",
+      "meta": {
+        "path": "frontend/src/presentation/screens/HomeScreen.tsx",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-screen-login",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/presentation/screens/LoginScreen.tsx\nBrif: E-posta + şifre; SMS yok.",
+      "output": "import { useState } from 'react';\nimport { Button, Text, TextInput, View } from 'react-native';\n\nexport function LoginScreen({ onSubmit }: { onSubmit: (email: string, password: string) =\u003e void }) {\n  const [email, setEmail] = useState('');\n  const [password, setPassword] = useState('');\n  const [error, setError] = useState\u003cstring | null\u003e(null);\n\n  return (\n    \u003cView\u003e\n      \u003cText\u003eGiriş\u003c/Text\u003e\n      \u003cTextInput\n        autoCapitalize=\"none\"\n        keyboardType=\"email-address\"\n        placeholder=\"E-posta\"\n        value={email}\n        onChangeText={setEmail}\n      /\u003e\n      \u003cTextInput\n        secureTextEntry\n        placeholder=\"Şifre\"\n        value={password}\n        onChangeText={setPassword}\n      /\u003e\n      {error ? \u003cText\u003e{error}\u003c/Text\u003e : null}\n      \u003cButton\n        title=\"Giriş yap\"\n        onPress={() =\u003e {\n          if (!email || !password) {\n            setError('E-posta ve şifre gerekli');\n            return;\n          }\n          setError(null);\n          onSubmit(email, password);\n        }}\n      /\u003e\n    \u003c/View\u003e\n  );\n}\n",
+      "meta": {
+        "path": "frontend/src/presentation/screens/LoginScreen.tsx",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-expo-backend-handler",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: backend/internal/http/items.go\nBrif: Yerel items listesi; barındırma yok.",
+      "output": "package httpapi\n\nimport (\n\t\"encoding/json\"\n\t\"net/http\"\n)\n\ntype Item struct {\n\tID       string `json:\"id\"`\n\tTitle    string `json:\"title\"`\n\tQuantity int    `json:\"quantity\"`\n}\n\nfunc ItemsHandler(w http.ResponseWriter, r *http.Request) {\n\tif r.Method != http.MethodGet {\n\t\thttp.Error(w, \"method\", http.StatusMethodNotAllowed)\n\t\treturn\n\t}\n\t_ = json.NewEncoder(w).Encode([]Item{{\n\t\tID: \"1\", Title: \"Filtre kahve\", Quantity: 1,\n\t}})\n}\n",
+      "meta": {
+        "path": "backend/internal/http/items.go",
+        "stack": "EXPO"
+      }
     },
     {
       "id": "seed-flutter-entity",
       "kind": "source",
       "source": "seed",
       "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
-      "input": "Yığın: FLUTTER\nYol: frontend/lib/features/home/domain/entities/home_item.dart\nBrif: Kahve sipariş listesi.",
-      "output": "final class HomeItem {\n  const HomeItem({required this.id, required this.title});\n  final String id;\n  final String title;\n}\n",
-      "meta": { "stack": "FLUTTER", "path": "frontend/lib/features/home/domain/entities/home_item.dart" }
+      "input": "Yığın: FLUTTER\nYol: frontend/lib/features/home/domain/entities/home_item.dart\nBrif: Antrenman günlüğü satırı.",
+      "output": "final class HomeItem {\n  const HomeItem({required this.id, required this.title, required this.minutes});\n  final String id;\n  final String title;\n  final int minutes;\n}\n",
+      "meta": {
+        "path": "frontend/lib/features/home/domain/entities/home_item.dart",
+        "stack": "FLUTTER"
+      }
+    },
+    {
+      "id": "seed-flutter-repo",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: FLUTTER\nYol: frontend/lib/features/home/data/repositories/home_repository.dart\nBrif: Yerel API’den liste.",
+      "output": "import '../domain/entities/home_item.dart';\nimport 'package:http/http.dart' as http;\nimport 'dart:convert';\n\nclass HomeRepository {\n  HomeRepository({http.Client? client}) : _client = client ?? http.Client();\n  final http.Client _client;\n  static const _base = 'http://127.0.0.1:47001';\n\n  Future\u003cList\u003cHomeItem\u003e\u003e list() async {\n    final res = await _client.get(Uri.parse('$_base/workouts'));\n    if (res.statusCode != 200) {\n      throw StateError('workouts_failed');\n    }\n    final raw = jsonDecode(res.body) as List\u003cdynamic\u003e;\n    return raw\n        .map((e) =\u003e HomeItem(\n              id: e['id'] as String,\n              title: e['title'] as String,\n              minutes: e['minutes'] as int,\n            ))\n        .toList();\n  }\n}\n",
+      "meta": {
+        "path": "frontend/lib/features/home/data/repositories/home_repository.dart",
+        "stack": "FLUTTER"
+      }
+    },
+    {
+      "id": "seed-flutter-page",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: FLUTTER\nYol: frontend/lib/features/home/presentation/pages/home_page.dart\nBrif: Liste; loading/empty/error.",
+      "output": "import 'package:flutter/material.dart';\nimport '../../domain/entities/home_item.dart';\nimport '../../data/repositories/home_repository.dart';\n\nclass HomePage extends StatefulWidget {\n  const HomePage({super.key});\n  @override\n  State\u003cHomePage\u003e createState() =\u003e _HomePageState();\n}\n\nclass _HomePageState extends State\u003cHomePage\u003e {\n  final _repo = HomeRepository();\n  late Future\u003cList\u003cHomeItem\u003e\u003e _future;\n\n  @override\n  void initState() {\n    super.initState();\n    _future = _repo.list();\n  }\n\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(title: const Text('Antrenmanlar')),\n      body: FutureBuilder\u003cList\u003cHomeItem\u003e\u003e(\n        future: _future,\n        builder: (context, snap) {\n          if (snap.hasError) return const Center(child: Text('Yüklenemedi'));\n          if (!snap.hasData) return const Center(child: CircularProgressIndicator());\n          final items = snap.data!;\n          if (items.isEmpty) return const Center(child: Text('Kayıt yok'));\n          return ListView(\n            children: [\n              for (final item in items)\n                ListTile(title: Text(item.title), subtitle: Text('${item.minutes} dk')),\n            ],\n          );\n        },\n      ),\n    );\n  }\n}\n",
+      "meta": {
+        "path": "frontend/lib/features/home/presentation/pages/home_page.dart",
+        "stack": "FLUTTER"
+      }
+    },
+    {
+      "id": "seed-swift-entity",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: NATIVE\nYol: frontend/Domain/Note.swift\nBrif: Not defteri entity.",
+      "output": "import Foundation\n\nstruct Note: Identifiable, Equatable {\n  let id: String\n  var title: String\n  var body: String\n}\n",
+      "meta": {
+        "path": "frontend/Domain/Note.swift",
+        "stack": "NATIVE"
+      }
     },
     {
       "id": "seed-swift-view",
       "kind": "source",
       "source": "seed",
       "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
-      "input": "Yığın: NATIVE\nYol: frontend/Presentation/Home/HomeView.swift\nBrif: Kahve sipariş listesi.",
-      "output": "import SwiftUI\n\nstruct HomeView: View {\n  var body: some View {\n    Text(\"Siparişler\")\n  }\n}\n",
-      "meta": { "stack": "NATIVE", "path": "frontend/Presentation/Home/HomeView.swift" }
+      "input": "Yığın: NATIVE\nYol: frontend/Presentation/Home/HomeView.swift\nBrif: Not listesi.",
+      "output": "import SwiftUI\n\nstruct HomeView: View {\n  let notes: [Note]\n  let errorMessage: String?\n\n  var body: some View {\n    Group {\n      if let errorMessage {\n        Text(errorMessage)\n      } else if notes.isEmpty {\n        Text(\"Not yok\")\n      } else {\n        List(notes) { note in\n          Text(note.title)\n        }\n      }\n    }\n    .navigationTitle(\"Notlar\")\n  }\n}\n",
+      "meta": {
+        "path": "frontend/Presentation/Home/HomeView.swift",
+        "stack": "NATIVE"
+      }
     },
     {
-      "id": "seed-maestro-login",
+      "id": "seed-swift-login",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: NATIVE\nYol: frontend/Presentation/Auth/LoginView.swift\nBrif: E-posta girişi; SMS yok.",
+      "output": "import SwiftUI\n\nstruct LoginView: View {\n  @State private var email = \"\"\n  @State private var password = \"\"\n  @State private var error: String?\n  var onSubmit: (String, String) -\u003e Void\n\n  var body: some View {\n    Form {\n      TextField(\"E-posta\", text: $email)\n        .textInputAutocapitalization(.never)\n        .keyboardType(.emailAddress)\n      SecureField(\"Şifre\", text: $password)\n      if let error { Text(error).foregroundStyle(.red) }\n      Button(\"Giriş\") {\n        guard !email.isEmpty, !password.isEmpty else {\n          error = \"E-posta ve şifre gerekli\"\n          return\n        }\n        error = nil\n        onSubmit(email, password)\n      }\n    }\n    .navigationTitle(\"Giriş\")\n  }\n}\n",
+      "meta": {
+        "path": "frontend/Presentation/Auth/LoginView.swift",
+        "stack": "NATIVE"
+      }
+    },
+    {
+      "id": "seed-readme-expo",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Müşteri teslim README yaz. Barındırma yok; klasör/zip/git. Yığın dilini koru.",
+      "input": "Proje: Kahve sipariş\nYığın: EXPO\nBrif:\nYerel backend ile sipariş listesi.",
+      "output": "# Kahve sipariş\n\nExpo (TypeScript) + yerel backend. Cherry barındırmaz.\n\n## Çalıştırma\n\n```bash\ncd backend \u0026\u0026 go run .\ncd frontend \u0026\u0026 npx expo start\n```\n\n## Yapı\n\n- `frontend/src/domain` — entity / use case\n- `frontend/src/data` — repository\n- `frontend/src/presentation` — ekranlar\n- `maestro/` — UI akışları\n- `preview/` — stüdyo maketi; teslim zip’ine koyma\n",
+      "meta": {
+        "path": "README.md",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-arch-expo",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yığın için Clean Architecture özetini yaz. Katmanları karıştırma.",
+      "input": "Yığın: EXPO\nDosya: frontend/ARCHITECTURE.md",
+      "output": "# Architecture (Expo)\n\n- **domain**: entity + use case; framework yok.\n- **data**: repository, DTO, HTTP client.\n- **presentation**: screens / hooks; domain’i çağırır.\n- **backend/**: müşteri API’si (yerel aktif); Cherry GraphQL değil.\n- **maestro/**: cihaz yoksa SKIPPED.\n",
+      "meta": {
+        "path": "frontend/ARCHITECTURE.md",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-maestro-login-skipped",
       "kind": "maestro",
       "source": "seed",
       "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
       "input": "Akış: login.yaml\nSonuç: SKIPPED\nNot: Emülatör yok. PASSED sayılmaz.",
-      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n",
-      "meta": { "flow": "login.yaml", "result": "SKIPPED" }
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n- tapOn: \"E-posta\"\n- inputText: \"user@example.com\"\n- tapOn: \"Şifre\"\n- inputText: \"••••••••\"\n- tapOn: \"Giriş yap\"\n",
+      "meta": {
+        "flow": "login.yaml",
+        "result": "SKIPPED"
+      }
     },
     {
-      "id": "seed-maestro-home",
+      "id": "seed-maestro-home-skipped",
       "kind": "maestro",
       "source": "seed",
       "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
       "input": "Akış: home.yaml\nSonuç: SKIPPED\nNot: Cihaz yoksa SKIPPED.",
       "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Siparişler\"\n",
-      "meta": { "flow": "home.yaml", "result": "SKIPPED" }
+      "meta": {
+        "flow": "home.yaml",
+        "result": "SKIPPED"
+      }
     },
     {
-      "id": "seed-completion",
+      "id": "seed-maestro-login-passed",
+      "kind": "maestro",
+      "source": "seed",
+      "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
+      "input": "Akış: login.yaml\nSonuç: PASSED\nNot: Emülatör bağlı; gerçek koşu.",
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Giriş\"\n- tapOn:\n    id: email\n- inputText: \"demo@cherry.local\"\n- tapOn:\n    id: password\n- inputText: \"demo-pass\"\n- tapOn: \"Giriş yap\"\n- assertVisible: \"Siparişler\"\n",
+      "meta": {
+        "flow": "login.yaml",
+        "result": "PASSED"
+      }
+    },
+    {
+      "id": "seed-maestro-inventory",
+      "kind": "maestro",
+      "source": "seed",
+      "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
+      "input": "Akış: inventory.yaml\nSonuç: SKIPPED\nNot: Stok listesi ekranı.",
+      "output": "appId: com.cherry.demo\n---\n- launchApp\n- assertVisible: \"Stok\"\n- assertVisible: \"Ürün ekle\"\n",
+      "meta": {
+        "flow": "inventory.yaml",
+        "result": "SKIPPED"
+      }
+    },
+    {
+      "id": "seed-completion-redacted",
       "kind": "completion",
       "source": "seed",
       "instruction": "GDPR sarmalı tamamla. PII yok. İşçi A, sürüm v1.0.",
-      "input": "Brif: [REDACTED_EMAIL] için kahve uygulaması. Kod [REDACTED_CODE].",
-      "output": "İşçi A v1.0 plan:\n- Ekranları yığın dosyalarına böl.\n- Maestro akışını giriş + ana ekran tut.\nPII yok.",
-      "meta": { "slot": "A", "version": "v1.0" }
+      "input": "Brif: [REDACTED_EMAIL] için kahve uygulaması. Kod [REDACTED_CODE]. Yığın EXPO.",
+      "output": "İşçi A v1.0 plan:\n- Ekranları yığın dosyalarına böl (domain/data/presentation).\n- Maestro: login + home; cihaz yoksa SKIPPED.\n- PII yok; e-posta/kod placeholder kaldı.\n- preview/ HTML site yazma.",
+      "meta": {
+        "slot": "A",
+        "version": "v1.0"
+      }
     },
     {
-      "id": "seed-workers",
+      "id": "seed-completion-patch",
+      "kind": "completion",
+      "source": "seed",
+      "instruction": "Cherry ajanı: brife ve sohbet mesajına göre dosya planı veya yama öner. PII yok.",
+      "input": "Ana ekranda boş liste metni yok. Expo. HomeScreen.tsx’e empty state ekle.",
+      "output": "Yama:\n- `frontend/src/presentation/screens/HomeScreen.tsx`\n- `items.length === 0` iken `\u003cText\u003eSipariş yok\u003c/Text\u003e` göster.\n- Repository’ye dokunma; domain use case aynı kalsın.\nMaestro home.yaml: `assertVisible: \"Sipariş yok\"` isteğe bağlı.",
+      "meta": {
+        "kind": "chat"
+      }
+    },
+    {
+      "id": "seed-completion-no-html",
+      "kind": "completion",
+      "source": "seed",
+      "instruction": "Cherry ajanı: brife ve sohbet mesajına göre dosya planı veya yama öner. PII yok.",
+      "input": "Zip’e HTML site koyup netlify’a atalım.",
+      "output": "Hayır. Teslim seçilen yığının kaynağıdır (Expo TS / Flutter Dart / SwiftUI).\n- `preview/` stüdyo maketi; zip’e girmez.\n- Barındırma v1’de yok; Bağlantılar’dan müşteri hesabı.\n- OpenCode’a HTML site yazma talimatı verme.",
+      "meta": {
+        "kind": "chat"
+      }
+    },
+    {
+      "id": "seed-completion-worker-b",
+      "kind": "completion",
+      "source": "seed",
+      "instruction": "GDPR sarmalı tamamla. PII yok. İşçi B, sürüm v1.1.",
+      "input": "Amaç: Flutter antrenman listesine detay ekranı. PII yok.",
+      "output": "İşçi B v1.1:\n- `home_item.dart` entity’ye dokunma veya `minutes` koru.\n- `presentation/pages/detail_page.dart` ekle.\n- Maestro `workout_detail.yaml` — cihaz yoksa SKIPPED.\nPII yok.",
+      "meta": {
+        "slot": "B",
+        "version": "v1.1"
+      }
+    },
+    {
+      "id": "seed-expo-entity-order",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: frontend/src/domain/entities/order.ts\nBrif: Sipariş durumu enum.",
+      "output": "export type OrderStatus = 'draft' | 'placed' | 'ready';\n\nexport type Order = {\n  id: string;\n  status: OrderStatus;\n  itemIds: string[];\n};\n",
+      "meta": {
+        "path": "frontend/src/domain/entities/order.ts",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-flutter-auth-entity",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: FLUTTER\nYol: frontend/lib/features/auth/domain/entities/session.dart\nBrif: Oturum; telefon yok.",
+      "output": "final class Session {\n  const Session({required this.userId, required this.email, required this.token});\n  final String userId;\n  final String email;\n  final String token;\n}\n",
+      "meta": {
+        "path": "frontend/lib/features/auth/domain/entities/session.dart",
+        "stack": "FLUTTER"
+      }
+    },
+    {
+      "id": "seed-backend-main",
+      "kind": "source",
+      "source": "seed",
+      "instruction": "Bu yola uygun kaynak dosyayı yaz. Seçilen dil. HTML site değil.",
+      "input": "Yığın: EXPO\nYol: backend/cmd/api/main.go\nBrif: Yerel dinleme 47001.",
+      "output": "package main\n\nimport (\n\t\"log\"\n\t\"net/http\"\n\n\thttpapi \"example.com/app/backend/internal/http\"\n)\n\nfunc main() {\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"/items\", httpapi.ItemsHandler)\n\tlog.Println(\"local api on 127.0.0.1:47001\")\n\tlog.Fatal(http.ListenAndServe(\"127.0.0.1:47001\", mux))\n}\n",
+      "meta": {
+        "path": "backend/cmd/api/main.go",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-maestro-notes",
+      "kind": "maestro",
+      "source": "seed",
+      "instruction": "Maestro YAML yaz. Cihaz yoksa sonuç SKIPPED olur; PASSED uydurma.",
+      "input": "Akış: notes.yaml\nSonuç: SKIPPED\nNot: SwiftUI not listesi.",
+      "output": "appId: com.cherry.notes\n---\n- launchApp\n- assertVisible: \"Notlar\"\n- assertVisible: \"Not yok\"\n",
+      "meta": {
+        "flow": "notes.yaml",
+        "result": "SKIPPED"
+      }
+    },
+    {
+      "id": "seed-brief-no-sms",
       "kind": "brief",
       "source": "seed",
       "instruction": "Cherry stüdyosu için mobil uygulama planı yaz. Seçilen yığın ve Clean Architecture. preview/ HTML site yazma. PII uydurma.",
-      "input": "Proje: Kapasite notu\nYığın: EXPO\nBrif:\nA ve B aynı işi yapar. Boş işçi alır; ikisi meşgulse kuyruk. Kod/test ayrımı yok.",
-      "output": "Plan:\n- Tek tarif, iki kapasite işçisi.\n- Versiyon pointer’ı sonraki cevabı değiştirir.\n- Colab üretim inferansı değil; checkpoint stüdyoya döner.",
-      "meta": { "stack": "EXPO", "kind": "capacity" }
+      "input": "Proje: Güvenli giriş\nYığın: EXPO\nBrif:\nSMS OTP istemiyorum. E-posta + şifre + cihaz kodu + TOTP.",
+      "output": "Plan (Expo):\n- Kimlik: e-posta/şifre; SMS yok; telefon kimlik değil.\n- Yeni cihaz: 6 haneli e-posta kodu.\n- TOTP isteğe bağlı; güvenilir cihazlar + oturum iptali.\n- frontend auth feature + maestro login.yaml.\n- Cherry X-benzeri güvenlik; müşteri backend yerelde.",
+      "meta": {
+        "kind": "security",
+        "stack": "EXPO"
+      }
+    },
+    {
+      "id": "seed-completion-connections",
+      "kind": "completion",
+      "source": "seed",
+      "instruction": "Cherry ajanı: brife ve sohbet mesajına göre dosya planı veya yama öner. PII yok.",
+      "input": "Backend’i Supabase’e taşıyalım, Cherry mi host edecek?",
+      "output": "Cherry host etmez.\n- Sidebar Bağlantılar → Supabase OAuth (müşteri hesabı).\n- Üretilen backend dosyaları diskte kalır; platform Mongo/GraphQL ile karıştırma.\n- Şimdi local target ile devam; Bağlantılar sonra.",
+      "meta": {
+        "kind": "chat"
+      }
     }
   ],
-  "stats": { "liveExamples": 0, "seedExamples": 8 },
-  "note": "Seed paket. Canlı iz yokken Colab bununla çalışır. Stüdyoda proje üretince LLM sayfasından canlı paketi indir."
+  "stats": {
+    "liveExamples": 0,
+    "seedExamples": 34
+  },
+  "note": "Seed corpus. Canlı iz yokken Colab bununla eğitilir. Stüdyoda proje üretince LLM sayfasından canlı paketi indir."
 }
