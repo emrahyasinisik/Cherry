@@ -46,6 +46,7 @@ flowchart TB
 1. [build-order.md](build-order.md) — ne önce
 1b. [remaining.md](remaining.md) — duraklama: bitti / kalan
 2. [architecture.md](architecture.md) — sistem resmi
+2a. [low-level-architecture.md](low-level-architecture.md) — düşük seviye mimari (Academy gist kaynağı)
 2. [security.md](security.md) + [email-verification.md](email-verification.md)
 3. [organizations.md](organizations.md) — kişisel / org
 4. [backend-graphql.md](backend-graphql.md) + [database.md](database.md)
@@ -61,7 +62,7 @@ flowchart TB
 | # | Bölüm | Rule | Doc |
 | --- | --- | --- | --- |
 | 00 | Proje | [00-project.mdc](../.cursor/rules/00-project.mdc) | this file |
-| 01 | Mimari | [01-architecture.mdc](../.cursor/rules/01-architecture.mdc) | [architecture.md](architecture.md) |
+| 01 | Mimari | [01-architecture.mdc](../.cursor/rules/01-architecture.mdc) | [architecture.md](architecture.md) · [low-level-architecture.md](low-level-architecture.md) |
 | 02 | GraphQL Go | [02-backend-graphql.mdc](../.cursor/rules/02-backend-graphql.mdc) | [backend-graphql.md](backend-graphql.md) |
 | 03 | MongoDB | [03-database.mdc](../.cursor/rules/03-database.mdc) | [database.md](database.md) |
 | 04 | Next.js | [04-frontend.mdc](../.cursor/rules/04-frontend.mdc) | [frontend.md](frontend.md) |
