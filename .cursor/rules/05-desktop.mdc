@@ -10,6 +10,7 @@ alwaysApply: false
 - Target Windows and macOS. No Linux requirement unless asked.
 - Separate main, preload, and renderer. Preload exposes a narrow API. No `nodeIntegration` in the renderer.
 - Main process owns: window, tray, generated-project paths, **bundled OpenCode + Maestro** (`vendor/bin` or `resources/bin`), optional `maestro mcp` stdio. The Go API owns local-activate child processes.
+- Packaged app (`npm run dist:desktop`) spawns bundled `cherry-api` + Next standalone. Do not require the customer to run `dev:api` / `dev:web`. Windows NSIS + macOS dmg. No Linux product installer unless asked.
 - Device fingerprint is collected in main and sent hashed to the API.
 - One Cherry window plus tray status for the background agent.
 - Never ship a mobile wrapper. Read [docs/desktop.md](docs/desktop.md).

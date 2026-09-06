@@ -2,11 +2,77 @@
   "name": "cherry-desktop",
   "version": "0.1.0",
   "private": true,
+  "author": "Cherry",
+  "description": "Cherry desktop studio — writes mobile apps, does not host them",
   "main": "main.cjs",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^37.2.6"
+    "electron": "37.10.3",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "electronVersion": "37.10.3",
+    "appId": "app.cherry.studio",
+    "productName": "Cherry",
+    "copyright": "Cherry",
+    "icon": "icon.png",
+    "directories": {
+      "output": "release-out"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "icon.png"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/bin",
+        "to": "bin"
+      },
+      {
+        "from": "resources/api",
+        "to": "api"
+      },
+      {
+        "from": "resources/web",
+        "to": "web"
+      },
+      {
+        "from": "resources/colab",
+        "to": "colab"
+      },
+      {
+        "from": "resources/maestro-dist",
+        "to": "maestro-dist"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "artifactName": "Cherry-${version}-mac-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "artifactName": "Cherry-${version}-win-${arch}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "dir"
+      ],
+      "category": "Development"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

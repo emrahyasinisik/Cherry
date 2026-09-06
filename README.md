@@ -40,7 +40,8 @@ Depo bir **npm workspaces monorepo**'sudur: bağımlılıklar kökten tek seferd
 npm install          # bir kez, kökte — apps/web + apps/desktop
 npm run dev:api      # Go GraphQL, 43148 — .env yükler, scripts/ensure-mongo.sh
 npm run dev:web      # Next.js, 43147
-npm run dev:desktop  # Electron kabuk
+npm run dev:desktop  # Electron kabuk (dev sunucuya bağlanır)
+npm run dist:desktop # Win NSIS/zip veya Mac dmg/zip — müşteri Next/Go kurmaz
 ```
 
 `dev:api` `MONGO_URI` doluysa native `mongod`’u ayağa kaldırmaya çalışır (`scripts/ensure-mongo.sh`). Docker tercih: `docker compose up -d mongo`.
