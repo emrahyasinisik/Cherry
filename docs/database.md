@@ -68,8 +68,11 @@ flowchart LR
 **EN:** `store.Store` is either `Memory` (default) or `Mongo` (`MONGO_URI`). Failed ping falls back to memory. Collections: `users`, `devices`, `sessions`, `verificationCodes`, `tempMailboxes`, `projects`, `jobs`, `connections`, `llmVersions`, `llmState`, `auditEvents`.
 
 ```bash
+# Option A — native mongod (no Docker): scripts/ensure-mongo.sh
+# Option B — Docker:
 docker compose up -d mongo
-export MONGO_URI=mongodb://127.0.0.1:27017/cherry
+
+export MONGO_URI=mongodb://127.0.0.1:27017/cherry   # also in .env; npm run dev:api loads it
 npm run dev:api
 # /health → "store":"mongo"
 ```
