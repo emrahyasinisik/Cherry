@@ -44,3 +44,18 @@ flowchart LR
 - **The customer does not install OpenCode or Maestro.** The installer fills `vendor/bin` or `resources/bin`.
 - PATH / `CHERRY_OPENCODE_BIN` / `CHERRY_MAESTRO_BIN` is a **developer fallback** only.
 - Missing sidecar: keep scaffold / SKIPPED Maestro. No fake write, no fake pass.
+
+## Kurucu / Release
+
+**TR:** Müşteri Next/Go/OpenCode kurmaz. `npm run dist:desktop` (Win veya Mac makinede) API ikilisini, Next standalone sunucuyu, `vendor/bin` sidecar’larını ve Colab dosyalarını `extraResources` olarak paketler. Paketlenmiş uygulama kendi sürecinde `cherry-api` + Next’i 43148/43147’de açar.
+
+**EN:** The customer does not install Next, Go, or OpenCode. `npm run dist:desktop` on a Windows or Mac machine bundles the API binary, Next standalone server, vendored CLIs, and Colab files as `extraResources`. The packaged app spawns `cherry-api` and Next on 43148/43147.
+
+```bash
+./scripts/vendor-sidecars.sh   # once, if vendor/bin is empty
+npm run dist:desktop           # Win: NSIS + zip · Mac: dmg + zip
+```
+
+Çıktı: `apps/desktop/release-out/`. Linux CI yalnızca unpacked `dir` duman testi üretir — ürün hedefi Win/Mac.
+
+Dev hâlâ üç süreç: `dev:api`, `dev:web`, `dev:desktop` (renderer `http://127.0.0.1:43147`).

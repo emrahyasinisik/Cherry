@@ -46,11 +46,33 @@ User notes below are not the current slice.
 
 LLM anahtarı yoksa `mock` kanal; `CHERRY_LLM_API_KEY` varsa HTTP + OpenCode’a `OPENAI_API_KEY`. İşçi A/B Colab inferans (`setColabInferenceUrl(slot, url)`) → o yuvada `colab-tunnel`. OpenCode CLI `vendor/bin`.
 
+## Spec checklist (orijinal brif)
+
+| İstek | Durum |
+| --- | --- |
+| Ajan arkada yazar; Next.js + Go | Kodda |
+| Dilim 5–8 birebir (OpenCode, yerel+Maestro, LLM B, Colab) | Kodda |
+| Backend GraphQL Go | `services/api` |
+| MongoDB | `MONGO_URI` veya bellek |
+| Electron masaüstü; mobil uygulama yok; Win/Mac | Kabuk + kurucu script |
+| 2 LLM, scale, LLMOps | A/B kuyruk, versiyon pointer |
+| Silme / dışa aktarma | `deleteMe` / `exportMe` |
+| Link + 6 hane | `verifyLink` + mailbox |
+| Organizasyon **veya** kişisel | Kişisel workspace var; org ekranı henüz kapalı |
+| MFA, geçici kutu, kayıtlı cihaz, tek oturum | Güvenlik ekranı |
+| Fine-tune + LLM yönetici + switch cevap değiştirir | Colab dosya + `setActiveVersion` |
+| MCP read-file | GraphQL `mcpReadFile` + kök |
+| KVKK/GDPR katmanı | redact → model → tarama |
+| OpenCode | `vendor/bin` sidecar |
+
 ## Kalan / Remaining
 
-Colab stüdyo işçisi değildir. Mongo, OAuth, Maestro PASSED yolu ve **Colab A/B ayrı inferans URL** kodda; emülatör senin makinen.
+- **Organizasyon UI** (oluştur / üye) — `workspaceKind` var, sidebar `enabled: false`.
+- **Masaüstü release:** `npm run dist:desktop` Win/Mac makinede NSIS/DMG üretir. Bu Linux ajan yalnızca unpacked duman testi yapar.
+- Colab stüdyo işçisi değildir. Emülatör senin makinen.
 
 ```bash
 npm run dev:api
 npm run dev:web
+npm run dist:desktop   # Win/Mac installer
 ```

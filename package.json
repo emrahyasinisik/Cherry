@@ -15,6 +15,7 @@
     "dev:desktop": "npm run start --workspace cherry-desktop",
     "build:web": "npm run build --workspace cherry-web",
     "start:web": "npm run start --workspace cherry-web",
+    "dist:desktop": "bash scripts/package-desktop.sh",
     "lint": "npm run lint --workspaces --if-present"
   }
 }
