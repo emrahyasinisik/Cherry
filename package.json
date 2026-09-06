@@ -1,7 +1,7 @@
 {
   "name": "cherry",
   "private": true,
-  "description": "Cherry desktop studio — scaffold",
+  "description": "Cherry desktop studio \u2014 scaffold",
   "workspaces": [
     "apps/*"
   ],
@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "echo 'Run dev:api and dev:web in two terminals (see README).'",
-    "dev:api": "go -C services/api run ./cmd/api",
+    "dev:api": "bash -lc 'unset npm_config_prefix; bash scripts/dev-bootstrap.sh; go -C services/api run ./cmd/api'",
     "dev:web": "npm run dev --workspace cherry-web",
     "dev:desktop": "npm run start --workspace cherry-desktop",
     "build:web": "npm run build --workspace cherry-web",
