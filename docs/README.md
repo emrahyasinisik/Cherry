@@ -42,6 +42,7 @@ flowchart TB
 
 ## Okuma sırası / Read order
 
+0. [cherry-proje-dosyasi.pdf](cherry-proje-dosyasi.pdf) — ne / nerede / neden / nasıl / çalıştırma (yenile: `python3 scripts/generate_project_brief_pdf.py`)
 1. [build-order.md](build-order.md) — ne önce
 1b. [remaining.md](remaining.md) — duraklama: bitti / kalan
 2. [architecture.md](architecture.md) — sistem resmi
