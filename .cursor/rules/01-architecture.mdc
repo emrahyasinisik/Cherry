@@ -2,13 +2,14 @@
 description: Sistem mimarisi — Electron + Next.js + Go GraphQL + MongoDB + iki LLM
 globs:
   - docs/architecture.md
+  - docs/low-level-architecture.md
   - AGENTS.md
 alwaysApply: false
 ---
 
 # Mimari / Architecture
 
-- Keep the process boundaries in [docs/architecture.md](docs/architecture.md).
+- Keep the process boundaries in [docs/architecture.md](docs/architecture.md) and the package/port/schema map in [docs/low-level-architecture.md](docs/low-level-architecture.md).
 - UI talks to the platform only through GraphQL. No ad-hoc REST except health checks.
 - The desktop runner, MCP host, and generated-project folder live on the user machine.
 - Platform state lives in MongoDB. Generated app source lives on disk, not as a substitute for MongoDB.

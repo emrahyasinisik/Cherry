@@ -2,9 +2,9 @@
 
 **Kural:** [.cursor/rules/01-architecture.mdc](../.cursor/rules/01-architecture.mdc)
 
-**TR:** Cherry, kullanıcının bilgisayarında duran bir stüdyo + kendi GraphQL platformudur. Üretilen mobil uygulama ayrı bir çıktıdır.
+**TR:** Cherry, kullanıcının bilgisayarında duran bir stüdyo + kendi GraphQL platformudur. Üretilen mobil uygulama ayrı bir çıktıdır. Düşük seviye (paketler, portlar, şema, koleksiyonlar): [low-level-architecture.md](low-level-architecture.md).
 
-**EN:** Cherry is a studio on the user’s computer plus its own GraphQL platform. The generated mobile app is a separate artifact.
+**EN:** Cherry is a studio on the user’s computer plus its own GraphQL platform. The generated mobile app is a separate artifact. Low-level (packages, ports, schema, collections): [low-level-architecture.md](low-level-architecture.md).
 
 ## Sistem bağlamı / System context
 
